@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Lock, LogOut, LayoutDashboard, MessageSquare, Briefcase, CreditCard,
-  FileText, CheckCircle2, XCircle, AlertCircle, Search, Filter, Plus,
+  FileText, CheckCircle2, XCircle, AlertCircle, Search, Filter, Plus, Clock,
   Download, ArrowRight, RefreshCw, Key, Shield, User, ExternalLink, Eye, EyeOff, Layers, Sparkles,
   Image as ImageIcon, Landmark, Building2, Trash2, Edit2, Star, Copy, Check, Globe
 } from 'lucide-react';
@@ -25,7 +25,7 @@ export const AdminPage: React.FC = () => {
   const [adminMode, setAdminMode] = useState<'cms' | 'business'>('cms');
 
   // Active Business Tab
-  const [activeTab, setActiveTab] = useState<'overview' | 'enquiries' | 'projects' | 'payments' | 'invoices' | 'bankAccounts' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'enquiries' | 'projects' | 'completedProjects' | 'payments' | 'invoices' | 'bankAccounts' | 'settings'>('overview');
 
   // Dashboard Data
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -86,6 +86,29 @@ export const AdminPage: React.FC = () => {
 
   // Selected Project for Internal Portal Modal
   const [selectedProjectForPortal, setSelectedProjectForPortal] = useState<Project | null>(null);
+
+  // Revert Project Modal & Feedback State
+  const [revertingProject, setRevertingProject] = useState<Project | null>(null);
+  const [revertLoading, setRevertLoading] = useState(false);
+  const [revertFeedback, setRevertFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+
+  const formatDateTime = (isoString?: string) => {
+    if (!isoString) return '—';
+    try {
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) return isoString;
+      return date.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch {
+      return isoString;
+    }
+  };
 
   // Project Modal
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
@@ -695,9 +718,15 @@ export const AdminPage: React.FC = () => {
     );
   }
 
-  // Revert project to enquiry handler
-  const handleRevertProject = async (projectId: string) => {
-    if (!window.confirm('Are you sure you want to revert this project back to an active enquiry?')) return;
+  // Revert project to enquiry handlers
+  const handleOpenRevert = (proj: Project) => {
+    setRevertFeedback(null);
+    setRevertingProject(proj);
+  };
+
+  const handleConfirmRevert = async (projectId: string) => {
+    setRevertFeedback(null);
+    setRevertLoading(true);
     try {
       const res = await fetch(`/api/admin/projects/${projectId}/revert`, {
         method: 'POST',
@@ -705,14 +734,19 @@ export const AdminPage: React.FC = () => {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || 'Cannot revert project: financial records exist.');
+        setRevertFeedback({ type: 'error', message: data.error || 'Cannot revert project: financial records exist.' });
         return;
       }
+      setRevertingProject(null);
+      setRevertFeedback({ type: 'success', message: 'Project successfully reverted to active Enquiry.' });
       await fetchAllData();
       setEnquiryFilterStatus('Active');
       setActiveTab('enquiries');
+      setTimeout(() => setRevertFeedback(null), 4000);
     } catch (err: any) {
-      alert(err.message || 'Failed to revert project.');
+      setRevertFeedback({ type: 'error', message: err.message || 'Failed to revert project.' });
+    } finally {
+      setRevertLoading(false);
     }
   };
 
@@ -820,8 +854,9 @@ export const AdminPage: React.FC = () => {
             <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-2">
               {[
                 { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-                { id: 'enquiries', label: `Enquiries (${enquiries.length})`, icon: MessageSquare },
-                { id: 'projects', label: `Projects (${projects.length})`, icon: Briefcase },
+                { id: 'enquiries', label: `Enquiries (${enquiries.filter(e => e.status !== 'Converted' && e.status !== 'Archived').length})`, icon: MessageSquare },
+                { id: 'projects', label: `Active Projects (${projects.filter(p => p.status !== 'Completed').length})`, icon: Briefcase },
+                { id: 'completedProjects', label: `Completed Projects (${projects.filter(p => p.status === 'Completed').length})`, icon: CheckCircle2 },
                 { id: 'payments', label: `UPI Payments (${payments.length})`, icon: CreditCard },
                 { id: 'invoices', label: `Invoices & Receipts (${invoices.length + receipts.length})`, icon: FileText },
                 { id: 'bankAccounts', label: `Bank Accounts (${bankAccounts.length})`, icon: Landmark },
@@ -1056,7 +1091,7 @@ export const AdminPage: React.FC = () => {
                                 onClick={() => {
                                   const proj = projects.find(p => p.id === enq.convertedProjectId || p.enquiryId === enq.id);
                                   if (proj) {
-                                    handleRevertProject(proj.id);
+                                    handleOpenRevert(proj);
                                   }
                                 }}
                                 className="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-bold transition-colors"
@@ -1091,105 +1126,377 @@ export const AdminPage: React.FC = () => {
           </div>
         )}
 
-        {/* TAB C: CLIENT & PROJECT MANAGEMENT */}
+        {/* TAB C: ACTIVE PROJECTS */}
         {activeTab === 'projects' && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-[#123578]">Client & Project Ledger</h2>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-xl font-bold text-[#123578]">Active Projects</h2>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#173B75] text-white">
+                    {projects.filter(p => p.status !== 'Completed').length}
+                  </span>
+                </div>
                 <p className="text-xs text-[#242832]/60">
-                  Agreed amounts, milestones, deadlines, and private client payment portals.
+                  Ongoing client deliverables, milestones, payment records, and client portals.
                 </p>
               </div>
 
-              <button
-                onClick={() => setShowNewProjectModal(true)}
-                className="bg-[#ED650B] hover:bg-[#d65805] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Create New Project</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-[#EEF2F9] p-1 rounded-xl">
+                  <button
+                    onClick={() => setActiveTab('projects')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-[#173B75] shadow-xs cursor-pointer"
+                  >
+                    Active ({projects.filter(p => p.status !== 'Completed').length})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('completedProjects')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-[#173B75] transition-colors cursor-pointer"
+                  >
+                    Completed ({projects.filter(p => p.status === 'Completed').length})
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setShowNewProjectModal(true)}
+                  className="bg-[#ED650B] hover:bg-[#d65805] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create New Project</span>
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {projects.map(proj => {
-                const projPayments = payments.filter(p => p.projectId === proj.id);
-                const verified = projPayments.filter(p => p.status === 'Verified').reduce((sum, p) => sum + p.amount, 0);
-                const balance = Math.max(0, proj.agreedAmount - verified);
-                const paymentUrl = `${window.location.origin}/pay/${proj.clientPaymentToken}`;
+            {revertFeedback && (
+              <div className={`p-4 rounded-2xl text-xs font-semibold flex items-center justify-between ${
+                revertFeedback.type === 'error' ? 'bg-rose-50 text-rose-800 border border-rose-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              }`}>
+                <div className="flex items-center gap-2">
+                  {revertFeedback.type === 'error' ? <AlertCircle className="w-4 h-4 text-rose-600" /> : <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+                  <span>{revertFeedback.message}</span>
+                </div>
+                <button onClick={() => setRevertFeedback(null)} className="text-xs font-bold underline cursor-pointer">
+                  Dismiss
+                </button>
+              </div>
+            )}
 
-                return (
-                  <div key={proj.id} className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E6E8ED] shadow-sm flex flex-col justify-between space-y-5">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-mono text-xs font-bold text-[#ED650B]">{proj.id}</span>
-                        <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#EEF2F9] text-[#123578]">
-                          {proj.status}
-                        </span>
+            {projects.filter(p => p.status !== 'Completed').length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 text-center border border-[#E6E8ED] space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#EEF2F9] text-[#173B75] mx-auto flex items-center justify-center">
+                  <Briefcase className="w-6 h-6 text-[#ED650B]" />
+                </div>
+                <h3 className="text-base font-bold text-[#123578]">No Active Projects</h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Convert an enquiry from the Enquiries desk or create a new project to start managing client milestones and payments.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {projects.filter(p => p.status !== 'Completed').map(proj => {
+                  const projPayments = payments.filter(p => p.projectId === proj.id);
+                  const verified = projPayments.filter(p => p.status === 'Verified').reduce((sum, p) => sum + p.amount, 0);
+                  const balance = Math.max(0, proj.agreedAmount - verified);
+
+                  return (
+                    <div key={proj.id} className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E6E8ED] shadow-sm flex flex-col justify-between space-y-5">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-mono text-xs font-bold text-[#ED650B]">{proj.id}</span>
+                          <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#EEF2F9] text-[#123578]">
+                            {proj.status}
+                          </span>
+                        </div>
+
+                        <h3 className="text-lg font-bold text-[#123578]">{proj.projectName}</h3>
+                        <p className="text-xs text-[#242832]/70 mt-0.5">
+                          Client: <strong>{proj.clientName}</strong> · Phone: {proj.contactPhone || '—'}
+                        </p>
+
+                        <div className="grid grid-cols-3 gap-2 mt-4 p-3 bg-[#F7F7F5] rounded-xl text-xs">
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Agreed Amount</span>
+                            <span className="font-bold text-[#123578]">₹{proj.agreedAmount.toLocaleString('en-IN')}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Verified Paid</span>
+                            <span className="font-bold text-emerald-600">₹{verified.toLocaleString('en-IN')}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Balance Due</span>
+                            <span className="font-bold text-[#ED650B]">₹{balance.toLocaleString('en-IN')}</span>
+                          </div>
+                        </div>
                       </div>
 
-                      <h3 className="text-lg font-bold text-[#123578]">{proj.projectName}</h3>
-                      <p className="text-xs text-[#242832]/70 mt-0.5">
-                        Client: <strong>{proj.clientName}</strong> · Phone: {proj.contactPhone}
-                      </p>
-
-                      {/* Financial breakdown */}
-                      <div className="grid grid-cols-3 gap-2 mt-4 p-3 bg-[#F7F7F5] rounded-xl text-xs">
-                        <div>
-                          <span className="text-[10px] text-slate-500 block">Agreed Amount</span>
-                          <span className="font-bold text-[#123578]">₹{proj.agreedAmount.toLocaleString('en-IN')}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-500 block">Verified Paid</span>
-                          <span className="font-bold text-emerald-600">₹{verified.toLocaleString('en-IN')}</span>
-                        </div>
-                        <div>
-                          <span className="text-[10px] text-slate-500 block">Balance Due</span>
-                          <span className="font-bold text-[#ED650B]">₹{balance.toLocaleString('en-IN')}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3 pt-3 border-t border-[#E6E8ED]">
-                      {/* Internal Project Portal & Quick Actions */}
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-                        <button
-                          onClick={() => setSelectedProjectForPortal(proj)}
-                          className="px-3.5 py-2 rounded-xl bg-[#123578] hover:bg-[#1f4a9b] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-                        >
-                          <LayoutDashboard className="w-3.5 h-3.5 text-[#ED650B]" />
-                          <span>View Client Portal</span>
-                        </button>
-                        <div className="flex items-center justify-end gap-1.5 text-xs">
+                      <div className="space-y-3 pt-3 border-t border-[#E6E8ED]">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                           <button
-                            onClick={() => copyToClipboard(`${window.location.origin}/pay/${proj.clientPaymentToken}`, `pay-${proj.id}`)}
-                            className="px-2.5 py-1.5 rounded-lg bg-[#EEF2F9] text-[#123578] text-[11px] font-semibold hover:bg-[#123578] hover:text-white transition-colors flex items-center gap-1"
-                            title="Copy client payment URL"
+                            onClick={() => setSelectedProjectForPortal(proj)}
+                            className="px-3.5 py-2 rounded-xl bg-[#123578] hover:bg-[#1f4a9b] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                           >
-                            <Copy className="w-3 h-3" />
-                            <span>{copiedField === `pay-${proj.id}` ? 'Copied' : 'Copy Pay Link'}</span>
+                            <LayoutDashboard className="w-3.5 h-3.5 text-[#ED650B]" />
+                            <span>View Client Portal</span>
                           </button>
-                          <a
-                            href={`/pay/${proj.clientPaymentToken}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 rounded-lg bg-[#EEF2F9] text-[#123578] hover:bg-[#123578] hover:text-white transition-colors"
-                            title="Preview client payment page"
+                          <div className="flex items-center justify-end gap-1.5 text-xs">
+                            <button
+                              onClick={() => handleOpenRevert(proj)}
+                              className="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-[11px] font-semibold transition-colors cursor-pointer"
+                              title="Revert project back to active enquiry"
+                            >
+                              Revert to Enquiry
+                            </button>
+                            <button
+                              onClick={() => copyToClipboard(`${window.location.origin}/pay/${proj.clientPaymentToken}`, `pay-${proj.id}`)}
+                              className="px-2.5 py-1.5 rounded-lg bg-[#EEF2F9] text-[#123578] text-[11px] font-semibold hover:bg-[#123578] hover:text-white transition-colors flex items-center gap-1"
+                              title="Copy client payment URL"
+                            >
+                              <Copy className="w-3 h-3" />
+                              <span>{copiedField === `pay-${proj.id}` ? 'Copied' : 'Copy Pay Link'}</span>
+                            </button>
+                            <a
+                              href={`/pay/${proj.clientPaymentToken}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 rounded-lg bg-[#EEF2F9] text-[#123578] hover:bg-[#123578] hover:text-white transition-colors"
+                              title="Preview client payment page"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] text-[#242832]/60 font-mono">
+                          <span>Start: {proj.startDate}</span>
+                          <span>Deadline: {proj.deadline}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB C2: COMPLETED PROJECTS */}
+        {activeTab === 'completedProjects' && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-xl font-bold text-[#123578]">Completed Projects</h2>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white">
+                    {projects.filter(p => p.status === 'Completed').length}
+                  </span>
+                </div>
+                <p className="text-xs text-[#242832]/60">
+                  Delivered creative projects with 100% verified payments, settled balance, and official tax invoices.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-[#EEF2F9] p-1 rounded-xl">
+                  <button
+                    onClick={() => setActiveTab('projects')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-[#173B75] transition-colors cursor-pointer"
+                  >
+                    Active ({projects.filter(p => p.status !== 'Completed').length})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('completedProjects')}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-[#173B75] shadow-xs cursor-pointer"
+                  >
+                    Completed ({projects.filter(p => p.status === 'Completed').length})
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {projects.filter(p => p.status === 'Completed').length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 text-center border border-[#E6E8ED] space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="text-base font-bold text-[#123578]">No Completed Projects Yet</h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  When all agreed milestone payments are received & verified and you mark a project complete, it will appear here with full history and downloadable tax invoice.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {projects.filter(p => p.status === 'Completed').map(proj => {
+                  const projPayments = payments
+                    .filter(p => p.projectId === proj.id && p.status === 'Verified')
+                    .sort((a, b) => new Date(a.verifiedAt || a.paymentDate || a.createdAt).getTime() - new Date(b.verifiedAt || b.paymentDate || b.createdAt).getTime());
+                  const totalPaid = projPayments.reduce((sum, p) => sum + p.amount, 0);
+                  const linkedEnquiry = enquiries.find(e => e.id === proj.enquiryId || e.convertedProjectId === proj.id);
+                  const invoice = invoices.find(inv => inv.id === proj.invoiceId || inv.projectId === proj.id);
+                  const advancePayment = projPayments.length > 0 ? projPayments[0] : null;
+                  const finalPayment = projPayments.length > 0 ? projPayments[projPayments.length - 1] : null;
+
+                  return (
+                    <div key={proj.id} className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E6E8ED] shadow-sm space-y-6">
+                      {/* Header */}
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E6E8ED]">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="font-mono text-xs font-bold text-[#173B75] bg-[#EEF2F9] px-2.5 py-0.5 rounded-full">
+                              {proj.id}
+                            </span>
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Completed</span>
+                            </span>
+                            {invoice && (
+                              <span className="font-mono text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                                Invoice: {invoice.id} (Paid)
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="text-xl font-bold text-[#123578]">{proj.projectName}</h3>
+                          <p className="text-xs text-slate-600 mt-1">
+                            Client: <strong>{proj.clientName}</strong> · Phone: {proj.contactPhone || '—'} · Email: {proj.contactEmail || '—'}
+                          </p>
+                        </div>
+
+                        {/* Actions: Download Invoice & View Client Portal */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          {invoice ? (
+                            <button
+                              onClick={() => downloadInvoicePDF(invoice)}
+                              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                              title="Download official Tax Invoice PDF"
+                            >
+                              <Download className="w-4 h-4" />
+                              <span>Download Invoice ({invoice.id})</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                const fallbackInv: Invoice = {
+                                  id: proj.invoiceId || `INV-2026-${proj.id.replace(/[^0-9]/g, '') || '01'}`,
+                                  projectId: proj.id,
+                                  clientName: proj.clientName,
+                                  contactEmail: proj.contactEmail,
+                                  contactPhone: proj.contactPhone,
+                                  projectName: proj.projectName,
+                                  amount: proj.agreedAmount,
+                                  lineItems: (proj.services || []).map(s => ({ description: `${s} Deliverables & Execution`, amount: Math.round(proj.agreedAmount / (proj.services.length || 1)) })),
+                                  issueDate: proj.completedAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+                                  dueDate: proj.completedAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+                                  status: 'Paid',
+                                  notes: 'Project completed successfully. Full payment verified.',
+                                  upiId: '9817961412@ibl',
+                                  createdAt: proj.completedAt || new Date().toISOString()
+                                };
+                                downloadInvoicePDF(fallbackInv);
+                              }}
+                              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                            >
+                              <Download className="w-4 h-4" />
+                              <span>Download Invoice</span>
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => setSelectedProjectForPortal(proj)}
+                            className="px-4 py-2.5 rounded-xl bg-[#173B75] hover:bg-[#2458A6] text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
+                            <LayoutDashboard className="w-3.5 h-3.5 text-[#ED650B]" />
+                            <span>View Client Portal</span>
+                          </button>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-[#242832]/60 font-mono">
-                        <span>Start: {proj.startDate}</span>
-                        <span>Deadline: {proj.deadline}</span>
+                      {/* Financial Overview */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#F7F7F5] rounded-2xl p-4 border border-[#E6E8ED]">
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Agreed Project Amount</span>
+                          <span className="text-lg font-black text-[#123578] mt-0.5 block">₹{proj.agreedAmount.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Total Verified Paid</span>
+                          <span className="text-lg font-black text-emerald-600 mt-0.5 block">₹{totalPaid.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Remaining Due</span>
+                          <span className="text-lg font-black text-emerald-700 mt-0.5 block">₹0 (Paid in Full)</span>
+                        </div>
+                      </div>
+
+                      {/* Detailed Historical Audit Trail & Timestamps */}
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#173B75] flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-[#ED650B]" />
+                          <span>Project Lifecycle & Payment History</span>
+                        </h4>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                          <div className="p-3 bg-[#FAFAFA] rounded-xl border border-slate-200">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">1. Enquiry Received</span>
+                            <span className="font-mono text-slate-800 font-semibold block mt-1">
+                              {formatDateTime(linkedEnquiry?.createdAt || proj.createdAt)}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">{linkedEnquiry?.id || 'Direct'}</span>
+                          </div>
+
+                          <div className="p-3 bg-[#FAFAFA] rounded-xl border border-slate-200">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">2. Converted to Project</span>
+                            <span className="font-mono text-slate-800 font-semibold block mt-1">
+                              {formatDateTime(proj.createdAt)}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">Work Start: {proj.startDate}</span>
+                          </div>
+
+                          <div className="p-3 bg-[#FAFAFA] rounded-xl border border-slate-200">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">3. Advance Payment</span>
+                            <span className="font-mono text-emerald-700 font-semibold block mt-1">
+                              {advancePayment ? `₹${advancePayment.amount.toLocaleString('en-IN')}` : '—'}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {advancePayment ? formatDateTime(advancePayment.verifiedAt || advancePayment.paymentDate) : '—'}
+                            </span>
+                          </div>
+
+                          <div className="p-3 bg-emerald-50/70 rounded-xl border border-emerald-200">
+                            <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">4. Final Settlement & Complete</span>
+                            <span className="font-mono text-emerald-900 font-bold block mt-1">
+                              {formatDateTime(proj.completedAt)}
+                            </span>
+                            <span className="text-[10px] text-emerald-700 font-mono">By {proj.completedBy || 'Akshay'}</span>
+                          </div>
+                        </div>
+
+                        {/* Verified Payments Ledger */}
+                        {projPayments.length > 0 && (
+                          <div className="bg-slate-50 rounded-xl p-3 border border-slate-200 space-y-2">
+                            <span className="text-[11px] font-bold text-slate-600 block">
+                              Verified Transactions ({projPayments.length})
+                            </span>
+                            <div className="divide-y divide-slate-200">
+                              {projPayments.map(p => (
+                                <div key={p.id} className="py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px]">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-mono font-bold text-emerald-700">₹{p.amount.toLocaleString('en-IN')}</span>
+                                    <span className="text-slate-500">via {p.paymentMethod || 'UPI'}</span>
+                                    <span className="font-mono text-slate-400">UTR: {p.utr}</span>
+                                  </div>
+                                  <div className="font-mono text-slate-500">
+                                    Verified: <strong>{formatDateTime(p.verifiedAt || p.paymentDate)}</strong>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -2425,6 +2732,50 @@ export const AdminPage: React.FC = () => {
             setActiveTab('enquiries');
           }}
         />
+      )}
+
+      {/* Revert Project to Enquiry Confirmation Modal */}
+      {revertingProject && (
+        <div className="fixed inset-0 z-60 bg-[#0d1c38]/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#E6E8ED] space-y-4 animate-in zoom-in-95">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-amber-700" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#123578]">Revert Project to Enquiry?</h3>
+                <p className="text-xs text-slate-500 font-mono">{revertingProject.id}</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              This will remove <strong>{revertingProject.projectName}</strong> from active Projects and restore <strong>{revertingProject.clientName}</strong> as an active Enquiry with its full notes and history.
+            </p>
+
+            <p className="text-[11px] text-amber-800 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+              Note: If this project has any verified payments, invoices, or receipts recorded, reversal is safely blocked by the system to protect financial accounting records.
+            </p>
+
+            <div className="pt-2 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                disabled={revertLoading}
+                onClick={() => setRevertingProject(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs cursor-pointer hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={revertLoading}
+                onClick={() => handleConfirmRevert(revertingProject.id)}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {revertLoading ? 'Reverting...' : 'Confirm Revert'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

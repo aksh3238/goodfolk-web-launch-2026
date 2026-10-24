@@ -78,6 +78,7 @@ export interface Project {
   internalNotes?: string;
   clientPaymentToken: string;
   enquiryId?: string;
+  invoiceId?: string;
   deliverables?: ProjectDeliverableItem[];
   adjustments?: ProjectAdjustment[];
   auditLog?: ProjectAuditEntry[];

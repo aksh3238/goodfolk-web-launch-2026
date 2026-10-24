@@ -71,547 +71,69 @@
     "7ed6fe510d3a2799058c3f5dcd9617c1dc91bafb68a4c937198e1534a132796c": {
       "userId": "owner-akshay",
       "expiresAt": 1793436957254
+    },
+    "8cfeba2156ba773af3cf700e56f73db38a93a8104b970e4ed4776b4073d008cc": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793457080306
+    },
+    "2e861bc90f74d8e78a430a5e347d77ad797c60afd90e53a0fbd679f8f71bb85d": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793457095072
+    },
+    "6c1f0dfc0c2803afe779692b50b98c6460f0b6b836109730cb52814ef4af2ffc": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793457119307
+    },
+    "4ebd1694763b330b2987d99e61ec88bd077100f25ddcebe5b1abd2112d203911": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793457139790
+    },
+    "fe81e669251de9f6afc731aedb2b5790f6207483854a040164bc7727d8540def": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458787517
+    },
+    "ebe194a9f5953689f08f7f1df959b357c0187fbc0ef11b0821433e42d3fd0656": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458819559
+    },
+    "d9cc249e9f68f26c031eb40e7de9106c1909dff0174b5ba96e35b5845342f017": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458827594
+    },
+    "56649dfefc0fafc83459b3cb57e81cfcd82a747ad4e71fdbc088ae6fc0da7a6a": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458836220
+    },
+    "89b05bdfd53136d1b39e618f2ded7e76c164465cea7ae169e0a06850d08ed560": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458846489
+    },
+    "2ed97f6fec025b878737586d9c167feaa8055c582944ef111840af39c9002354": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458874953
+    },
+    "fb0fa1087064da1cc05b728eb7986ca203e402284f02762ee65ffb82b0264414": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458899695
+    },
+    "a58cb40da974742717ea6e03a47d02b41d4b7b56094ce017edde016ce9e88d8d": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458915660
+    },
+    "65563b0b658b6cba1ce37ab85a7a57bf7efe9a38673aff5f3b662e3623b06a7b": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458941905
+    },
+    "aec9fde4be4c75991fd4bc3ae4ddec71549eb076bb4d6fc7efe2cf41e02b17e0": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793458957298
     }
   },
-  "enquiries": [
-    {
-      "name": "Rohan Sharma",
-      "email": "rohan@apexspirits.in",
-      "company": "Apex Spirits",
-      "phone": "+91 98200 12345",
-      "service": "Branding & Packaging",
-      "budget": "₹2,00,000",
-      "deadline": "",
-      "details": "Craft gin bottle packaging and label dieline development.",
-      "consent": true,
-      "id": "ENQ-2026-5525",
-      "status": "Converted",
-      "createdAt": "2026-10-24T08:55:57.270Z",
-      "internalNotes": "[Reverted from Project GF-PRJ-2026-06 by Akshay on 24/10/2026, 8:55:57 am]",
-      "convertedProjectId": "GF-PRJ-2026-06"
-    },
-    {
-      "name": "Rohan Sharma",
-      "email": "rohan@apexspirits.in",
-      "company": "Apex Spirits",
-      "phone": "+91 98200 12345",
-      "service": "Branding & Packaging",
-      "budget": "₹2,00,000",
-      "deadline": "",
-      "details": "Craft gin bottle packaging and label dieline development.",
-      "consent": true,
-      "id": "ENQ-2026-2718",
-      "status": "Converted",
-      "createdAt": "2026-10-24T08:55:42.891Z",
-      "convertedProjectId": "GF-PRJ-2026-05"
-    },
-    {
-      "name": "Aman Sethi",
-      "email": "aman@sethifoods.in",
-      "company": "Sethi Fine Foods",
-      "phone": "+91 98111 22334",
-      "service": "Branding & Packaging",
-      "details": "Need complete brand identity and pouch packaging dielines for gourmet snacks.",
-      "consent": false,
-      "id": "ENQ-2026-3085",
-      "status": "New",
-      "createdAt": "2026-10-18T07:19:33.409Z"
-    },
-    {
-      "id": "ENQ-2026-1001",
-      "name": "Kabir Verma",
-      "email": "kabir@zenithorganics.in",
-      "company": "Zenith Organics",
-      "phone": "+91 98201 44512",
-      "service": "Branding & Packaging",
-      "budget": "₹1,50,000 - ₹2,50,000",
-      "deadline": "4 Weeks",
-      "details": "Looking for a comprehensive luxury packaging overhaul for our organic cold-pressed beverage line, along with updated brand guidelines.",
-      "consent": true,
-      "status": "Converted",
-      "internalNotes": "Discussed requirements on call. Converted to Project GF-PRJ-2026-01.",
-      "convertedProjectId": "GF-PRJ-2026-01",
-      "createdAt": "2026-10-11T07:19:23.291Z"
-    },
-    {
-      "id": "ENQ-2026-1002",
-      "name": "Sneha Roy",
-      "email": "sneha@auraapparel.co",
-      "company": "Aura Sustainable Apparel",
-      "phone": "+91 98711 23098",
-      "service": "Performance Marketing Creatives",
-      "budget": "₹80,000 - ₹1,20,000",
-      "deadline": "2 Weeks",
-      "details": "Need 15 high-converting ad creative variations (static + video reels) for Meta and Google ads for our upcoming festive collection.",
-      "consent": true,
-      "status": "Contacted",
-      "internalNotes": "Shared portfolio deck and rate card. Awaiting client review.",
-      "createdAt": "2026-10-15T07:19:23.292Z"
-    },
-    {
-      "id": "ENQ-2026-1003",
-      "name": "Devansh Kulkarni",
-      "email": "dev@novanutrition.com",
-      "company": "Nova Nutrition",
-      "phone": "+91 97654 89123",
-      "service": "Creative Design",
-      "budget": "₹1,00,000",
-      "deadline": "3 Weeks",
-      "details": "Amazon A+ content design for 4 SKU product pages and 3D mockups for retail website banner.",
-      "consent": true,
-      "status": "New",
-      "internalNotes": "Received via Contact page. Needs briefing call.",
-      "createdAt": "2026-10-17T07:19:23.292Z"
-    }
-  ],
-  "projects": [
-    {
-      "clientName": "Apex Spirits",
-      "contactEmail": "rohan@apexspirits.in",
-      "contactPhone": "+91 98200 12345",
-      "projectName": "Apex Craft Gin Visual Identity (Second Round)",
-      "services": [
-        "Branding & Packaging"
-      ],
-      "agreedAmount": 180000,
-      "advanceAmountAgreed": 90000,
-      "startDate": "2026-10-24",
-      "deadline": "2026-11-23",
-      "status": "Completed",
-      "internalNotes": "Converted from Enquiry ENQ-2026-5525. Original brief: Craft gin bottle packaging and label dieline development.",
-      "enquiryId": "ENQ-2026-5525",
-      "auditLog": [
-        {
-          "id": "AUD-1792832157426-648",
-          "timestamp": "2026-10-24T08:55:57.426Z",
-          "action": "Project Completed",
-          "actor": "Akshay",
-          "details": "All 4 completion gates passed. Project marked as Completed."
-        },
-        {
-          "id": "AUD-1792832157413-179",
-          "timestamp": "2026-10-24T08:55:57.413Z",
-          "action": "Project Updated",
-          "actor": "Akshay",
-          "details": "Project details updated (status)"
-        },
-        {
-          "id": "AUD-1792832157409-942",
-          "timestamp": "2026-10-24T08:55:57.409Z",
-          "action": "Payment Verified",
-          "actor": "Akshay",
-          "details": "Payment PAY-2026-9679 of ₹1,30,000 verified. Receipt REC-2026-05 issued."
-        },
-        {
-          "id": "AUD-1792832157398-491",
-          "timestamp": "2026-10-24T08:55:57.398Z",
-          "action": "Payment Recorded",
-          "actor": "Akshay",
-          "details": "Payment PAY-2026-9679 of ₹1,30,000 recorded (Pending Verification). Method: Bank Transfer (NEFT/IMPS), UTR: UTR-APEX-FINAL-002"
-        },
-        {
-          "id": "AUD-1792832157388-191",
-          "timestamp": "2026-10-24T08:55:57.388Z",
-          "action": "Deliverable Added",
-          "actor": "Akshay",
-          "details": "Added deliverable \"3D Bottle Renders Suite\""
-        },
-        {
-          "id": "AUD-1792832157378-200",
-          "timestamp": "2026-10-24T08:55:57.378Z",
-          "action": "Deliverable Added",
-          "actor": "Akshay",
-          "details": "Added deliverable \"Packaging Dielines & Print Specs\""
-        },
-        {
-          "id": "AUD-1792832157364-264",
-          "timestamp": "2026-10-24T08:55:57.364Z",
-          "action": "Payment Rejected",
-          "actor": "Akshay",
-          "details": "Payment PAY-2026-5916 of ₹50,000 rejected. Reason: Duplicate transaction reference in bank reconciliation"
-        },
-        {
-          "id": "AUD-1792832157355-771",
-          "timestamp": "2026-10-24T08:55:57.355Z",
-          "action": "Payment Verified",
-          "actor": "Akshay",
-          "details": "Payment PAY-2026-3634 of ₹50,000 verified. Receipt REC-2026-04 issued."
-        },
-        {
-          "id": "AUD-1792832157346-42",
-          "timestamp": "2026-10-24T08:55:57.346Z",
-          "action": "Payment Recorded",
-          "actor": "Akshay",
-          "details": "Payment PAY-2026-5916 of ₹50,000 recorded (Pending Verification). Method: UPI, UTR: UTR-APEX-001"
-        },
-        {
-          "id": "AUD-1792832157331-148",
-          "timestamp": "2026-10-24T08:55:57.331Z",
-          "action": "Payment Recorded",
-          "actor": "Akshay",
-          "details": "Payment PAY-2026-3634 of ₹50,000 recorded (Pending Verification). Method: UPI, UTR: UTR-APEX-001"
-        },
-        {
-          "id": "AUD-1792832157311",
-          "timestamp": "2026-10-24T08:55:57.311Z",
-          "action": "Converted from Enquiry",
-          "actor": "Akshay",
-          "details": "Enquiry ENQ-2026-5525 successfully converted into project."
-        }
-      ],
-      "id": "GF-PRJ-2026-06",
-      "clientPaymentToken": "79b7fd990f7187ed",
-      "deliverables": [
-        {
-          "id": "DEL-1792832157378-425",
-          "title": "Packaging Dielines & Print Specs",
-          "description": "Vector AI and PDF files",
-          "fileUrl": "/uploads/test-apex-packaging.pdf",
-          "fileName": "apex-packaging-dielines.pdf",
-          "uploadedAt": "2026-10-24T08:55:57.378Z",
-          "isDelivered": true,
-          "deliveredAt": "2026-10-24T08:55:57.378Z"
-        },
-        {
-          "id": "DEL-1792832157388-184",
-          "title": "3D Bottle Renders Suite",
-          "description": "4K photorealistic renders",
-          "fileUrl": "/uploads/test-apex-renders.zip",
-          "fileName": "apex-3d-renders.zip",
-          "uploadedAt": "2026-10-24T08:55:57.388Z",
-          "isDelivered": true,
-          "deliveredAt": "2026-10-24T08:55:57.388Z"
-        }
-      ],
-      "adjustments": [],
-      "createdAt": "2026-10-24T08:55:57.311Z",
-      "updatedAt": "2026-10-24T08:55:57.426Z",
-      "completedAt": "2026-10-24T08:55:57.426Z",
-      "completedBy": "Akshay"
-    },
-    {
-      "clientName": "Apex Spirits",
-      "contactEmail": "rohan@apexspirits.in",
-      "contactPhone": "+91 98200 12345",
-      "projectName": "Apex Craft Gin Visual Identity (Second Round)",
-      "services": [
-        "Branding & Packaging"
-      ],
-      "agreedAmount": 180000,
-      "startDate": "2026-10-24",
-      "deadline": "2026-11-23",
-      "status": "In Progress",
-      "internalNotes": "Converted from Enquiry ENQ-2026-2718. Original note: Craft gin bottle packaging and label dieline development.",
-      "enquiryId": "ENQ-2026-2718",
-      "id": "GF-PRJ-2026-05",
-      "clientPaymentToken": "e292ebfed7e4a86d",
-      "createdAt": "2026-10-24T08:55:42.946Z",
-      "updatedAt": "2026-10-24T08:55:42.946Z"
-    },
-    {
-      "clientName": "Apex Spirits",
-      "contactEmail": "rohan@apexspirits.in",
-      "contactPhone": "+91 98200 12345",
-      "projectName": "Apex Craft Gin Visual Identity",
-      "services": [
-        "Branding & Packaging"
-      ],
-      "agreedAmount": 180000,
-      "startDate": "2026-10-24",
-      "deadline": "2026-11-23",
-      "status": "In Progress",
-      "internalNotes": "Converted from Enquiry ENQ-2026-2718. Original note: Craft gin bottle packaging and label dieline development.",
-      "enquiryId": "ENQ-2026-2718",
-      "id": "GF-PRJ-2026-04",
-      "clientPaymentToken": "de5a5b95a7a9d821",
-      "createdAt": "2026-10-24T08:55:42.913Z",
-      "updatedAt": "2026-10-24T08:55:42.913Z"
-    },
-    {
-      "clientName": "Apex Spirits",
-      "contactEmail": "rohan@apexspirits.in",
-      "contactPhone": "+91 98200 12345",
-      "projectName": "Apex Craft Gin Visual Identity",
-      "services": [
-        "Branding & Packaging"
-      ],
-      "agreedAmount": 180000,
-      "startDate": "2026-10-25",
-      "deadline": "2026-11-30",
-      "status": "In Progress",
-      "internalNotes": "Converted from Enquiry ENQ-2026-2718. Original note: Craft gin bottle packaging and label dieline development.",
-      "enquiryId": "ENQ-2026-2718",
-      "id": "GF-PRJ-2026-03",
-      "clientPaymentToken": "ce1d944ee6ca7a03",
-      "createdAt": "2026-10-24T08:55:42.900Z",
-      "updatedAt": "2026-10-24T08:55:42.900Z"
-    },
-    {
-      "id": "GF-PRJ-2026-01",
-      "clientName": "Zenith Organics",
-      "contactEmail": "kabir@zenithorganics.in",
-      "contactPhone": "+91 98201 44512",
-      "projectName": "Artisanal Cold-Pressed Juice Brand & Packaging",
-      "services": [
-        "Branding & Packaging",
-        "Creative Design"
-      ],
-      "agreedAmount": 185000,
-      "startDate": "2026-10-10",
-      "deadline": "2026-11-15",
-      "status": "In Progress",
-      "internalNotes": "Initial moodboards approved. Label dielines underway.",
-      "clientPaymentToken": "zenith-pay-981796",
-      "enquiryId": "ENQ-2026-1001",
-      "createdAt": "2026-10-12T07:19:23.292Z",
-      "updatedAt": "2026-10-16T07:19:23.292Z"
-    },
-    {
-      "id": "GF-PRJ-2026-02",
-      "clientName": "Kaveri Botanicals",
-      "contactEmail": "contact@kaveribotanicals.in",
-      "contactPhone": "+91 99002 88419",
-      "projectName": "Ayurvedic Skincare Brand Identity & Launch Ads",
-      "services": [
-        "Branding & Packaging",
-        "Performance Marketing Creatives"
-      ],
-      "agreedAmount": 220000,
-      "startDate": "2026-09-20",
-      "deadline": "2026-10-25",
-      "status": "Review & Revisions",
-      "internalNotes": "Final packaging approved. Ad creatives in review.",
-      "clientPaymentToken": "kaveri-pay-441238",
-      "createdAt": "2026-09-20T07:19:23.292Z",
-      "updatedAt": "2026-10-18T07:27:07.146Z"
-    }
-  ],
-  "payments": [
-    {
-      "id": "PAY-2026-9679",
-      "projectId": "GF-PRJ-2026-06",
-      "clientName": "Apex Spirits",
-      "amount": 130000,
-      "utr": "UTR-APEX-FINAL-002",
-      "upiId": "9817961412@ibl",
-      "paymentMethod": "Bank Transfer (NEFT/IMPS)",
-      "paymentDate": "2026-10-24T08:55:57.398Z",
-      "status": "Verified",
-      "notes": "Final balance clearance",
-      "duplicateWarningAcknowledged": false,
-      "createdAt": "2026-10-24T08:55:57.398Z",
-      "verifiedAt": "2026-10-24T08:55:57.409Z",
-      "verifiedBy": "Akshay",
-      "receiptId": "REC-2026-05"
-    },
-    {
-      "id": "PAY-2026-5916",
-      "projectId": "GF-PRJ-2026-06",
-      "clientName": "Apex Spirits",
-      "amount": 50000,
-      "utr": "UTR-APEX-001",
-      "upiId": "9817961412@ibl",
-      "paymentMethod": "UPI",
-      "paymentDate": "2026-10-24T08:55:57.345Z",
-      "status": "Rejected",
-      "duplicateWarningAcknowledged": true,
-      "createdAt": "2026-10-24T08:55:57.345Z",
-      "rejectionReason": "Duplicate transaction reference in bank reconciliation"
-    },
-    {
-      "id": "PAY-2026-3634",
-      "projectId": "GF-PRJ-2026-06",
-      "clientName": "Apex Spirits",
-      "amount": 50000,
-      "utr": "UTR-APEX-001",
-      "upiId": "9817961412@ibl",
-      "paymentMethod": "UPI",
-      "paymentDate": "2026-10-24T08:55:57.324Z",
-      "status": "Verified",
-      "notes": "Initial advance",
-      "duplicateWarningAcknowledged": false,
-      "createdAt": "2026-10-24T08:55:57.324Z",
-      "verifiedAt": "2026-10-24T08:55:57.355Z",
-      "verifiedBy": "Akshay",
-      "receiptId": "REC-2026-04"
-    },
-    {
-      "id": "PAY-2026-3001",
-      "projectId": "GF-PRJ-2026-01",
-      "clientName": "Zenith Organics",
-      "amount": 92500,
-      "utr": "428819034112",
-      "upiId": "9817961412@ibl",
-      "paymentDate": "2026-10-11T11:30:00.000Z",
-      "status": "Verified",
-      "verifiedAt": "2026-10-11T12:15:00.000Z",
-      "verifiedBy": "Akshay",
-      "notes": "50% Advance received in bank account via UPI.",
-      "receiptId": "REC-2026-01",
-      "createdAt": "2026-10-11T11:30:00.000Z"
-    },
-    {
-      "id": "PAY-2026-3002",
-      "projectId": "GF-PRJ-2026-02",
-      "clientName": "Kaveri Botanicals",
-      "amount": 110000,
-      "utr": "426510982341",
-      "upiId": "9817961412@ibl",
-      "paymentDate": "2026-09-22T15:20:00.000Z",
-      "status": "Verified",
-      "verifiedAt": "2026-09-22T16:00:00.000Z",
-      "verifiedBy": "Akshay",
-      "notes": "50% Advance payment verified in bank.",
-      "receiptId": "REC-2026-02",
-      "createdAt": "2026-09-22T15:20:00.000Z"
-    },
-    {
-      "id": "PAY-2026-3003",
-      "projectId": "GF-PRJ-2026-02",
-      "clientName": "Kaveri Botanicals",
-      "amount": 110000,
-      "utr": "429012339845",
-      "upiId": "9817961412@ibl",
-      "paymentDate": "2026-10-17T09:45:00.000Z",
-      "status": "Verified",
-      "notes": "Client submitted final milestone payment UTR for verification.",
-      "createdAt": "2026-10-17T09:45:00.000Z",
-      "verifiedAt": "2026-10-18T07:27:07.146Z",
-      "verifiedBy": "Akshay",
-      "receiptId": "REC-2026-03"
-    }
-  ],
-  "invoices": [
-    {
-      "id": "INV-2026-01",
-      "projectId": "GF-PRJ-2026-01",
-      "clientName": "Zenith Organics",
-      "contactEmail": "kabir@zenithorganics.in",
-      "contactPhone": "+91 98201 44512",
-      "projectName": "Artisanal Cold-Pressed Juice Brand & Packaging",
-      "amount": 185000,
-      "lineItems": [
-        {
-          "description": "Comprehensive Brand Identity System & Guidelines",
-          "amount": 85000
-        },
-        {
-          "description": "Product Packaging Design for 4 SKUs & Production Dielines",
-          "amount": 80000
-        },
-        {
-          "description": "Creative 3D Realistic Bottle Renders & Digital Assets",
-          "amount": 20000
-        }
-      ],
-      "issueDate": "2026-10-10",
-      "dueDate": "2026-10-20",
-      "status": "Partially Paid",
-      "notes": "Terms: 50% advance before kickoff, 50% upon final artwork approval. Payment via UPI to 9817961412@ibl.",
-      "upiId": "9817961412@ibl",
-      "createdAt": "2026-10-10T08:00:00.000Z"
-    },
-    {
-      "id": "INV-2026-02",
-      "projectId": "GF-PRJ-2026-02",
-      "clientName": "Kaveri Botanicals",
-      "contactEmail": "contact@kaveribotanicals.in",
-      "contactPhone": "+91 99002 88419",
-      "projectName": "Ayurvedic Skincare Brand Identity & Launch Ads",
-      "amount": 220000,
-      "lineItems": [
-        {
-          "description": "Visual Identity, Luxury Glass Packaging & Box Design",
-          "amount": 140000
-        },
-        {
-          "description": "Performance Ad Creatives & Video Reel Assets",
-          "amount": 80000
-        }
-      ],
-      "issueDate": "2026-09-20",
-      "dueDate": "2026-10-05",
-      "status": "Partially Paid",
-      "notes": "50% advance milestone received. Balance pending verification.",
-      "upiId": "9817961412@ibl",
-      "createdAt": "2026-09-20T09:00:00.000Z"
-    }
-  ],
-  "receipts": [
-    {
-      "id": "REC-2026-05",
-      "paymentId": "PAY-2026-9679",
-      "projectId": "GF-PRJ-2026-06",
-      "clientName": "Apex Spirits",
-      "amountReceived": 130000,
-      "utr": "UTR-APEX-FINAL-002",
-      "verifiedDate": "2026-10-24T08:55:57.409Z",
-      "agreedProjectAmount": 180000,
-      "totalVerifiedPaid": 180000,
-      "remainingBalance": 0,
-      "isFinalReceipt": true,
-      "createdAt": "2026-10-24T08:55:57.409Z"
-    },
-    {
-      "id": "REC-2026-04",
-      "paymentId": "PAY-2026-3634",
-      "projectId": "GF-PRJ-2026-06",
-      "clientName": "Apex Spirits",
-      "amountReceived": 50000,
-      "utr": "UTR-APEX-001",
-      "verifiedDate": "2026-10-24T08:55:57.355Z",
-      "agreedProjectAmount": 180000,
-      "totalVerifiedPaid": 50000,
-      "remainingBalance": 130000,
-      "isFinalReceipt": false,
-      "createdAt": "2026-10-24T08:55:57.355Z"
-    },
-    {
-      "id": "REC-2026-03",
-      "paymentId": "PAY-2026-3003",
-      "projectId": "GF-PRJ-2026-02",
-      "invoiceId": "INV-2026-02",
-      "clientName": "Kaveri Botanicals",
-      "amountReceived": 110000,
-      "utr": "429012339845",
-      "verifiedDate": "2026-10-18T07:27:07.146Z",
-      "agreedProjectAmount": 220000,
-      "totalVerifiedPaid": 220000,
-      "remainingBalance": 0,
-      "isFinalReceipt": true,
-      "createdAt": "2026-10-18T07:27:07.146Z"
-    },
-    {
-      "id": "REC-2026-01",
-      "paymentId": "PAY-2026-3001",
-      "projectId": "GF-PRJ-2026-01",
-      "invoiceId": "INV-2026-01",
-      "clientName": "Zenith Organics",
-      "amountReceived": 92500,
-      "utr": "428819034112",
-      "verifiedDate": "2026-10-11T12:15:00.000Z",
-      "agreedProjectAmount": 185000,
-      "totalVerifiedPaid": 92500,
-      "remainingBalance": 92500,
-      "isFinalReceipt": false,
-      "createdAt": "2026-10-11T12:15:00.000Z"
-    },
-    {
-      "id": "REC-2026-02",
-      "paymentId": "PAY-2026-3002",
-      "projectId": "GF-PRJ-2026-02",
-      "invoiceId": "INV-2026-02",
-      "clientName": "Kaveri Botanicals",
-      "amountReceived": 110000,
-      "utr": "426510982341",
-      "verifiedDate": "2026-09-22T16:00:00.000Z",
-      "agreedProjectAmount": 220000,
-      "totalVerifiedPaid": 110000,
-      "remainingBalance": 110000,
-      "isFinalReceipt": false,
-      "createdAt": "2026-09-22T16:00:00.000Z"
-    }
-  ],
+  "enquiries": [],
+  "projects": [],
+  "payments": [],
+  "invoices": [],
+  "receipts": [],
   "bankAccounts": [],
   "siteContent": {
     "logoText": "good folk",

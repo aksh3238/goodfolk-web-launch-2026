@@ -61,206 +61,11 @@ function getInitialData(): DatabaseSchema {
       isInitialized: true
     },
     sessions: {},
-    enquiries: [
-      {
-        id: 'ENQ-2026-1001',
-        name: 'Kabir Verma',
-        email: 'kabir@zenithorganics.in',
-        company: 'Zenith Organics',
-        phone: '+91 98201 44512',
-        service: 'Branding & Packaging',
-        budget: '₹1,50,000 - ₹2,50,000',
-        deadline: '4 Weeks',
-        details: 'Looking for a comprehensive luxury packaging overhaul for our organic cold-pressed beverage line, along with updated brand guidelines.',
-        consent: true,
-        status: 'Converted',
-        internalNotes: 'Discussed requirements on call. Converted to Project GF-PRJ-2026-01.',
-        convertedProjectId: 'GF-PRJ-2026-01',
-        createdAt: new Date(Date.now() - 7 * 86400000).toISOString()
-      },
-      {
-        id: 'ENQ-2026-1002',
-        name: 'Sneha Roy',
-        email: 'sneha@auraapparel.co',
-        company: 'Aura Sustainable Apparel',
-        phone: '+91 98711 23098',
-        service: 'Performance Marketing Creatives',
-        budget: '₹80,000 - ₹1,20,000',
-        deadline: '2 Weeks',
-        details: 'Need 15 high-converting ad creative variations (static + video reels) for Meta and Google ads for our upcoming festive collection.',
-        consent: true,
-        status: 'Contacted',
-        internalNotes: 'Shared portfolio deck and rate card. Awaiting client review.',
-        createdAt: new Date(Date.now() - 3 * 86400000).toISOString()
-      },
-      {
-        id: 'ENQ-2026-1003',
-        name: 'Devansh Kulkarni',
-        email: 'dev@novanutrition.com',
-        company: 'Nova Nutrition',
-        phone: '+91 97654 89123',
-        service: 'Creative Design',
-        budget: '₹1,00,000',
-        deadline: '3 Weeks',
-        details: 'Amazon A+ content design for 4 SKU product pages and 3D mockups for retail website banner.',
-        consent: true,
-        status: 'New',
-        internalNotes: 'Received via Contact page. Needs briefing call.',
-        createdAt: new Date(Date.now() - 1 * 86400000).toISOString()
-      }
-    ],
-    projects: [
-      {
-        id: 'GF-PRJ-2026-01',
-        clientName: 'Zenith Organics',
-        contactEmail: 'kabir@zenithorganics.in',
-        contactPhone: '+91 98201 44512',
-        projectName: 'Artisanal Cold-Pressed Juice Brand & Packaging',
-        services: ['Branding & Packaging', 'Creative Design'],
-        agreedAmount: 185000,
-        startDate: '2026-10-10',
-        deadline: '2026-11-15',
-        status: 'In Progress',
-        internalNotes: 'Initial moodboards approved. Label dielines underway.',
-        clientPaymentToken: 'zenith-pay-981796',
-        enquiryId: 'ENQ-2026-1001',
-        createdAt: new Date(Date.now() - 6 * 86400000).toISOString(),
-        updatedAt: new Date(Date.now() - 2 * 86400000).toISOString()
-      },
-      {
-        id: 'GF-PRJ-2026-02',
-        clientName: 'Kaveri Botanicals',
-        contactEmail: 'contact@kaveribotanicals.in',
-        contactPhone: '+91 99002 88419',
-        projectName: 'Ayurvedic Skincare Brand Identity & Launch Ads',
-        services: ['Branding & Packaging', 'Performance Marketing Creatives'],
-        agreedAmount: 220000,
-        startDate: '2026-09-20',
-        deadline: '2026-10-25',
-        status: 'Review & Revisions',
-        internalNotes: 'Final packaging approved. Ad creatives in review.',
-        clientPaymentToken: 'kaveri-pay-441238',
-        createdAt: new Date(Date.now() - 28 * 86400000).toISOString(),
-        updatedAt: new Date(Date.now() - 4 * 86400000).toISOString()
-      }
-    ],
-    payments: [
-      {
-        id: 'PAY-2026-3001',
-        projectId: 'GF-PRJ-2026-01',
-        clientName: 'Zenith Organics',
-        amount: 92500,
-        utr: '428819034112',
-        upiId: '9817961412@ibl',
-        paymentDate: '2026-10-11T11:30:00.000Z',
-        status: 'Verified',
-        verifiedAt: '2026-10-11T12:15:00.000Z',
-        verifiedBy: 'Akshay',
-        notes: '50% Advance received in bank account via UPI.',
-        receiptId: 'REC-2026-01',
-        createdAt: '2026-10-11T11:30:00.000Z'
-      },
-      {
-        id: 'PAY-2026-3002',
-        projectId: 'GF-PRJ-2026-02',
-        clientName: 'Kaveri Botanicals',
-        amount: 110000,
-        utr: '426510982341',
-        upiId: '9817961412@ibl',
-        paymentDate: '2026-09-22T15:20:00.000Z',
-        status: 'Verified',
-        verifiedAt: '2026-09-22T16:00:00.000Z',
-        verifiedBy: 'Akshay',
-        notes: '50% Advance payment verified in bank.',
-        receiptId: 'REC-2026-02',
-        createdAt: '2026-09-22T15:20:00.000Z'
-      },
-      {
-        id: 'PAY-2026-3003',
-        projectId: 'GF-PRJ-2026-02',
-        clientName: 'Kaveri Botanicals',
-        amount: 110000,
-        utr: '429012339845',
-        upiId: '9817961412@ibl',
-        paymentDate: '2026-10-17T09:45:00.000Z',
-        status: 'Pending Verification',
-        notes: 'Client submitted final milestone payment UTR for verification.',
-        createdAt: '2026-10-17T09:45:00.000Z'
-      }
-    ],
-    invoices: [
-      {
-        id: 'INV-2026-01',
-        projectId: 'GF-PRJ-2026-01',
-        clientName: 'Zenith Organics',
-        contactEmail: 'kabir@zenithorganics.in',
-        contactPhone: '+91 98201 44512',
-        projectName: 'Artisanal Cold-Pressed Juice Brand & Packaging',
-        amount: 185000,
-        lineItems: [
-          { description: 'Comprehensive Brand Identity System & Guidelines', amount: 85000 },
-          { description: 'Product Packaging Design for 4 SKUs & Production Dielines', amount: 80000 },
-          { description: 'Creative 3D Realistic Bottle Renders & Digital Assets', amount: 20000 }
-        ],
-        issueDate: '2026-10-10',
-        dueDate: '2026-10-20',
-        status: 'Partially Paid',
-        notes: 'Terms: 50% advance before kickoff, 50% upon final artwork approval. Payment via UPI to 9817961412@ibl.',
-        upiId: '9817961412@ibl',
-        createdAt: '2026-10-10T08:00:00.000Z'
-      },
-      {
-        id: 'INV-2026-02',
-        projectId: 'GF-PRJ-2026-02',
-        clientName: 'Kaveri Botanicals',
-        contactEmail: 'contact@kaveribotanicals.in',
-        contactPhone: '+91 99002 88419',
-        projectName: 'Ayurvedic Skincare Brand Identity & Launch Ads',
-        amount: 220000,
-        lineItems: [
-          { description: 'Visual Identity, Luxury Glass Packaging & Box Design', amount: 140000 },
-          { description: 'Performance Ad Creatives & Video Reel Assets', amount: 80000 }
-        ],
-        issueDate: '2026-09-20',
-        dueDate: '2026-10-05',
-        status: 'Partially Paid',
-        notes: '50% advance milestone received. Balance pending verification.',
-        upiId: '9817961412@ibl',
-        createdAt: '2026-09-20T09:00:00.000Z'
-      }
-    ],
-    receipts: [
-      {
-        id: 'REC-2026-01',
-        paymentId: 'PAY-2026-3001',
-        projectId: 'GF-PRJ-2026-01',
-        invoiceId: 'INV-2026-01',
-        clientName: 'Zenith Organics',
-        amountReceived: 92500,
-        utr: '428819034112',
-        verifiedDate: '2026-10-11T12:15:00.000Z',
-        agreedProjectAmount: 185000,
-        totalVerifiedPaid: 92500,
-        remainingBalance: 92500,
-        isFinalReceipt: false,
-        createdAt: '2026-10-11T12:15:00.000Z'
-      },
-      {
-        id: 'REC-2026-02',
-        paymentId: 'PAY-2026-3002',
-        projectId: 'GF-PRJ-2026-02',
-        invoiceId: 'INV-2026-02',
-        clientName: 'Kaveri Botanicals',
-        amountReceived: 110000,
-        utr: '426510982341',
-        verifiedDate: '2026-09-22T16:00:00.000Z',
-        agreedProjectAmount: 220000,
-        totalVerifiedPaid: 110000,
-        remainingBalance: 110000,
-        isFinalReceipt: false,
-        createdAt: '2026-09-22T16:00:00.000Z'
-      }
-    ],
+    enquiries: [],
+    projects: [],
+    payments: [],
+    invoices: [],
+    receipts: [],
     bankAccounts: [],
     // CMS Initial Data
     siteContent: {
@@ -2035,93 +1840,98 @@ export class Database {
     return { success: true, adjustment: newAdjustment };
   }
 
-  // Complete Project Gate
+  // Complete Project (Direct Admin Action with Safety Guards & Idempotent Invoicing)
   completeProject(projectId: string, actor: string = 'Akshay'): {
     success: boolean;
     project?: Project;
+    invoice?: Invoice;
     error?: string;
-    failedConditions?: Array<{ key: string; title: string; passed: boolean; details: string }>;
   } {
     const project = this.getProjectById(projectId);
     if (!project) return { success: false, error: 'Project not found.' };
 
-    const deliverables = project.deliverables || [];
-    const adjustments = project.adjustments || [];
-    const payments = this.getPayments(projectId);
-
-    // Calculate financials
-    const discountSum = adjustments
-      .filter(a => a.type === 'discount' || a.type === 'waiver')
-      .reduce((sum, a) => sum + a.amount, 0);
-    const additionSum = adjustments
-      .filter(a => a.type === 'addition')
-      .reduce((sum, a) => sum + a.amount, 0);
-    const netAgreed = Math.max(0, project.agreedAmount + additionSum - discountSum);
-
-    const verifiedPaid = payments
-      .filter(p => p.status === 'Verified')
-      .reduce((sum, p) => sum + p.amount, 0);
+    const payments = this.data.payments.filter(p => p.projectId === projectId);
     const pendingPayments = payments.filter(p => p.status === 'Pending Verification');
-    const balanceDue = netAgreed - verifiedPaid;
-
-    // Strict 4 Conditions:
-    // 1. Deliverables uploaded & marked delivered
-    const condDeliverablesPassed = deliverables.length > 0 && deliverables.every(d => Boolean(d.fileUrl) && d.isDelivered);
-    // 2. Final payment recorded & verified
-    const condFinalPaymentPassed = verifiedPaid >= netAgreed && verifiedPaid > 0;
-    // 3. Outstanding balance <= 0
-    const condBalancePassed = balanceDue <= 0;
-    // 4. No payments pending verification
-    const condNoPendingPassed = pendingPayments.length === 0;
-
-    const allPassed = condDeliverablesPassed && condFinalPaymentPassed && condBalancePassed && condNoPendingPassed;
-
-    if (!allPassed) {
+    if (pendingPayments.length > 0) {
       return {
         success: false,
-        error: 'Project completion blocked: all 4 completion criteria must be satisfied.',
-        failedConditions: [
-          {
-            key: 'deliverables',
-            title: 'All deliverables uploaded & marked delivered',
-            passed: condDeliverablesPassed,
-            details:
-              deliverables.length === 0
-                ? 'No deliverables defined. Add project deliverables and mark them delivered.'
-                : `${deliverables.filter(d => Boolean(d.fileUrl) && d.isDelivered).length} of ${deliverables.length} deliverables complete.`
-          },
-          {
-            key: 'finalPayment',
-            title: 'Final payment recorded & verified',
-            passed: condFinalPaymentPassed,
-            details: `Verified paid: ₹${verifiedPaid.toLocaleString('en-IN')} (Target: ₹${netAgreed.toLocaleString('en-IN')}).`
-          },
-          {
-            key: 'balance',
-            title: 'Outstanding balance is ₹0 or less',
-            passed: condBalancePassed,
-            details: balanceDue > 0 ? `Remaining balance: ₹${balanceDue.toLocaleString('en-IN')}.` : 'Balance is fully settled.'
-          },
-          {
-            key: 'pendingPayments',
-            title: 'No payments pending verification',
-            passed: condNoPendingPassed,
-            details:
-              pendingPayments.length > 0
-                ? `${pendingPayments.length} payment transaction(s) pending verification.`
-                : 'No pending payments.'
-          }
-        ]
+        error: `Cannot complete project: There are ${pendingPayments.length} unverified or pending payment submission(s). Verify or reject them first.`
       };
     }
 
+    const verifiedPayments = payments.filter(p => p.status === 'Verified');
+    const totalVerified = verifiedPayments.reduce((sum, p) => sum + p.amount, 0);
+
+    const additions = (project.adjustments || []).filter(a => a.type === 'addition').reduce((sum, a) => sum + a.amount, 0);
+    const deductions = (project.adjustments || []).filter(a => a.type === 'discount' || a.type === 'waiver').reduce((sum, a) => sum + a.amount, 0);
+    const effectiveAgreed = Math.max(0, project.agreedAmount + additions - deductions);
+    const remainingDue = Math.max(0, effectiveAgreed - totalVerified);
+
+    if (totalVerified < effectiveAgreed || remainingDue > 0) {
+      return {
+        success: false,
+        error: `Cannot complete project: Full payment has not been received and verified. (Verified: ₹${totalVerified.toLocaleString('en-IN')}, Agreed: ₹${effectiveAgreed.toLocaleString('en-IN')}, Remaining Due: ₹${remainingDue.toLocaleString('en-IN')})`
+      };
+    }
+
+    // Find or create invoice idempotently
+    let invoice = this.data.invoices.find(inv => inv.projectId === projectId);
+    if (!invoice) {
+      const lineItems = (project.services && project.services.length > 0)
+        ? project.services.map((srv, idx, arr) => ({
+            description: `${srv} - Deliverables & Execution`,
+            amount: Math.round(effectiveAgreed / arr.length)
+          }))
+        : [{ description: project.projectName || 'Professional Creative & Design Services', amount: effectiveAgreed }];
+
+      const itemsSum = lineItems.reduce((acc, it) => acc + it.amount, 0);
+      if (itemsSum !== effectiveAgreed && lineItems.length > 0) {
+        lineItems[0].amount += (effectiveAgreed - itemsSum);
+      }
+
+      const defaultBank = this.getDefaultBankAccount();
+
+      invoice = this.createInvoice({
+        projectId: project.id,
+        clientName: project.clientName,
+        contactEmail: project.contactEmail,
+        contactPhone: project.contactPhone,
+        projectName: project.projectName,
+        amount: effectiveAgreed,
+        lineItems,
+        issueDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date().toISOString().split('T')[0],
+        status: 'Paid',
+        notes: `Project completed successfully. Full payment verified.`,
+        upiId: '9817961412@ibl',
+        bankDetails: defaultBank ? {
+          accountHolderName: defaultBank.accountHolderName,
+          bankName: defaultBank.bankName,
+          accountNumber: defaultBank.accountNumber,
+          ifscCode: defaultBank.ifscCode,
+          branchName: defaultBank.branchName,
+          accountType: defaultBank.accountType
+        } : undefined
+      });
+    } else {
+      invoice.status = 'Paid';
+    }
+
     project.status = 'Completed';
-    project.completedAt = new Date().toISOString();
+    project.completedAt = project.completedAt || new Date().toISOString();
     project.completedBy = actor;
+    project.invoiceId = invoice.id;
     project.updatedAt = new Date().toISOString();
-    this.logProjectAudit(projectId, 'Project Completed', actor, 'All 4 completion gates passed. Project marked as Completed.');
+
+    this.logProjectAudit(
+      projectId,
+      'Project Completed',
+      actor,
+      `Project marked as Completed by ${actor}. Official Invoice ${invoice.id} marked as Paid.`
+    );
     this.save();
-    return { success: true, project };
+
+    return { success: true, project, invoice };
   }
 
   // Payments
