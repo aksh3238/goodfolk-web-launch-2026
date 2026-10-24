@@ -8,7 +8,7 @@ import type {
   CMSImageSlot, CMSServiceItem, BankAccount
 } from '../types';
 
-const DATA_DIR = path.resolve(process.cwd(), 'data');
+const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.resolve(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'database.json');
 
 export interface DatabaseSchema {
@@ -1538,6 +1538,19 @@ export class Database {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
 
+    // Auto-seed persistent disk with repository data if DB_FILE is absent
+    if (!fs.existsSync(DB_FILE)) {
+      const defaultRepoData = path.resolve(process.cwd(), 'data', 'database.json');
+      if (fs.existsSync(defaultRepoData) && defaultRepoData !== DB_FILE) {
+        try {
+          fs.copyFileSync(defaultRepoData, DB_FILE);
+          console.log(`[Database] Seeded persistent disk from ${defaultRepoData} to ${DB_FILE}`);
+        } catch (seedErr) {
+          console.warn('[Database] Seed failed:', seedErr);
+        }
+      }
+    }
+
     if (fs.existsSync(DB_FILE)) {
       try {
         const fileContent = fs.readFileSync(DB_FILE, 'utf-8');
@@ -1730,8 +1743,9 @@ export class Database {
   }
 
   // Projects
-  getProjects(): Project[] {
-    return [...this.data.projects].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  getProjects(includeArchived: boolean = false): Project[] {
+    const list = includeArchived ? this.data.projects : this.data.projects.filter(p => !p.isArchived);
+    return [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   getProjectById(id: string): Project | null {
@@ -1742,6 +1756,22 @@ export class Database {
     return this.data.projects.find(p => p.clientPaymentToken === token || p.id === token) || null;
   }
 
+  logProjectAudit(projectId: string, action: string, actor: string, details: string, metadata?: Record<string, any>): void {
+    const project = this.getProjectById(projectId);
+    if (!project) return;
+    if (!project.auditLog) project.auditLog = [];
+    const entry = {
+      id: `AUD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      timestamp: new Date().toISOString(),
+      action,
+      actor,
+      details,
+      metadata
+    };
+    project.auditLog.unshift(entry);
+    this.save();
+  }
+
   createProject(projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'clientPaymentToken'>): Project {
     const id = `GF-PRJ-2026-${String(this.data.projects.length + 1).padStart(2, '0')}`;
     const clientPaymentToken = crypto.randomBytes(8).toString('hex');
@@ -1749,6 +1779,17 @@ export class Database {
       ...projectData,
       id,
       clientPaymentToken,
+      deliverables: projectData.deliverables || [],
+      adjustments: projectData.adjustments || [],
+      auditLog: projectData.auditLog || [
+        {
+          id: `AUD-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          action: 'Project Created',
+          actor: 'Akshay',
+          details: `Project record created for ${projectData.clientName}`
+        }
+      ],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -1757,7 +1798,118 @@ export class Database {
     return newProject;
   }
 
-  updateProject(id: string, updates: Partial<Project>): Project | null {
+  // Idempotent conversion of enquiry to project
+  convertEnquiryToProject(
+    enquiryId: string,
+    data: { projectName?: string; services?: string[]; agreedAmount?: number; advanceAmountAgreed?: number; startDate?: string; deadline?: string },
+    actor: string = 'Akshay'
+  ): { success: boolean; project?: Project; error?: string; alreadyConverted?: boolean } {
+    const enquiry = this.data.enquiries.find(e => e.id === enquiryId);
+    if (!enquiry) {
+      return { success: false, error: 'Enquiry not found.' };
+    }
+
+    // Idempotency check: if already converted or project exists with this enquiryId
+    if (enquiry.convertedProjectId) {
+      const existingProj = this.getProjectById(enquiry.convertedProjectId);
+      if (existingProj) {
+        return { success: true, project: existingProj, alreadyConverted: true };
+      }
+    }
+    const existingByEnquiry = this.data.projects.find(p => p.enquiryId === enquiryId);
+    if (existingByEnquiry) {
+      enquiry.status = 'Converted';
+      enquiry.convertedProjectId = existingByEnquiry.id;
+      this.save();
+      return { success: true, project: existingByEnquiry, alreadyConverted: true };
+    }
+
+    const agreed = Number(data.agreedAmount) || 120000;
+    const advance = data.advanceAmountAgreed !== undefined ? Number(data.advanceAmountAgreed) : Math.round(agreed * 0.5);
+
+    const newProject = this.createProject({
+      clientName: enquiry.company || enquiry.name,
+      contactEmail: enquiry.email,
+      contactPhone: enquiry.phone,
+      projectName: data.projectName || `${enquiry.service} for ${enquiry.company || enquiry.name}`,
+      services: Array.isArray(data.services) && data.services.length > 0 ? data.services : [enquiry.service],
+      agreedAmount: agreed,
+      advanceAmountAgreed: advance,
+      startDate: data.startDate || new Date().toISOString().split('T')[0],
+      deadline: data.deadline || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+      status: 'In Progress',
+      internalNotes: `Converted from Enquiry ${enquiry.id}. Original brief: ${enquiry.details}`,
+      enquiryId: enquiry.id,
+      auditLog: [
+        {
+          id: `AUD-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          action: 'Converted from Enquiry',
+          actor,
+          details: `Enquiry ${enquiry.id} successfully converted into project.`
+        }
+      ]
+    });
+
+    enquiry.status = 'Converted';
+    enquiry.convertedProjectId = newProject.id;
+    this.save();
+
+    return { success: true, project: newProject };
+  }
+
+  // Safe Reversion of Project to Enquiry
+  revertProjectToEnquiry(projectId: string, actor: string = 'Akshay'): { success: boolean; enquiryId?: string; error?: string } {
+    const project = this.getProjectById(projectId);
+    if (!project) {
+      return { success: false, error: 'Project not found.' };
+    }
+
+    // Safety check: financial records must not exist
+    const payments = this.getPayments(projectId);
+    if (payments.length > 0) {
+      return {
+        success: false,
+        error: `Cannot revert project: ${payments.length} payment transaction(s) exist on this project. Reversal is blocked to protect financial records.`
+      };
+    }
+
+    const invoices = this.data.invoices.filter(i => i.projectId === projectId);
+    if (invoices.length > 0) {
+      return {
+        success: false,
+        error: `Cannot revert project: ${invoices.length} active invoice(s) exist on this project.`
+      };
+    }
+
+    const receipts = this.data.receipts.filter(r => r.projectId === projectId);
+    if (receipts.length > 0) {
+      return {
+        success: false,
+        error: `Cannot revert project: ${receipts.length} receipt(s) exist on this project.`
+      };
+    }
+
+    // Find linked enquiry
+    const enquiry = this.data.enquiries.find(e => e.id === project.enquiryId || e.convertedProjectId === projectId);
+    if (enquiry) {
+      enquiry.status = 'New';
+      delete enquiry.convertedProjectId;
+      const revertNote = `[Reverted from Project ${projectId} by ${actor} on ${new Date().toLocaleString('en-IN')}]`;
+      enquiry.internalNotes = enquiry.internalNotes ? `${enquiry.internalNotes}\n${revertNote}` : revertNote;
+    }
+
+    // Remove project from active projects
+    const projIdx = this.data.projects.findIndex(p => p.id === projectId);
+    if (projIdx !== -1) {
+      this.data.projects.splice(projIdx, 1);
+    }
+
+    this.save();
+    return { success: true, enquiryId: enquiry?.id };
+  }
+
+  updateProject(id: string, updates: Partial<Project>, actor: string = 'Akshay'): Project | null {
     const idx = this.data.projects.findIndex(p => p.id === id);
     if (idx === -1) return null;
     this.data.projects[idx] = {
@@ -1765,6 +1917,7 @@ export class Database {
       ...updates,
       updatedAt: new Date().toISOString()
     };
+    this.logProjectAudit(id, 'Project Updated', actor, `Project details updated (${Object.keys(updates).join(', ')})`);
     this.save();
     return this.data.projects[idx];
   }
@@ -1775,6 +1928,200 @@ export class Database {
     this.data.projects.splice(idx, 1);
     this.save();
     return true;
+  }
+
+  // Deliverables Management
+  addProjectDeliverable(
+    projectId: string,
+    item: { title: string; description?: string; fileUrl?: string; fileName?: string; fileSize?: number; isDelivered?: boolean },
+    actor: string = 'Akshay'
+  ): { success: boolean; deliverable?: any; error?: string } {
+    const project = this.getProjectById(projectId);
+    if (!project) return { success: false, error: 'Project not found.' };
+    if (!project.deliverables) project.deliverables = [];
+
+    const newDeliverable = {
+      id: `DEL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      title: item.title.trim(),
+      description: item.description?.trim(),
+      fileUrl: item.fileUrl,
+      fileName: item.fileName,
+      fileSize: item.fileSize,
+      uploadedAt: item.fileUrl ? new Date().toISOString() : undefined,
+      isDelivered: Boolean(item.isDelivered),
+      deliveredAt: item.isDelivered ? new Date().toISOString() : undefined
+    };
+
+    project.deliverables.push(newDeliverable);
+    project.updatedAt = new Date().toISOString();
+    this.logProjectAudit(projectId, 'Deliverable Added', actor, `Added deliverable "${newDeliverable.title}"`);
+    this.save();
+    return { success: true, deliverable: newDeliverable };
+  }
+
+  updateProjectDeliverable(
+    projectId: string,
+    deliverableId: string,
+    updates: Partial<any>,
+    actor: string = 'Akshay'
+  ): { success: boolean; deliverable?: any; error?: string } {
+    const project = this.getProjectById(projectId);
+    if (!project || !project.deliverables) return { success: false, error: 'Project or deliverables not found.' };
+
+    const del = project.deliverables.find(d => d.id === deliverableId);
+    if (!del) return { success: false, error: 'Deliverable not found.' };
+
+    if (updates.isDelivered !== undefined) {
+      del.isDelivered = Boolean(updates.isDelivered);
+      del.deliveredAt = del.isDelivered ? new Date().toISOString() : undefined;
+    }
+    if (updates.title !== undefined) del.title = updates.title.trim();
+    if (updates.description !== undefined) del.description = updates.description.trim();
+    if (updates.fileUrl !== undefined) {
+      del.fileUrl = updates.fileUrl;
+      del.fileName = updates.fileName || del.fileName;
+      del.fileSize = updates.fileSize !== undefined ? updates.fileSize : del.fileSize;
+      del.uploadedAt = updates.fileUrl ? new Date().toISOString() : undefined;
+    }
+
+    project.updatedAt = new Date().toISOString();
+    this.logProjectAudit(projectId, 'Deliverable Updated', actor, `Updated deliverable "${del.title}"`);
+    this.save();
+    return { success: true, deliverable: del };
+  }
+
+  deleteProjectDeliverable(projectId: string, deliverableId: string, actor: string = 'Akshay'): { success: boolean; error?: string } {
+    const project = this.getProjectById(projectId);
+    if (!project || !project.deliverables) return { success: false, error: 'Project not found.' };
+
+    const idx = project.deliverables.findIndex(d => d.id === deliverableId);
+    if (idx === -1) return { success: false, error: 'Deliverable not found.' };
+
+    const removed = project.deliverables.splice(idx, 1)[0];
+    project.updatedAt = new Date().toISOString();
+    this.logProjectAudit(projectId, 'Deliverable Deleted', actor, `Deleted deliverable "${removed.title}"`);
+    this.save();
+    return { success: true };
+  }
+
+  // Financial Adjustments
+  addProjectAdjustment(
+    projectId: string,
+    adj: { type: 'discount' | 'addition' | 'waiver'; amount: number; reason: string },
+    actor: string = 'Akshay'
+  ): { success: boolean; adjustment?: any; error?: string } {
+    const project = this.getProjectById(projectId);
+    if (!project) return { success: false, error: 'Project not found.' };
+    if (!project.adjustments) project.adjustments = [];
+
+    const newAdjustment = {
+      id: `ADJ-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      type: adj.type,
+      amount: Math.abs(Number(adj.amount)),
+      reason: adj.reason.trim(),
+      createdAt: new Date().toISOString(),
+      createdBy: actor
+    };
+
+    project.adjustments.push(newAdjustment);
+    project.updatedAt = new Date().toISOString();
+    this.logProjectAudit(
+      projectId,
+      'Financial Adjustment Added',
+      actor,
+      `${adj.type.toUpperCase()}: ₹${newAdjustment.amount.toLocaleString('en-IN')} - Reason: ${newAdjustment.reason}`
+    );
+    this.save();
+    return { success: true, adjustment: newAdjustment };
+  }
+
+  // Complete Project Gate
+  completeProject(projectId: string, actor: string = 'Akshay'): {
+    success: boolean;
+    project?: Project;
+    error?: string;
+    failedConditions?: Array<{ key: string; title: string; passed: boolean; details: string }>;
+  } {
+    const project = this.getProjectById(projectId);
+    if (!project) return { success: false, error: 'Project not found.' };
+
+    const deliverables = project.deliverables || [];
+    const adjustments = project.adjustments || [];
+    const payments = this.getPayments(projectId);
+
+    // Calculate financials
+    const discountSum = adjustments
+      .filter(a => a.type === 'discount' || a.type === 'waiver')
+      .reduce((sum, a) => sum + a.amount, 0);
+    const additionSum = adjustments
+      .filter(a => a.type === 'addition')
+      .reduce((sum, a) => sum + a.amount, 0);
+    const netAgreed = Math.max(0, project.agreedAmount + additionSum - discountSum);
+
+    const verifiedPaid = payments
+      .filter(p => p.status === 'Verified')
+      .reduce((sum, p) => sum + p.amount, 0);
+    const pendingPayments = payments.filter(p => p.status === 'Pending Verification');
+    const balanceDue = netAgreed - verifiedPaid;
+
+    // Strict 4 Conditions:
+    // 1. Deliverables uploaded & marked delivered
+    const condDeliverablesPassed = deliverables.length > 0 && deliverables.every(d => Boolean(d.fileUrl) && d.isDelivered);
+    // 2. Final payment recorded & verified
+    const condFinalPaymentPassed = verifiedPaid >= netAgreed && verifiedPaid > 0;
+    // 3. Outstanding balance <= 0
+    const condBalancePassed = balanceDue <= 0;
+    // 4. No payments pending verification
+    const condNoPendingPassed = pendingPayments.length === 0;
+
+    const allPassed = condDeliverablesPassed && condFinalPaymentPassed && condBalancePassed && condNoPendingPassed;
+
+    if (!allPassed) {
+      return {
+        success: false,
+        error: 'Project completion blocked: all 4 completion criteria must be satisfied.',
+        failedConditions: [
+          {
+            key: 'deliverables',
+            title: 'All deliverables uploaded & marked delivered',
+            passed: condDeliverablesPassed,
+            details:
+              deliverables.length === 0
+                ? 'No deliverables defined. Add project deliverables and mark them delivered.'
+                : `${deliverables.filter(d => Boolean(d.fileUrl) && d.isDelivered).length} of ${deliverables.length} deliverables complete.`
+          },
+          {
+            key: 'finalPayment',
+            title: 'Final payment recorded & verified',
+            passed: condFinalPaymentPassed,
+            details: `Verified paid: ₹${verifiedPaid.toLocaleString('en-IN')} (Target: ₹${netAgreed.toLocaleString('en-IN')}).`
+          },
+          {
+            key: 'balance',
+            title: 'Outstanding balance is ₹0 or less',
+            passed: condBalancePassed,
+            details: balanceDue > 0 ? `Remaining balance: ₹${balanceDue.toLocaleString('en-IN')}.` : 'Balance is fully settled.'
+          },
+          {
+            key: 'pendingPayments',
+            title: 'No payments pending verification',
+            passed: condNoPendingPassed,
+            details:
+              pendingPayments.length > 0
+                ? `${pendingPayments.length} payment transaction(s) pending verification.`
+                : 'No pending payments.'
+          }
+        ]
+      };
+    }
+
+    project.status = 'Completed';
+    project.completedAt = new Date().toISOString();
+    project.completedBy = actor;
+    project.updatedAt = new Date().toISOString();
+    this.logProjectAudit(projectId, 'Project Completed', actor, 'All 4 completion gates passed. Project marked as Completed.');
+    this.save();
+    return { success: true, project };
   }
 
   // Payments
@@ -1811,6 +2158,83 @@ export class Database {
     };
 
     this.data.payments.unshift(newPayment);
+    this.logProjectAudit(
+      paymentData.projectId,
+      'Client Submitted Payment',
+      paymentData.clientName,
+      `Client recorded payment of ₹${paymentData.amount} (UTR: ${paymentData.utr})`
+    );
+    this.save();
+    return { success: true, payment: newPayment };
+  }
+
+  // Admin records payment with two-step verification & duplicate detection
+  recordAdminPayment(
+    paymentData: {
+      projectId: string;
+      amount: number;
+      utr: string;
+      clientName?: string;
+      paymentMethod?: string;
+      paymentDate?: string;
+      notes?: string;
+      proofUrl?: string;
+      proofFileName?: string;
+      overrideDuplicate?: boolean;
+    },
+    actor: string = 'Akshay'
+  ): { success: boolean; payment?: PaymentTransaction; error?: string; duplicateWarning?: boolean; existingPayment?: PaymentTransaction } {
+    const project = this.getProjectById(paymentData.projectId);
+    if (!project) return { success: false, error: 'Project not found.' };
+
+    const utrTrimmed = (paymentData.utr || '').trim().toLowerCase();
+    // Duplicate check: matching UTR or matching amount within 24h
+    const existingUtr = utrTrimmed ? this.data.payments.find(p => p.utr.trim().toLowerCase() === utrTrimmed) : null;
+    const existingAmountTime = this.data.payments.find(
+      p =>
+        p.projectId === paymentData.projectId &&
+        p.amount === Number(paymentData.amount) &&
+        Math.abs(Date.now() - new Date(p.paymentDate || p.createdAt).getTime()) < 86400000
+    );
+
+    const duplicateMatch = existingUtr || existingAmountTime;
+
+    if (duplicateMatch && !paymentData.overrideDuplicate) {
+      return {
+        success: false,
+        duplicateWarning: true,
+        existingPayment: duplicateMatch,
+        error: existingUtr
+          ? `Duplicate Warning: Transaction with UTR reference "${paymentData.utr}" already exists (${duplicateMatch.id}).`
+          : `Duplicate Warning: A payment of ₹${paymentData.amount.toLocaleString('en-IN')} was already recorded for this project within the last 24 hours.`
+      };
+    }
+
+    const id = `PAY-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newPayment: PaymentTransaction = {
+      id,
+      projectId: paymentData.projectId,
+      clientName: paymentData.clientName || project.clientName,
+      amount: Number(paymentData.amount),
+      utr: (paymentData.utr || '').trim(),
+      upiId: '9817961412@ibl',
+      paymentMethod: paymentData.paymentMethod || 'UPI',
+      paymentDate: paymentData.paymentDate || new Date().toISOString(),
+      status: 'Pending Verification',
+      proofUrl: paymentData.proofUrl,
+      proofFileName: paymentData.proofFileName,
+      notes: paymentData.notes,
+      duplicateWarningAcknowledged: Boolean(paymentData.overrideDuplicate),
+      createdAt: new Date().toISOString()
+    };
+
+    this.data.payments.unshift(newPayment);
+    this.logProjectAudit(
+      paymentData.projectId,
+      'Payment Recorded',
+      actor,
+      `Payment ${newPayment.id} of ₹${newPayment.amount.toLocaleString('en-IN')} recorded (Pending Verification). Method: ${newPayment.paymentMethod}, UTR: ${newPayment.utr}`
+    );
     this.save();
     return { success: true, payment: newPayment };
   }
@@ -1854,8 +2278,15 @@ export class Database {
     payment.receiptId = receiptId;
     this.data.receipts.unshift(receipt);
 
+    this.logProjectAudit(
+      payment.projectId,
+      'Payment Verified',
+      verifiedBy,
+      `Payment ${payment.id} of ₹${payment.amount.toLocaleString('en-IN')} verified. Receipt ${receiptId} issued.`
+    );
+
     if (project && remainingBalance === 0) {
-      this.updateProject(project.id, { status: project.status === 'Discovery' ? 'In Progress' : project.status });
+      this.updateProject(project.id, { status: project.status === 'Discovery' ? 'In Progress' : project.status }, verifiedBy);
     }
 
     this.save();
@@ -1868,6 +2299,14 @@ export class Database {
 
     payment.status = 'Rejected';
     payment.rejectionReason = reason;
+
+    this.logProjectAudit(
+      payment.projectId,
+      'Payment Rejected',
+      'Akshay',
+      `Payment ${payment.id} of ₹${payment.amount.toLocaleString('en-IN')} rejected. Reason: ${reason}`
+    );
+
     this.save();
     return { success: true, payment };
   }

@@ -30,8 +30,38 @@ export interface Enquiry {
   createdAt: string;
 }
 
-export type ProjectStatus = 'Discovery' | 'In Progress' | 'Review & Revisions' | 'Completed' | 'Archived';
+export type ProjectStatus = 'Discovery' | 'In Progress' | 'Review & Revisions' | 'Awaiting Final Payment' | 'Completed' | 'Archived';
 export type ProjectPaymentStatus = 'Unpaid' | 'Partially Paid' | 'Fully Paid';
+
+export interface ProjectDeliverableItem {
+  id: string;
+  title: string;
+  description?: string;
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+  uploadedAt?: string;
+  isDelivered: boolean;
+  deliveredAt?: string;
+}
+
+export interface ProjectAdjustment {
+  id: string;
+  type: 'discount' | 'addition' | 'waiver';
+  amount: number;
+  reason: string;
+  createdAt: string;
+  createdBy?: string;
+}
+
+export interface ProjectAuditEntry {
+  id: string;
+  timestamp: string;
+  action: string;
+  actor: string;
+  details: string;
+  metadata?: Record<string, any>;
+}
 
 export interface Project {
   id: string;
@@ -41,12 +71,19 @@ export interface Project {
   projectName: string;
   services: string[];
   agreedAmount: number;
+  advanceAmountAgreed?: number;
   startDate: string;
   deadline: string;
   status: ProjectStatus;
   internalNotes?: string;
   clientPaymentToken: string;
   enquiryId?: string;
+  deliverables?: ProjectDeliverableItem[];
+  adjustments?: ProjectAdjustment[];
+  auditLog?: ProjectAuditEntry[];
+  completedAt?: string;
+  completedBy?: string;
+  isArchived?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -60,13 +97,17 @@ export interface PaymentTransaction {
   amount: number;
   utr: string;
   upiId: string;
+  paymentMethod?: string;
   paymentDate: string;
   status: PaymentVerificationStatus;
+  proofUrl?: string;
+  proofFileName?: string;
   rejectionReason?: string;
   verifiedAt?: string;
   verifiedBy?: string;
   notes?: string;
   receiptId?: string;
+  duplicateWarningAcknowledged?: boolean;
   createdAt: string;
 }
 
@@ -228,6 +269,7 @@ export interface CMSPortfolioItem {
   approach: string;
   ctaText?: string;
   ctaPrompt?: string;
+  typographyNotes?: string;
   tags?: string[];
   published: boolean;
   isDraft?: boolean;

@@ -8,6 +8,7 @@ import {
 import { downloadInvoicePDF, downloadReceiptPDF } from '../utils/pdfGenerator';
 import type { Enquiry, Project, PaymentTransaction, Invoice, Receipt, AdminStats, BankAccount } from '../types';
 import { WebsiteContentManager } from '../components/admin/WebsiteContentManager';
+import { InternalProjectPortalModal } from '../components/admin/InternalProjectPortalModal';
 
 export const AdminPage: React.FC = () => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('gf_admin_token'));
@@ -73,7 +74,7 @@ export const AdminPage: React.FC = () => {
 
   // Enquiries filter & search
   const [enquirySearch, setEnquirySearch] = useState('');
-  const [enquiryFilterStatus, setEnquiryFilterStatus] = useState<string>('All');
+  const [enquiryFilterStatus, setEnquiryFilterStatus] = useState<string>('Active');
   const [selectedEnquiry, setSelectedEnquiry] = useState<Enquiry | null>(null);
   const [convertingEnquiry, setConvertingEnquiry] = useState<Enquiry | null>(null);
   const [convertForm, setConvertForm] = useState({
@@ -82,6 +83,9 @@ export const AdminPage: React.FC = () => {
     startDate: new Date().toISOString().split('T')[0],
     deadline: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]
   });
+
+  // Selected Project for Internal Portal Modal
+  const [selectedProjectForPortal, setSelectedProjectForPortal] = useState<Project | null>(null);
 
   // Project Modal
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
@@ -691,15 +695,41 @@ export const AdminPage: React.FC = () => {
     );
   }
 
+  // Revert project to enquiry handler
+  const handleRevertProject = async (projectId: string) => {
+    if (!window.confirm('Are you sure you want to revert this project back to an active enquiry?')) return;
+    try {
+      const res = await fetch(`/api/admin/projects/${projectId}/revert`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Cannot revert project: financial records exist.');
+        return;
+      }
+      await fetchAllData();
+      setEnquiryFilterStatus('Active');
+      setActiveTab('enquiries');
+    } catch (err: any) {
+      alert(err.message || 'Failed to revert project.');
+    }
+  };
+
   // Filtered enquiries
   const filteredEnquiries = enquiries.filter(e => {
     const matchesSearch =
       e.name.toLowerCase().includes(enquirySearch.toLowerCase()) ||
-      e.company.toLowerCase().includes(enquirySearch.toLowerCase()) ||
+      (e.company && e.company.toLowerCase().includes(enquirySearch.toLowerCase())) ||
       e.email.toLowerCase().includes(enquirySearch.toLowerCase()) ||
       e.id.toLowerCase().includes(enquirySearch.toLowerCase());
-    const matchesStatus = enquiryFilterStatus === 'All' || e.status === enquiryFilterStatus;
-    return matchesSearch && matchesStatus;
+
+    if (!matchesSearch) return false;
+    if (enquiryFilterStatus === 'Active') {
+      return e.status !== 'Converted' && e.status !== 'Archived';
+    }
+    if (enquiryFilterStatus === 'All') return true;
+    return e.status === enquiryFilterStatus;
   });
 
   // 2. AUTHENTICATED DASHBOARD
@@ -939,7 +969,8 @@ export const AdminPage: React.FC = () => {
                   onChange={e => setEnquiryFilterStatus(e.target.value)}
                   className="px-3 py-2 rounded-xl border border-[#E6E8ED] text-xs font-semibold text-[#123578] bg-[#F7F7F5]"
                 >
-                  <option value="All">All Statuses</option>
+                  <option value="Active">Active Enquiries (Unconverted)</option>
+                  <option value="All">All Enquiries</option>
                   <option value="New">New</option>
                   <option value="Contacted">Contacted</option>
                   <option value="Converted">Converted</option>
@@ -999,14 +1030,42 @@ export const AdminPage: React.FC = () => {
                         <td className="p-4 font-mono text-[#242832]/60 text-[11px]">
                           {new Date(enq.createdAt).toLocaleDateString('en-IN')}
                         </td>
-                        <td className="p-4 text-right space-x-2">
+                        <td className="p-4 text-right space-x-1.5">
                           <button
                             onClick={() => setSelectedEnquiry(enq)}
                             className="px-2.5 py-1.5 rounded-lg bg-[#EEF2F9] text-[#123578] font-bold hover:bg-[#123578] hover:text-white transition-colors"
                           >
                             View Brief
                           </button>
-                          {enq.status !== 'Converted' && (
+                          {enq.status === 'Converted' ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  const proj = projects.find(p => p.id === enq.convertedProjectId || p.enquiryId === enq.id);
+                                  if (proj) {
+                                    setSelectedProjectForPortal(proj);
+                                  } else {
+                                    setActiveTab('projects');
+                                  }
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-[#123578] text-white font-bold hover:bg-[#1f4a9b] transition-colors"
+                              >
+                                View Project
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const proj = projects.find(p => p.id === enq.convertedProjectId || p.enquiryId === enq.id);
+                                  if (proj) {
+                                    handleRevertProject(proj.id);
+                                  }
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 font-bold transition-colors"
+                                title="Revert to active enquiry"
+                              >
+                                Revert
+                              </button>
+                            </>
+                          ) : (
                             <button
                               onClick={() => {
                                 setConvertingEnquiry(enq);
@@ -1092,20 +1151,34 @@ export const AdminPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-3 pt-3 border-t border-[#E6E8ED]">
-                      {/* Private Payment Link */}
-                      <div className="bg-[#EEF2F9]/60 p-2.5 rounded-xl border border-[#123578]/10 text-xs flex items-center justify-between">
-                        <span className="text-[11px] font-medium text-[#123578] truncate max-w-[200px]">
-                          /pay/{proj.clientPaymentToken}
-                        </span>
-                        <a
-                          href={`/pay/${proj.clientPaymentToken}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs font-bold text-[#ED650B] hover:underline flex items-center gap-1"
+                      {/* Internal Project Portal & Quick Actions */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                        <button
+                          onClick={() => setSelectedProjectForPortal(proj)}
+                          className="px-3.5 py-2 rounded-xl bg-[#123578] hover:bg-[#1f4a9b] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                         >
-                          <span>Open Client Portal</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                          <LayoutDashboard className="w-3.5 h-3.5 text-[#ED650B]" />
+                          <span>View Client Portal</span>
+                        </button>
+                        <div className="flex items-center justify-end gap-1.5 text-xs">
+                          <button
+                            onClick={() => copyToClipboard(`${window.location.origin}/pay/${proj.clientPaymentToken}`, `pay-${proj.id}`)}
+                            className="px-2.5 py-1.5 rounded-lg bg-[#EEF2F9] text-[#123578] text-[11px] font-semibold hover:bg-[#123578] hover:text-white transition-colors flex items-center gap-1"
+                            title="Copy client payment URL"
+                          >
+                            <Copy className="w-3 h-3" />
+                            <span>{copiedField === `pay-${proj.id}` ? 'Copied' : 'Copy Pay Link'}</span>
+                          </button>
+                          <a
+                            href={`/pay/${proj.clientPaymentToken}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg bg-[#EEF2F9] text-[#123578] hover:bg-[#123578] hover:text-white transition-colors"
+                            title="Preview client payment page"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between text-[11px] text-[#242832]/60 font-mono">
@@ -2333,6 +2406,25 @@ export const AdminPage: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Internal Project Portal Modal */}
+      {selectedProjectForPortal && (
+        <InternalProjectPortalModal
+          project={projects.find(p => p.id === selectedProjectForPortal.id) || selectedProjectForPortal}
+          allPayments={payments}
+          allInvoices={invoices}
+          allReceipts={receipts}
+          allEnquiries={enquiries}
+          token={token || ''}
+          onClose={() => setSelectedProjectForPortal(null)}
+          onRefreshData={fetchAllData}
+          onRevertedToEnquiry={() => {
+            setSelectedProjectForPortal(null);
+            setEnquiryFilterStatus('Active');
+            setActiveTab('enquiries');
+          }}
+        />
       )}
     </div>
   );

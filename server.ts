@@ -34,8 +34,8 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
-// Static uploads directory for media files
-const UPLOADS_DIR = path.resolve(process.cwd(), 'uploads');
+// Static uploads directory for media files (configurable via UPLOADS_DIR for Render Persistent Disk)
+const UPLOADS_DIR = process.env.UPLOADS_DIR ? path.resolve(process.env.UPLOADS_DIR) : path.resolve(process.cwd(), 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
@@ -412,32 +412,11 @@ app.patch('/api/admin/enquiries/:id', requireAdmin, (req, res) => {
 
 app.post('/api/admin/enquiries/:id/convert', requireAdmin, (req, res) => {
   const { id } = req.params;
-  const enquiry = db.getEnquiries().find(e => e.id === id);
-  if (!enquiry) {
-    return res.status(404).json({ success: false, error: 'Enquiry not found.' });
+  const result = db.convertEnquiryToProject(id, req.body || {}, 'Akshay');
+  if (!result.success) {
+    return res.status(400).json(result);
   }
-
-  const { projectName, services, agreedAmount, startDate, deadline } = req.body;
-  const newProject = db.createProject({
-    clientName: enquiry.company || enquiry.name,
-    contactEmail: enquiry.email,
-    contactPhone: enquiry.phone,
-    projectName: projectName || `${enquiry.service} for ${enquiry.company || enquiry.name}`,
-    services: Array.isArray(services) ? services : [enquiry.service],
-    agreedAmount: Number(agreedAmount) || 120000,
-    startDate: startDate || new Date().toISOString().split('T')[0],
-    deadline: deadline || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-    status: 'In Progress',
-    internalNotes: `Converted from Enquiry ${enquiry.id}. Original note: ${enquiry.details}`,
-    enquiryId: enquiry.id
-  });
-
-  db.updateEnquiry(id, {
-    status: 'Converted',
-    convertedProjectId: newProject.id
-  });
-
-  return res.json({ success: true, project: newProject });
+  return res.json(result);
 });
 
 app.delete('/api/admin/enquiries/:id', requireAdmin, (req, res) => {
@@ -628,6 +607,101 @@ app.patch('/api/admin/projects/:id', requireAdmin, (req, res) => {
 app.delete('/api/admin/projects/:id', requireAdmin, (req, res) => {
   const deleted = db.deleteProject(req.params.id);
   return res.json({ success: deleted });
+});
+
+// Revert Project to Enquiry with safe financial check
+app.post('/api/admin/projects/:id/revert', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const result = db.revertProjectToEnquiry(id, 'Akshay');
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+  return res.json(result);
+});
+
+// Project Deliverables
+app.post('/api/admin/projects/:id/deliverables', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { title, description, fileUrl, fileName, fileSize, isDelivered } = req.body || {};
+  if (!title) {
+    return res.status(400).json({ success: false, error: 'Deliverable title is required.' });
+  }
+  const result = db.addProjectDeliverable(id, { title, description, fileUrl, fileName, fileSize, isDelivered }, 'Akshay');
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+  return res.status(201).json(result);
+});
+
+app.put('/api/admin/projects/:id/deliverables/:deliverableId', requireAdmin, (req, res) => {
+  const { id, deliverableId } = req.params;
+  const result = db.updateProjectDeliverable(id, deliverableId, req.body || {}, 'Akshay');
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+  return res.json(result);
+});
+
+app.delete('/api/admin/projects/:id/deliverables/:deliverableId', requireAdmin, (req, res) => {
+  const { id, deliverableId } = req.params;
+  const result = db.deleteProjectDeliverable(id, deliverableId, 'Akshay');
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+  return res.json(result);
+});
+
+// Project Financial Adjustments
+app.post('/api/admin/projects/:id/adjustments', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { type, amount, reason } = req.body || {};
+  if (!type || !amount || !reason) {
+    return res.status(400).json({ success: false, error: 'Adjustment type, amount, and reason are required.' });
+  }
+  const result = db.addProjectAdjustment(id, { type, amount: Number(amount), reason }, 'Akshay');
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+  return res.status(201).json(result);
+});
+
+// Project Internal Payment Recording with duplicate detection & two-step verification
+app.post('/api/admin/projects/:id/payments', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { amount, utr, clientName, paymentMethod, paymentDate, notes, proofUrl, proofFileName, overrideDuplicate } = req.body || {};
+  if (!amount || !utr) {
+    return res.status(400).json({ success: false, error: 'Payment amount and UTR/reference number are required.' });
+  }
+  const result = db.recordAdminPayment(
+    {
+      projectId: id,
+      amount: Number(amount),
+      utr: String(utr).trim(),
+      clientName,
+      paymentMethod,
+      paymentDate,
+      notes,
+      proofUrl,
+      proofFileName,
+      overrideDuplicate: Boolean(overrideDuplicate)
+    },
+    'Akshay'
+  );
+
+  if (!result.success) {
+    return res.status(result.duplicateWarning ? 409 : 400).json(result);
+  }
+  return res.status(201).json(result);
+});
+
+// Project Completion Gate
+app.post('/api/admin/projects/:id/complete', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const result = db.completeProject(id, 'Akshay');
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+  return res.json(result);
 });
 
 // ============================================================================

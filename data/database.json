@@ -63,9 +63,48 @@
     "f460a8e1f399db44f3be58fa2956064a47b509dc3e3d2d1c4b2ddf88a649177e": {
       "userId": "owner-akshay",
       "expiresAt": 1793346468424
+    },
+    "6fba2be43b19aeec5aa76405528837eae2464329f83c2db6e9cce9cb8ea06ae8": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793436942876
+    },
+    "7ed6fe510d3a2799058c3f5dcd9617c1dc91bafb68a4c937198e1534a132796c": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793436957254
     }
   },
   "enquiries": [
+    {
+      "name": "Rohan Sharma",
+      "email": "rohan@apexspirits.in",
+      "company": "Apex Spirits",
+      "phone": "+91 98200 12345",
+      "service": "Branding & Packaging",
+      "budget": "₹2,00,000",
+      "deadline": "",
+      "details": "Craft gin bottle packaging and label dieline development.",
+      "consent": true,
+      "id": "ENQ-2026-5525",
+      "status": "Converted",
+      "createdAt": "2026-10-24T08:55:57.270Z",
+      "internalNotes": "[Reverted from Project GF-PRJ-2026-06 by Akshay on 24/10/2026, 8:55:57 am]",
+      "convertedProjectId": "GF-PRJ-2026-06"
+    },
+    {
+      "name": "Rohan Sharma",
+      "email": "rohan@apexspirits.in",
+      "company": "Apex Spirits",
+      "phone": "+91 98200 12345",
+      "service": "Branding & Packaging",
+      "budget": "₹2,00,000",
+      "deadline": "",
+      "details": "Craft gin bottle packaging and label dieline development.",
+      "consent": true,
+      "id": "ENQ-2026-2718",
+      "status": "Converted",
+      "createdAt": "2026-10-24T08:55:42.891Z",
+      "convertedProjectId": "GF-PRJ-2026-05"
+    },
     {
       "name": "Aman Sethi",
       "email": "aman@sethifoods.in",
@@ -127,6 +166,187 @@
   ],
   "projects": [
     {
+      "clientName": "Apex Spirits",
+      "contactEmail": "rohan@apexspirits.in",
+      "contactPhone": "+91 98200 12345",
+      "projectName": "Apex Craft Gin Visual Identity (Second Round)",
+      "services": [
+        "Branding & Packaging"
+      ],
+      "agreedAmount": 180000,
+      "advanceAmountAgreed": 90000,
+      "startDate": "2026-10-24",
+      "deadline": "2026-11-23",
+      "status": "Completed",
+      "internalNotes": "Converted from Enquiry ENQ-2026-5525. Original brief: Craft gin bottle packaging and label dieline development.",
+      "enquiryId": "ENQ-2026-5525",
+      "auditLog": [
+        {
+          "id": "AUD-1792832157426-648",
+          "timestamp": "2026-10-24T08:55:57.426Z",
+          "action": "Project Completed",
+          "actor": "Akshay",
+          "details": "All 4 completion gates passed. Project marked as Completed."
+        },
+        {
+          "id": "AUD-1792832157413-179",
+          "timestamp": "2026-10-24T08:55:57.413Z",
+          "action": "Project Updated",
+          "actor": "Akshay",
+          "details": "Project details updated (status)"
+        },
+        {
+          "id": "AUD-1792832157409-942",
+          "timestamp": "2026-10-24T08:55:57.409Z",
+          "action": "Payment Verified",
+          "actor": "Akshay",
+          "details": "Payment PAY-2026-9679 of ₹1,30,000 verified. Receipt REC-2026-05 issued."
+        },
+        {
+          "id": "AUD-1792832157398-491",
+          "timestamp": "2026-10-24T08:55:57.398Z",
+          "action": "Payment Recorded",
+          "actor": "Akshay",
+          "details": "Payment PAY-2026-9679 of ₹1,30,000 recorded (Pending Verification). Method: Bank Transfer (NEFT/IMPS), UTR: UTR-APEX-FINAL-002"
+        },
+        {
+          "id": "AUD-1792832157388-191",
+          "timestamp": "2026-10-24T08:55:57.388Z",
+          "action": "Deliverable Added",
+          "actor": "Akshay",
+          "details": "Added deliverable \"3D Bottle Renders Suite\""
+        },
+        {
+          "id": "AUD-1792832157378-200",
+          "timestamp": "2026-10-24T08:55:57.378Z",
+          "action": "Deliverable Added",
+          "actor": "Akshay",
+          "details": "Added deliverable \"Packaging Dielines & Print Specs\""
+        },
+        {
+          "id": "AUD-1792832157364-264",
+          "timestamp": "2026-10-24T08:55:57.364Z",
+          "action": "Payment Rejected",
+          "actor": "Akshay",
+          "details": "Payment PAY-2026-5916 of ₹50,000 rejected. Reason: Duplicate transaction reference in bank reconciliation"
+        },
+        {
+          "id": "AUD-1792832157355-771",
+          "timestamp": "2026-10-24T08:55:57.355Z",
+          "action": "Payment Verified",
+          "actor": "Akshay",
+          "details": "Payment PAY-2026-3634 of ₹50,000 verified. Receipt REC-2026-04 issued."
+        },
+        {
+          "id": "AUD-1792832157346-42",
+          "timestamp": "2026-10-24T08:55:57.346Z",
+          "action": "Payment Recorded",
+          "actor": "Akshay",
+          "details": "Payment PAY-2026-5916 of ₹50,000 recorded (Pending Verification). Method: UPI, UTR: UTR-APEX-001"
+        },
+        {
+          "id": "AUD-1792832157331-148",
+          "timestamp": "2026-10-24T08:55:57.331Z",
+          "action": "Payment Recorded",
+          "actor": "Akshay",
+          "details": "Payment PAY-2026-3634 of ₹50,000 recorded (Pending Verification). Method: UPI, UTR: UTR-APEX-001"
+        },
+        {
+          "id": "AUD-1792832157311",
+          "timestamp": "2026-10-24T08:55:57.311Z",
+          "action": "Converted from Enquiry",
+          "actor": "Akshay",
+          "details": "Enquiry ENQ-2026-5525 successfully converted into project."
+        }
+      ],
+      "id": "GF-PRJ-2026-06",
+      "clientPaymentToken": "79b7fd990f7187ed",
+      "deliverables": [
+        {
+          "id": "DEL-1792832157378-425",
+          "title": "Packaging Dielines & Print Specs",
+          "description": "Vector AI and PDF files",
+          "fileUrl": "/uploads/test-apex-packaging.pdf",
+          "fileName": "apex-packaging-dielines.pdf",
+          "uploadedAt": "2026-10-24T08:55:57.378Z",
+          "isDelivered": true,
+          "deliveredAt": "2026-10-24T08:55:57.378Z"
+        },
+        {
+          "id": "DEL-1792832157388-184",
+          "title": "3D Bottle Renders Suite",
+          "description": "4K photorealistic renders",
+          "fileUrl": "/uploads/test-apex-renders.zip",
+          "fileName": "apex-3d-renders.zip",
+          "uploadedAt": "2026-10-24T08:55:57.388Z",
+          "isDelivered": true,
+          "deliveredAt": "2026-10-24T08:55:57.388Z"
+        }
+      ],
+      "adjustments": [],
+      "createdAt": "2026-10-24T08:55:57.311Z",
+      "updatedAt": "2026-10-24T08:55:57.426Z",
+      "completedAt": "2026-10-24T08:55:57.426Z",
+      "completedBy": "Akshay"
+    },
+    {
+      "clientName": "Apex Spirits",
+      "contactEmail": "rohan@apexspirits.in",
+      "contactPhone": "+91 98200 12345",
+      "projectName": "Apex Craft Gin Visual Identity (Second Round)",
+      "services": [
+        "Branding & Packaging"
+      ],
+      "agreedAmount": 180000,
+      "startDate": "2026-10-24",
+      "deadline": "2026-11-23",
+      "status": "In Progress",
+      "internalNotes": "Converted from Enquiry ENQ-2026-2718. Original note: Craft gin bottle packaging and label dieline development.",
+      "enquiryId": "ENQ-2026-2718",
+      "id": "GF-PRJ-2026-05",
+      "clientPaymentToken": "e292ebfed7e4a86d",
+      "createdAt": "2026-10-24T08:55:42.946Z",
+      "updatedAt": "2026-10-24T08:55:42.946Z"
+    },
+    {
+      "clientName": "Apex Spirits",
+      "contactEmail": "rohan@apexspirits.in",
+      "contactPhone": "+91 98200 12345",
+      "projectName": "Apex Craft Gin Visual Identity",
+      "services": [
+        "Branding & Packaging"
+      ],
+      "agreedAmount": 180000,
+      "startDate": "2026-10-24",
+      "deadline": "2026-11-23",
+      "status": "In Progress",
+      "internalNotes": "Converted from Enquiry ENQ-2026-2718. Original note: Craft gin bottle packaging and label dieline development.",
+      "enquiryId": "ENQ-2026-2718",
+      "id": "GF-PRJ-2026-04",
+      "clientPaymentToken": "de5a5b95a7a9d821",
+      "createdAt": "2026-10-24T08:55:42.913Z",
+      "updatedAt": "2026-10-24T08:55:42.913Z"
+    },
+    {
+      "clientName": "Apex Spirits",
+      "contactEmail": "rohan@apexspirits.in",
+      "contactPhone": "+91 98200 12345",
+      "projectName": "Apex Craft Gin Visual Identity",
+      "services": [
+        "Branding & Packaging"
+      ],
+      "agreedAmount": 180000,
+      "startDate": "2026-10-25",
+      "deadline": "2026-11-30",
+      "status": "In Progress",
+      "internalNotes": "Converted from Enquiry ENQ-2026-2718. Original note: Craft gin bottle packaging and label dieline development.",
+      "enquiryId": "ENQ-2026-2718",
+      "id": "GF-PRJ-2026-03",
+      "clientPaymentToken": "ce1d944ee6ca7a03",
+      "createdAt": "2026-10-24T08:55:42.900Z",
+      "updatedAt": "2026-10-24T08:55:42.900Z"
+    },
+    {
       "id": "GF-PRJ-2026-01",
       "clientName": "Zenith Organics",
       "contactEmail": "kabir@zenithorganics.in",
@@ -167,6 +387,54 @@
     }
   ],
   "payments": [
+    {
+      "id": "PAY-2026-9679",
+      "projectId": "GF-PRJ-2026-06",
+      "clientName": "Apex Spirits",
+      "amount": 130000,
+      "utr": "UTR-APEX-FINAL-002",
+      "upiId": "9817961412@ibl",
+      "paymentMethod": "Bank Transfer (NEFT/IMPS)",
+      "paymentDate": "2026-10-24T08:55:57.398Z",
+      "status": "Verified",
+      "notes": "Final balance clearance",
+      "duplicateWarningAcknowledged": false,
+      "createdAt": "2026-10-24T08:55:57.398Z",
+      "verifiedAt": "2026-10-24T08:55:57.409Z",
+      "verifiedBy": "Akshay",
+      "receiptId": "REC-2026-05"
+    },
+    {
+      "id": "PAY-2026-5916",
+      "projectId": "GF-PRJ-2026-06",
+      "clientName": "Apex Spirits",
+      "amount": 50000,
+      "utr": "UTR-APEX-001",
+      "upiId": "9817961412@ibl",
+      "paymentMethod": "UPI",
+      "paymentDate": "2026-10-24T08:55:57.345Z",
+      "status": "Rejected",
+      "duplicateWarningAcknowledged": true,
+      "createdAt": "2026-10-24T08:55:57.345Z",
+      "rejectionReason": "Duplicate transaction reference in bank reconciliation"
+    },
+    {
+      "id": "PAY-2026-3634",
+      "projectId": "GF-PRJ-2026-06",
+      "clientName": "Apex Spirits",
+      "amount": 50000,
+      "utr": "UTR-APEX-001",
+      "upiId": "9817961412@ibl",
+      "paymentMethod": "UPI",
+      "paymentDate": "2026-10-24T08:55:57.324Z",
+      "status": "Verified",
+      "notes": "Initial advance",
+      "duplicateWarningAcknowledged": false,
+      "createdAt": "2026-10-24T08:55:57.324Z",
+      "verifiedAt": "2026-10-24T08:55:57.355Z",
+      "verifiedBy": "Akshay",
+      "receiptId": "REC-2026-04"
+    },
     {
       "id": "PAY-2026-3001",
       "projectId": "GF-PRJ-2026-01",
@@ -270,6 +538,34 @@
     }
   ],
   "receipts": [
+    {
+      "id": "REC-2026-05",
+      "paymentId": "PAY-2026-9679",
+      "projectId": "GF-PRJ-2026-06",
+      "clientName": "Apex Spirits",
+      "amountReceived": 130000,
+      "utr": "UTR-APEX-FINAL-002",
+      "verifiedDate": "2026-10-24T08:55:57.409Z",
+      "agreedProjectAmount": 180000,
+      "totalVerifiedPaid": 180000,
+      "remainingBalance": 0,
+      "isFinalReceipt": true,
+      "createdAt": "2026-10-24T08:55:57.409Z"
+    },
+    {
+      "id": "REC-2026-04",
+      "paymentId": "PAY-2026-3634",
+      "projectId": "GF-PRJ-2026-06",
+      "clientName": "Apex Spirits",
+      "amountReceived": 50000,
+      "utr": "UTR-APEX-001",
+      "verifiedDate": "2026-10-24T08:55:57.355Z",
+      "agreedProjectAmount": 180000,
+      "totalVerifiedPaid": 50000,
+      "remainingBalance": 130000,
+      "isFinalReceipt": false,
+      "createdAt": "2026-10-24T08:55:57.355Z"
+    },
     {
       "id": "REC-2026-03",
       "paymentId": "PAY-2026-3003",

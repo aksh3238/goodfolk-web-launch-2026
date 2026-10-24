@@ -74,7 +74,8 @@ const SiteContentContext = createContext<SiteContentContextType>({
   customSections: [],
   mediaLibrary: [],
   loading: false,
-  refreshContent: async () => {}
+  refreshContent: async () => {},
+  previewThemeColors: () => {}
 });
 
 export const SiteContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
