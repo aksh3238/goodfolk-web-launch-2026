@@ -376,6 +376,8 @@ export interface CMSServiceConcept {
   tagline: string;
   description: string;
   image: string;
+  videoUrl?: string;
+  badge?: string;
   deliverables: string[];
   clientName?: string;
   order: number;
@@ -412,6 +414,8 @@ export interface CMSServiceItem {
   shortDesc: string;
   fullDesc: string;
   image: string;
+  homepageImageDesktop?: string;
+  homepageImageMobile?: string;
   bannerImage?: string;
   deliverables: string[];
   keyHighlights: string[];
@@ -452,6 +456,7 @@ export interface CMSSiteContent {
   heroSlides?: CMSHeroSlide[];
   websiteImages?: CMSImageSlot[];
   services?: CMSServiceItem[];
+  homepageServiceTiles?: Record<string, { desktop?: string; mobile?: string }>;
   // Hero Brand Video (15-second cinematic brand film)
   heroVideoUrl?: string;
   heroVideoPoster?: string;
@@ -701,6 +706,10 @@ export interface PageBannerConfig {
 export interface CMSServicesBanner {
   enabled: boolean;
   imageUrl?: string;
+  desktopArtworkUrl?: string;
+  mobileArtworkUrl?: string;
+  hideOverlayText?: boolean;
+  hideOverlayCta?: boolean;
   heading?: string;
   subheading?: string;
   ctaLabel?: string;

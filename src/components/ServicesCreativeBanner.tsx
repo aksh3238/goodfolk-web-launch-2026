@@ -52,6 +52,74 @@ export const ServicesCreativeBanner: React.FC<ServicesCreativeBannerProps> = ({
     }
   };
 
+  const hasCompleteArtwork = Boolean(banner?.desktopArtworkUrl || banner?.mobileArtworkUrl);
+  const hideOverlayText = banner?.hideOverlayText === true;
+
+  if (hasCompleteArtwork) {
+    return (
+      <section className="w-full my-8 sm:my-12 lg:my-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div
+          className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-[#2458A6]/20 bg-[#0A1628] group"
+        >
+          <picture className="w-full h-auto block">
+            {banner?.mobileArtworkUrl && (
+              <source media="(max-width: 767px)" srcSet={banner.mobileArtworkUrl} />
+            )}
+            {banner?.desktopArtworkUrl && (
+              <source media="(min-width: 768px)" srcSet={banner.desktopArtworkUrl} />
+            )}
+            <img
+              src={banner?.desktopArtworkUrl || banner?.mobileArtworkUrl || ''}
+              alt={heading}
+              className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-500"
+            />
+          </picture>
+
+          {/* Overlaid Copy & CTA if not hidden */}
+          {!hideOverlayText ? (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent p-6 sm:p-10 lg:p-12 flex flex-col justify-end text-left pointer-events-none">
+              <div className="max-w-2xl space-y-3 sm:space-y-4 pointer-events-auto">
+                {badge && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold text-white shadow-xs">
+                    <span className="w-2 h-2 rounded-full bg-[#F07822] animate-pulse" />
+                    <span className="tracking-wide uppercase text-[11px]">{badge}</span>
+                  </div>
+                )}
+                {heading && (
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-snug drop-shadow-md">
+                    {heading}
+                  </h2>
+                )}
+                {subheading && (
+                  <p className="text-xs sm:text-sm text-white/90 leading-relaxed drop-shadow-sm max-w-xl">
+                    {subheading}
+                  </p>
+                )}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleCtaClick}
+                    className="bg-[#F07822] hover:bg-[#d65805] text-white px-7 py-3 rounded-full text-xs sm:text-sm font-bold shadow-lg shadow-[#F07822]/40 hover:scale-105 active:scale-95 transition-all duration-300 inline-flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>{ctaLabel}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* When text is hidden because artwork includes custom copy, entire banner is clickable */
+            <div
+              onClick={handleCtaClick}
+              className="absolute inset-0 cursor-pointer"
+              title={ctaLabel}
+            />
+          )}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="w-full my-12 lg:my-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <div className="relative rounded-3xl overflow-hidden bg-[#0A1628] text-white border border-[#2458A6]/30 shadow-2xl">

@@ -1,17 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ChevronDown, ChevronUp, Save, Eye, EyeOff, Upload, Trash2, Plus,
   Sparkles, Layers, Image as ImageIcon, Briefcase, Check, ArrowUp, ArrowDown,
-  Edit, RefreshCw, CheckCircle2
+  Edit, RefreshCw, CheckCircle2, Copy, ExternalLink, Film, Tag, X
 } from 'lucide-react';
 import type {
   CMSSiteContent,
   CMSServiceItem,
   PageBannerConfig,
-  CMSServicesBanner
+  CMSServicesBanner,
+  CMSServiceConcept
 } from '../../types';
 import { AssetUploadField } from './AssetUploadField';
 import { SERVICES_DATA } from '../../data/services';
+import { useSiteContent } from '../../context/SiteContentContext';
+
+export const SERVICE_OPTIONS = [
+  { id: 'branding', title: '01 · Branding & Packaging' },
+  { id: 'creative', title: '02 · Creative Design' },
+  { id: 'performance', title: '03 · Performance Marketing & Paid Media' },
+  { id: 'video', title: '04 · Commercial Video & Motion' },
+  { id: 'digital', title: '05 · Digital Marketing & Social Media Management' },
+  { id: 'uiux', title: '06 · Website & UI/UX Design' },
+  { id: 'ecommerce', title: '07 · E-Commerce Solutions' },
+  { id: 'motion', title: '08 · Motion Graphics & 3D' },
+  { id: 'print', title: '09 · Print & Production' },
+  { id: 'presentation', title: '10 · Presentation & Pitch Decks' }
+];
 
 export interface ServicesTabProps {
   token: string;
@@ -34,16 +49,68 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
   onPublishLive,
   saving
 }) => {
+  const { serviceConcepts: contextConcepts, refreshContent } = useSiteContent();
+
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     hero: true,
     creativeBanner: false,
-    servicesList: true,
+    servicesList: false,
+    conceptsManager: true, // Opened by default for immediate discoverability
     methodology: false,
     footerCta: false,
     visibility: false
   });
 
   const [editingServiceIndex, setEditingServiceIndex] = useState<number | null>(null);
+
+  // Concepts Manager State
+  const [concepts, setConcepts] = useState<CMSServiceConcept[]>(contextConcepts || []);
+  const [selectedServiceFilter, setSelectedServiceFilter] = useState<string>('all');
+  const [editingConcept, setEditingConcept] = useState<CMSServiceConcept | null>(null);
+  const [isCreatingConcept, setIsCreatingConcept] = useState<boolean>(false);
+  const [conceptFormData, setConceptFormData] = useState<Partial<CMSServiceConcept>>({
+    serviceId: 'branding',
+    title: '',
+    clientName: '',
+    category: 'Brand Identity',
+    tagline: '',
+    description: '',
+    image: '',
+    videoUrl: '',
+    deliverables: [],
+    order: 1,
+    published: true
+  });
+  const [deliverablesInput, setDeliverablesInput] = useState<string>('');
+  const [savingConcept, setSavingConcept] = useState<boolean>(false);
+
+  // Sync concepts when context updates
+  useEffect(() => {
+    if (contextConcepts && contextConcepts.length > 0) {
+      setConcepts(contextConcepts);
+    }
+  }, [contextConcepts]);
+
+  // Load concepts from REST API
+  const loadConcepts = async () => {
+    try {
+      const res = await fetch('/api/admin/service-concepts', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.serviceConcepts) {
+          setConcepts(data.serviceConcepts);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load service concepts:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadConcepts();
+  }, [token]);
 
   const toggleSection = (key: string) => {
     setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -111,6 +178,11 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
   const services: CMSServiceItem[] = siteContent.services && siteContent.services.length > 0
     ? siteContent.services
     : initialServices;
+
+  const dynamicServiceOptions = services.map((s, idx) => ({
+    id: s.id,
+    title: `${String(idx + 1).padStart(2, '0')} · ${s.title.replace(/^\d+[\.\-\s]+/, '')}`
+  }));
 
   const handleUpdateService = (index: number, updates: Partial<CMSServiceItem>) => {
     const updated = [...services];
@@ -215,6 +287,181 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
   const handleDeleteMethodologyStep = (idx: number) => {
     const updated = methodologySteps.filter((_, i) => i !== idx);
     onUpdateSiteContent({ ...siteContent, servicesMethodologySteps: updated });
+  };
+
+  // Concept Action Handlers
+  const handleOpenCreateConcept = (preferredServiceId?: string) => {
+    const sId = preferredServiceId || (selectedServiceFilter !== 'all' ? selectedServiceFilter : 'branding');
+    const existing = concepts.filter(c => c.serviceId.toLowerCase() === sId.toLowerCase());
+    setConceptFormData({
+      serviceId: sId,
+      title: '',
+      clientName: '',
+      category: 'Brand Identity',
+      tagline: '',
+      description: '',
+      image: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1200&q=80',
+      videoUrl: '',
+      deliverables: ['Custom Brand Mark', 'Guidelines Book', 'Packaging Specs'],
+      order: existing.length + 1,
+      published: true
+    });
+    setDeliverablesInput('Custom Brand Mark, Guidelines Book, Packaging Specs');
+    setEditingConcept(null);
+    setIsCreatingConcept(true);
+  };
+
+  const handleOpenEditConcept = (concept: CMSServiceConcept) => {
+    setConceptFormData({ ...concept });
+    setDeliverablesInput((concept.deliverables || []).join(', '));
+    setEditingConcept(concept);
+    setIsCreatingConcept(true);
+  };
+
+  const handleSaveConceptSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!conceptFormData.title?.trim() || !conceptFormData.serviceId) {
+      showToast('Please provide a concept title and select an associated service.', 'error');
+      return;
+    }
+    setSavingConcept(true);
+    try {
+      const isEdit = Boolean(editingConcept?.id);
+      const url = isEdit
+        ? `/api/admin/service-concepts/${editingConcept!.id}`
+        : '/api/admin/service-concepts';
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const deliverables = deliverablesInput
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const payload = {
+        ...conceptFormData,
+        title: conceptFormData.title.trim(),
+        clientName: conceptFormData.clientName?.trim() || '',
+        category: conceptFormData.category?.trim() || 'Creative Concept',
+        tagline: conceptFormData.tagline?.trim() || conceptFormData.description?.trim() || '',
+        description: conceptFormData.description?.trim() || '',
+        image: conceptFormData.image?.trim() || 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1200&q=80',
+        videoUrl: conceptFormData.videoUrl?.trim() || '',
+        deliverables,
+        order: Number(conceptFormData.order) || 1,
+        published: conceptFormData.published !== false
+      };
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(isEdit ? 'Concept case study updated successfully!' : 'New concept case study created!', 'success');
+        await loadConcepts();
+        await refreshContent();
+        setIsCreatingConcept(false);
+        setEditingConcept(null);
+      } else {
+        throw new Error(data.error || 'Failed to save concept.');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error occurred while saving concept.', 'error');
+    } finally {
+      setSavingConcept(false);
+    }
+  };
+
+  const handleDeleteConcept = async (id: string, title: string) => {
+    if (!window.confirm(`Are you sure you want to delete the concept "${title}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/service-concepts/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`Deleted concept "${title}".`, 'success');
+        await loadConcepts();
+        await refreshContent();
+      } else {
+        throw new Error(data.error || 'Failed to delete concept.');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error deleting concept.', 'error');
+    }
+  };
+
+  const handleDuplicateConcept = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/service-concepts/${id}/duplicate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast('Concept duplicated successfully.', 'success');
+        await loadConcepts();
+        await refreshContent();
+      } else {
+        throw new Error(data.error || 'Failed to duplicate concept.');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error duplicating concept.', 'error');
+    }
+  };
+
+  const handleToggleConceptPublish = async (concept: CMSServiceConcept) => {
+    try {
+      const newStatus = !concept.published;
+      const res = await fetch(`/api/admin/service-concepts/${concept.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ published: newStatus })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(`Concept "${concept.title}" is now ${newStatus ? 'Live' : 'Draft'}.`, 'success');
+        await loadConcepts();
+        await refreshContent();
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error updating status.', 'error');
+    }
+  };
+
+  const handleMoveConcept = async (concept: CMSServiceConcept, direction: 'up' | 'down') => {
+    const list = concepts.filter(c => c.serviceId.toLowerCase() === concept.serviceId.toLowerCase());
+    const idx = list.findIndex(c => c.id === concept.id);
+    if (idx === -1) return;
+    if (direction === 'up' && idx === 0) return;
+    if (direction === 'down' && idx === list.length - 1) return;
+
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    const target = list[targetIdx];
+
+    const currentOrder = concept.order;
+    const targetOrder = target.order;
+
+    await fetch(`/api/admin/service-concepts/${concept.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ order: targetOrder })
+    });
+    await fetch(`/api/admin/service-concepts/${target.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ order: currentOrder })
+    });
+
+    await loadConcepts();
+    await refreshContent();
+    showToast('Concept order updated.', 'success');
   };
 
   return (
@@ -358,7 +605,7 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
         )}
       </div>
 
-      {/* SECTION 2: ADVERTISING AGENCY CREATIVE BANNER */}
+      {/* SECTION 2: SERVICES PAGE BANNER */}
       <div className="bg-white rounded-3xl border border-[#E4D8C8] overflow-hidden shadow-xs">
         <button
           onClick={() => toggleSection('creativeBanner')}
@@ -367,17 +614,20 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">2</div>
             <div className="text-left">
-              <h3 className="text-sm font-bold text-[#173B75]">Section 2: Agency Creative Banner</h3>
-              <p className="text-[11px] text-[#252A34]/70">Mid-page promotional banner headline, subheading, CTA button and high-res artwork</p>
+              <h3 className="text-sm font-bold text-[#173B75]">Section 2: Services Page Banner (Complete Artwork & Content)</h3>
+              <p className="text-[11px] text-[#252A34]/70">Upload complete full-bleed banner artwork for desktop & mobile, manage overlay text, and set CTA destination</p>
             </div>
           </div>
           {openSections.creativeBanner ? <ChevronUp className="w-5 h-5 text-[#173B75]" /> : <ChevronDown className="w-5 h-5 text-[#173B75]" />}
         </button>
 
         {openSections.creativeBanner && (
-          <div className="p-6 space-y-4">
+          <div className="p-6 space-y-6">
             <div className="flex items-center justify-between pb-2 border-b border-[#E4D8C8]">
-              <span className="text-xs font-bold text-[#173B75]">Creative Banner Display Status</span>
+              <div>
+                <span className="text-xs font-bold text-[#173B75] block">Services Page Banner Display Status</span>
+                <span className="text-[11px] text-[#252A34]/60">Controls visibility of the mid-page banner on /services</span>
+              </div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -389,64 +639,148 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
               </label>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Complete Banner Artwork Uploads */}
+            <div className="p-4 bg-[#F7F7F5] rounded-2xl border border-[#E4D8C8] space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#173B75] mb-1">Badge</label>
+                <h4 className="text-xs font-bold text-[#173B75] flex items-center gap-1.5">
+                  <ImageIcon className="w-3.5 h-3.5 text-[#F07822]" />
+                  <span>Complete Banner Artwork (Full Artwork Replacement)</span>
+                </h4>
+                <p className="text-[11px] text-[#252A34]/70 mt-0.5">
+                  Uploading complete banner artwork replaces the default dark blue grid background, ambient glow, and decorative specimen cards with your finished design.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <AssetUploadField
+                  label="Desktop Complete Banner Artwork"
+                  sectionName="Services Banner (Desktop Artwork)"
+                  currentUrl={creativeBanner.desktopArtworkUrl}
+                  onUpload={async (file) => {
+                    const url = await uploadImageFile(file);
+                    if (url) handleCreativeBannerChange({ desktopArtworkUrl: url });
+                  }}
+                  onClear={() => handleCreativeBannerChange({ desktopArtworkUrl: '' })}
+                  recommendedDimensions="1920 × 640 px (Recommended)"
+                  aspectRatio="3:1 / 16:5.3 Widescreen Banner"
+                  supportedFormats="JPG, PNG, WebP"
+                  maxFileSize="5 MB"
+                  helpText="Full-bleed complete artwork rendered on desktop and laptop screens."
+                />
+
+                <AssetUploadField
+                  label="Mobile Complete Banner Artwork"
+                  sectionName="Services Banner (Mobile Artwork)"
+                  currentUrl={creativeBanner.mobileArtworkUrl}
+                  onUpload={async (file) => {
+                    const url = await uploadImageFile(file);
+                    if (url) handleCreativeBannerChange({ mobileArtworkUrl: url });
+                  }}
+                  onClear={() => handleCreativeBannerChange({ mobileArtworkUrl: '' })}
+                  recommendedDimensions="800 × 800 px (Recommended)"
+                  aspectRatio="1:1 Square / 4:5 Portrait"
+                  supportedFormats="JPG, PNG, WebP"
+                  maxFileSize="5 MB"
+                  helpText="Optimized square or portrait artwork rendered on smartphones."
+                />
+              </div>
+
+              {/* Text Duplication & Overlay Control */}
+              <div className="pt-3 border-t border-[#E4D8C8]">
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={creativeBanner.hideOverlayText === true}
+                    onChange={(e) => handleCreativeBannerChange({ hideOverlayText: e.target.checked })}
+                    className="w-4 h-4 text-[#F07822] rounded mt-0.5"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-[#173B75] block">Hide Overlaid Text & Badges</span>
+                    <span className="text-[11px] text-[#252A34]/70 block">
+                      Enable this if your uploaded artwork already includes its own embedded headline, copy, and badges to avoid duplicate overlaid text.
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Banner Copy & CTA Settings */}
+            <div className="space-y-4">
+              <span className="text-xs font-bold text-[#173B75] block">Banner Content & CTA (Rendered when text overlay is active)</span>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#173B75] mb-1">Badge</label>
+                  <input
+                    type="text"
+                    value={creativeBanner.badge || 'Creative Direction & Campaign Art'}
+                    onChange={(e) => handleCreativeBannerChange({ badge: e.target.value })}
+                    className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#173B75] mb-1">Button Label</label>
+                  <input
+                    type="text"
+                    value={creativeBanner.ctaLabel || 'Discuss Your Brief'}
+                    onChange={(e) => handleCreativeBannerChange({ ctaLabel: e.target.value })}
+                    className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#173B75] mb-1">Heading</label>
                 <input
                   type="text"
-                  value={creativeBanner.badge || 'Creative Direction & Campaign Art'}
-                  onChange={(e) => handleCreativeBannerChange({ badge: e.target.value })}
+                  value={creativeBanner.heading || 'Where Bold Strategy Meets Relentless Creative Craft.'}
+                  onChange={(e) => handleCreativeBannerChange({ heading: e.target.value })}
+                  className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#173B75] mb-1">Subheading</label>
+                <textarea
+                  rows={2}
+                  value={creativeBanner.subheading || 'Branding, packaging dielines, and performance ad creative engineered for commercial resonance.'}
+                  onChange={(e) => handleCreativeBannerChange({ subheading: e.target.value })}
                   className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs"
                 />
               </div>
+
               <div>
-                <label className="block text-xs font-bold text-[#173B75] mb-1">Button Label</label>
+                <label className="block text-xs font-bold text-[#173B75] mb-1">CTA Destination</label>
                 <input
                   type="text"
-                  value={creativeBanner.ctaLabel || 'Discuss Your Brief'}
-                  onChange={(e) => handleCreativeBannerChange({ ctaLabel: e.target.value })}
-                  className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs"
+                  value={creativeBanner.ctaDestination || 'lets-talk'}
+                  onChange={(e) => handleCreativeBannerChange({ ctaDestination: e.target.value })}
+                  placeholder="lets-talk or /contact or #branding"
+                  className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs font-mono"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[#173B75] mb-1">Heading</label>
-              <input
-                type="text"
-                value={creativeBanner.heading || 'Where Bold Strategy Meets Relentless Creative Craft.'}
-                onChange={(e) => handleCreativeBannerChange({ heading: e.target.value })}
-                className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs font-bold"
+            {/* Optional Inner Image (Fallback for default background) */}
+            <div className="pt-2 border-t border-[#E4D8C8]">
+              <AssetUploadField
+                label="Inner Craft Image (Default Banner Layout Only)"
+                sectionName="Services Creative Banner Inner Image"
+                currentUrl={creativeBanner.imageUrl}
+                focalPoint={creativeBanner.focalPoint}
+                onFocalPointChange={(fp) => handleCreativeBannerChange({ focalPoint: fp })}
+                onUpload={async (file) => {
+                  const url = await uploadImageFile(file);
+                  if (url) handleCreativeBannerChange({ imageUrl: url });
+                }}
+                onClear={() => handleCreativeBannerChange({ imageUrl: '' })}
+                recommendedDimensions="1200 × 750 px (Recommended)"
+                aspectRatio="16:10 Landscape"
+                supportedFormats="PNG, JPG, WebP"
+                maxFileSize="5 MB"
+                helpText="Optional inner imagery used when complete banner artwork is not provided."
               />
             </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#173B75] mb-1">Subheading</label>
-              <textarea
-                rows={2}
-                value={creativeBanner.subheading || 'Branding, packaging dielines, and performance ad creative engineered for commercial resonance.'}
-                onChange={(e) => handleCreativeBannerChange({ subheading: e.target.value })}
-                className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs"
-              />
-            </div>
-
-            <AssetUploadField
-              label="Agency Creative Banner Artwork"
-              sectionName="Services Creative Banner"
-              currentUrl={creativeBanner.imageUrl}
-              focalPoint={creativeBanner.focalPoint}
-              onFocalPointChange={(fp) => handleCreativeBannerChange({ focalPoint: fp })}
-              onUpload={async (file) => {
-                const url = await uploadImageFile(file);
-                if (url) handleCreativeBannerChange({ imageUrl: url });
-              }}
-              onClear={() => handleCreativeBannerChange({ imageUrl: '' })}
-              recommendedDimensions="1920 × 800 px (Recommended)"
-              aspectRatio="12:5 Widescreen Banner"
-              supportedFormats="PNG, JPG, WebP"
-              maxFileSize="10 MB"
-              helpText="Embedded in the high-contrast navy/orange advertising craft banner."
-            />
           </div>
         )}
       </div>
@@ -460,7 +794,7 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">3</div>
             <div className="text-left">
-              <h3 className="text-sm font-bold text-[#173B75]">Section 3: All 10 Creative Services ({services.length} Total)</h3>
+              <h3 className="text-sm font-bold text-[#173B75]">Section 3: Creative Services ({services.length} Total)</h3>
               <p className="text-[11px] text-[#252A34]/70">Edit headlines, descriptions, deliverables, and primary visual assets for each discipline</p>
             </div>
           </div>
@@ -486,7 +820,7 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
                   <label className="block text-[11px] font-semibold text-[#252A34]/70 mb-1">Heading</label>
                   <input
                     type="text"
-                    value={siteContent.servicesCapabilitiesHeading ?? 'All 10 Specialized Creative Services'}
+                    value={siteContent.servicesCapabilitiesHeading ?? 'Specialized Creative Services'}
                     onChange={(e) => onUpdateSiteContent({ ...siteContent, servicesCapabilitiesHeading: e.target.value })}
                     className="w-full px-3 py-1.5 border border-[#E4D8C8] rounded-xl text-xs bg-white font-bold"
                   />
@@ -496,7 +830,7 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
                 <label className="block text-[11px] font-semibold text-[#252A34]/70 mb-1">Subtitle</label>
                 <input
                   type="text"
-                  value={siteContent.servicesCapabilitiesSubtitle ?? 'Explore our complete suite of 10 specialized creative capabilities.'}
+                  value={siteContent.servicesCapabilitiesSubtitle ?? 'Explore our complete suite of specialized creative capabilities.'}
                   onChange={(e) => onUpdateSiteContent({ ...siteContent, servicesCapabilitiesSubtitle: e.target.value })}
                   className="w-full px-3 py-1.5 border border-[#E4D8C8] rounded-xl text-xs bg-white"
                 />
@@ -614,18 +948,38 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
                         </div>
 
                         {/* Service Visual Asset Upload with Side-by-Side Dimension Specs */}
-                        <AssetUploadField
-                          label={`${service.title} Feature Artwork`}
-                          sectionName={`Services Page Section #${idx + 1}`}
-                          currentUrl={service.image}
-                          onUpload={(file) => handleServiceImageUpload(idx, file)}
-                          onClear={() => handleUpdateService(idx, { image: '' })}
-                          recommendedDimensions="1000 × 750 px (Recommended)"
-                          aspectRatio="4:3 Landscape"
-                          supportedFormats="JPG, PNG, WebP"
-                          maxFileSize="5 MB"
-                          helpText="Primary visual feature artwork displayed alongside the deliverables list."
-                        />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <AssetUploadField
+                            label="Main Service Artwork (Desktop & Shared)"
+                            sectionName={`Services Section #${idx + 1} (Desktop & Shared)`}
+                            currentUrl={service.image}
+                            onUpload={(file) => handleServiceImageUpload(idx, file)}
+                            onClear={() => handleUpdateService(idx, { image: '' })}
+                            recommendedDimensions="1000 × 750 px (Recommended)"
+                            aspectRatio="4:3 / 16:10 Landscape"
+                            supportedFormats="JPG, PNG, WebP"
+                            maxFileSize="5 MB"
+                            helpText="Single source of truth. Rendered on the Services page and automatically shared to homepage service preview tiles."
+                          />
+
+                          <AssetUploadField
+                            label="Optional Mobile Artwork"
+                            sectionName={`Services Section #${idx + 1} (Mobile)`}
+                            currentUrl={service.homepageImageMobile}
+                            onUpload={async (file) => {
+                              const url = await uploadImageFile(file);
+                              if (url) {
+                                handleUpdateService(idx, { homepageImageMobile: url });
+                              }
+                            }}
+                            onClear={() => handleUpdateService(idx, { homepageImageMobile: '' })}
+                            recommendedDimensions="600 × 380 px (Recommended)"
+                            aspectRatio="16:10 Landscape"
+                            supportedFormats="JPG, PNG, WebP"
+                            maxFileSize="5 MB"
+                            helpText="Optional mobile composition. Rendered on mobile viewports. If omitted, the main artwork is responsively scaled."
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
@@ -636,16 +990,501 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
         )}
       </div>
 
-      {/* SECTION 4: FROM BRIEF TO DELIVERY METHODOLOGY */}
+      {/* SECTION 4: RELEVANT CONCEPTS / CASE STUDIES MANAGER */}
+      <div className="bg-white rounded-3xl border border-[#E4D8C8] overflow-hidden shadow-xs">
+        <button
+          onClick={() => toggleSection('conceptsManager')}
+          className="w-full px-6 py-4 flex items-center justify-between bg-[#FFF9F1] hover:bg-[#F8EFE3] transition-colors border-b border-[#E4D8C8] cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">4</div>
+            <div className="text-left">
+              <h3 className="text-sm font-bold text-[#173B75]">Section 4: Relevant Concepts & Case Studies Manager ({concepts.length} Total)</h3>
+              <p className="text-[11px] text-[#252A34]/70">Curate showcase case studies and concept mockups displayed under "View Relevant Concepts" on the public /services page</p>
+            </div>
+          </div>
+          {openSections.conceptsManager ? <ChevronUp className="w-5 h-5 text-[#173B75]" /> : <ChevronDown className="w-5 h-5 text-[#173B75]" />}
+        </button>
+
+        {openSections.conceptsManager && (
+          <div className="p-6 space-y-6">
+            {/* Header Toolbar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E4D8C8]">
+              <div>
+                <span className="text-xs font-bold text-[#173B75] flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-[#F07822]" />
+                  <span>Curated Service Concepts & Tactical Deliverables</span>
+                </span>
+                <p className="text-[11px] text-[#252A34]/70 mt-0.5">
+                  Organized by service discipline. Each published concept appears when visitors click "View Relevant Concepts" on the public Services page.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleOpenCreateConcept()}
+                className="px-4 py-2.5 bg-[#F07822] hover:bg-[#d65805] text-white text-xs font-bold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 cursor-pointer self-start sm:self-auto"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add New Concept</span>
+              </button>
+            </div>
+
+            {/* Discipline Filter Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <button
+                type="button"
+                onClick={() => setSelectedServiceFilter('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  selectedServiceFilter === 'all'
+                    ? 'bg-[#173B75] text-white shadow-xs'
+                    : 'bg-[#F7F7F5] text-[#252A34]/80 hover:bg-[#EEF2F9] border border-[#E4D8C8]'
+                }`}
+              >
+                <span>All Disciplines</span>
+                <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                  selectedServiceFilter === 'all' ? 'bg-white/20 text-white' : 'bg-black/5 text-[#252A34]'
+                }`}>
+                  {concepts.length}
+                </span>
+              </button>
+
+              {dynamicServiceOptions.map((srv) => {
+                const count = concepts.filter(c => c.serviceId.toLowerCase() === srv.id.toLowerCase()).length;
+                const isSelected = selectedServiceFilter === srv.id;
+                return (
+                  <button
+                    key={srv.id}
+                    type="button"
+                    onClick={() => setSelectedServiceFilter(srv.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-[#173B75] text-white shadow-xs'
+                        : 'bg-[#F7F7F5] text-[#252A34]/80 hover:bg-[#EEF2F9] border border-[#E4D8C8]'
+                    }`}
+                  >
+                    <span>{srv.title.split('·')[1]?.trim() || srv.title}</span>
+                    <span className={`px-1.5 py-0.2 rounded-md text-[10px] ${
+                      isSelected ? 'bg-[#F07822] text-white' : 'bg-black/5 text-[#252A34]'
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Concepts Grid / List */}
+            {(() => {
+              const filtered = selectedServiceFilter === 'all'
+                ? concepts
+                : concepts.filter(c => c.serviceId.toLowerCase() === selectedServiceFilter.toLowerCase());
+
+              const sorted = [...filtered].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+              if (sorted.length === 0) {
+                return (
+                  <div className="p-8 text-center bg-[#F7F7F5] rounded-2xl border border-dashed border-[#E4D8C8] space-y-3">
+                    <Sparkles className="w-8 h-8 text-[#F07822]/60 mx-auto" />
+                    <div>
+                      <h5 className="text-sm font-bold text-[#173B75]">No Concepts Added Yet</h5>
+                      <p className="text-xs text-[#252A34]/70 mt-1 max-w-md mx-auto">
+                        {selectedServiceFilter === 'all'
+                          ? 'Add your first real concept or case study to display under the "View Relevant Concepts" button on /services.'
+                          : `No concepts created yet for this discipline. Click the button below to add one.`}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCreateConcept(selectedServiceFilter !== 'all' ? selectedServiceFilter : 'branding')}
+                      className="px-4 py-2 bg-[#173B75] hover:bg-[#123163] text-white text-xs font-bold rounded-xl transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Create First Concept</span>
+                    </button>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {sorted.map((concept) => {
+                    const srv = dynamicServiceOptions.find(s => s.id.toLowerCase() === concept.serviceId.toLowerCase());
+                    const serviceTitle = srv?.title || concept.serviceId;
+
+                    return (
+                      <div
+                        key={concept.id}
+                        className="bg-[#F7F7F5] rounded-2xl border border-[#E4D8C8] overflow-hidden flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow"
+                      >
+                        <div>
+                          {/* Image Thumbnail with Overlay Badges */}
+                          <div className="relative h-44 overflow-hidden bg-[#EEF2F9]">
+                            <img
+                              src={concept.image}
+                              alt={concept.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1200&q=80';
+                              }}
+                            />
+                            {/* Service Discipline Badge */}
+                            <div className="absolute top-2.5 left-2.5 bg-[#173B75]/95 text-white backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-bold shadow-xs">
+                              {serviceTitle}
+                            </div>
+                            {/* Published / Draft Pill */}
+                            <button
+                              type="button"
+                              onClick={() => handleToggleConceptPublish(concept)}
+                              className={`absolute top-2.5 right-2.5 px-2.5 py-1 rounded-md text-[10px] font-bold backdrop-blur-md shadow-xs cursor-pointer transition-colors ${
+                                concept.published
+                                  ? 'bg-emerald-600/90 hover:bg-emerald-700 text-white'
+                                  : 'bg-amber-600/90 hover:bg-amber-700 text-white'
+                              }`}
+                            >
+                              {concept.published ? 'Live' : 'Draft'}
+                            </button>
+                            {/* Video Pill if present */}
+                            {concept.videoUrl && (
+                              <div className="absolute bottom-2.5 right-2.5 bg-black/80 text-white px-2 py-0.5 rounded text-[10px] font-mono flex items-center gap-1">
+                                <Film className="w-3 h-3 text-[#F07822]" />
+                                <span>Video</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Body Content */}
+                          <div className="p-4 space-y-2">
+                            <div className="flex items-center justify-between text-[11px] text-[#252A34]/70">
+                              <span className="font-semibold text-[#F07822]">{concept.clientName || 'Studio Concept'}</span>
+                              <span className="px-2 py-0.5 rounded bg-white border border-[#E4D8C8] text-[10px] font-mono">
+                                {concept.category || 'Creative Concept'}
+                              </span>
+                            </div>
+
+                            <h4 className="text-sm font-bold text-[#173B75] leading-snug line-clamp-1">
+                              {concept.title}
+                            </h4>
+
+                            <p className="text-xs text-[#252A34]/75 line-clamp-2 leading-relaxed">
+                              {concept.description || concept.tagline}
+                            </p>
+
+                            {/* Deliverables tags */}
+                            {concept.deliverables && concept.deliverables.length > 0 && (
+                              <div className="pt-1 flex flex-wrap gap-1.5">
+                                {concept.deliverables.slice(0, 3).map((d, dIdx) => (
+                                  <span
+                                    key={dIdx}
+                                    className="px-2 py-0.5 bg-white rounded-md border border-[#E4D8C8] text-[10px] text-[#252A34]/80 flex items-center gap-1"
+                                  >
+                                    <Check className="w-2.5 h-2.5 text-[#F07822]" />
+                                    <span>{d}</span>
+                                  </span>
+                                ))}
+                                {concept.deliverables.length > 3 && (
+                                  <span className="px-1.5 py-0.5 text-[10px] text-[#252A34]/60 font-semibold">
+                                    +{concept.deliverables.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Card Footer Controls */}
+                        <div className="px-4 py-3 bg-white border-t border-[#E4D8C8] flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] font-mono text-[#252A34]/60 mr-1">
+                              Order #{concept.order}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveConcept(concept, 'up')}
+                              className="p-1 hover:bg-[#EEF2F9] rounded text-[#173B75] transition-colors cursor-pointer"
+                              title="Move Up"
+                            >
+                              <ArrowUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveConcept(concept, 'down')}
+                              className="p-1 hover:bg-[#EEF2F9] rounded text-[#173B75] transition-colors cursor-pointer"
+                              title="Move Down"
+                            >
+                              <ArrowDown className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleDuplicateConcept(concept.id)}
+                              className="p-1.5 hover:bg-[#EEF2F9] text-[#173B75] rounded-lg transition-colors cursor-pointer"
+                              title="Duplicate Concept"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditConcept(concept)}
+                              className="px-2.5 py-1.5 bg-[#173B75] hover:bg-[#123163] text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                            >
+                              <Edit className="w-3 h-3" />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteConcept(concept.id, concept.title)}
+                              className="p-1.5 hover:bg-red-50 text-red-600 rounded-lg transition-colors cursor-pointer"
+                              title="Delete Concept"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+            {/* MODAL: CREATE / EDIT CONCEPT */}
+            {isCreatingConcept && (
+              <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                <div className="bg-white rounded-3xl max-w-2xl w-full border border-[#E4D8C8] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
+                  {/* Modal Header */}
+                  <div className="p-6 bg-[#FFF9F1] border-b border-[#E4D8C8] flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">
+                        <Sparkles className="w-4 h-4 text-[#F07822]" />
+                      </div>
+                      <div>
+                        <h4 className="text-base font-bold text-[#173B75]">
+                          {editingConcept ? 'Edit Relevant Concept' : 'Add New Relevant Concept'}
+                        </h4>
+                        <p className="text-[11px] text-[#252A34]/70">
+                          Configure case study details shown when visitors click "View Relevant Concepts" on /services.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsCreatingConcept(false);
+                        setEditingConcept(null);
+                      }}
+                      className="p-2 text-[#252A34]/60 hover:text-[#173B75] rounded-xl hover:bg-black/5 transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Modal Form */}
+                  <form onSubmit={handleSaveConceptSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-[#173B75] mb-1">
+                          Concept Title <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Minimalist Skincare Visual Identity & Dielines"
+                          value={conceptFormData.title || ''}
+                          onChange={(e) => setConceptFormData({ ...conceptFormData, title: e.target.value })}
+                          className="w-full px-3.5 py-2.5 border border-[#E4D8C8] rounded-xl text-xs font-bold focus:ring-2 focus:ring-[#173B75] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-[#173B75] mb-1">
+                          Associated Service Discipline <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          required
+                          value={conceptFormData.serviceId || 'branding'}
+                          onChange={(e) => setConceptFormData({ ...conceptFormData, serviceId: e.target.value })}
+                          className="w-full px-3.5 py-2.5 border border-[#E4D8C8] rounded-xl text-xs font-bold bg-white focus:ring-2 focus:ring-[#173B75] focus:outline-none"
+                        >
+                          {dynamicServiceOptions.map((srv) => (
+                            <option key={srv.id} value={srv.id}>
+                              {srv.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-[#173B75] mb-1">
+                          Client / Brand Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Lumina Organics or Goodfolk Craft Lab"
+                          value={conceptFormData.clientName || ''}
+                          onChange={(e) => setConceptFormData({ ...conceptFormData, clientName: e.target.value })}
+                          className="w-full px-3.5 py-2.5 border border-[#E4D8C8] rounded-xl text-xs focus:ring-2 focus:ring-[#173B75] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-[#173B75] mb-1">
+                          Category / Badge
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Brand Identity, Packaging Dieline, Motion Ad"
+                          value={conceptFormData.category || ''}
+                          onChange={(e) => setConceptFormData({ ...conceptFormData, category: e.target.value })}
+                          className="w-full px-3.5 py-2.5 border border-[#E4D8C8] rounded-xl text-xs focus:ring-2 focus:ring-[#173B75] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-[#173B75] mb-1">
+                          Display Order
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={conceptFormData.order || 1}
+                          onChange={(e) => setConceptFormData({ ...conceptFormData, order: Number(e.target.value) })}
+                          className="w-full px-3.5 py-2.5 border border-[#E4D8C8] rounded-xl text-xs font-mono focus:ring-2 focus:ring-[#173B75] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#173B75] mb-1">
+                        Short Description / Tagline
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="Brief summary of creative objectives, materials, or strategic commercial impact..."
+                        value={conceptFormData.description || ''}
+                        onChange={(e) => setConceptFormData({ ...conceptFormData, description: e.target.value, tagline: e.target.value })}
+                        className="w-full px-3.5 py-2 border border-[#E4D8C8] rounded-xl text-xs focus:ring-2 focus:ring-[#173B75] focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Media Upload */}
+                    <div className="p-4 bg-[#F7F7F5] rounded-2xl border border-[#E4D8C8] space-y-4">
+                      <AssetUploadField
+                        label="Concept Showcase Image"
+                        sectionName="Service Concept Showcase Image"
+                        currentUrl={conceptFormData.image}
+                        onUpload={async (file) => {
+                          const url = await uploadImageFile(file);
+                          if (url) setConceptFormData({ ...conceptFormData, image: url });
+                        }}
+                        onClear={() => setConceptFormData({ ...conceptFormData, image: '' })}
+                        recommendedDimensions="1200 × 800 px (Recommended)"
+                        aspectRatio="3:2 / 16:10 Landscape"
+                        supportedFormats="JPG, PNG, WebP"
+                        maxFileSize="5 MB"
+                        helpText="Primary card visual rendered in the concept showcase grid."
+                      />
+
+                      <div>
+                        <label className="block text-xs font-bold text-[#173B75] mb-1">
+                          Optional Video Showcase URL (MP4 / WebM / Embed)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="https://example.com/concept-motion.mp4"
+                          value={conceptFormData.videoUrl || ''}
+                          onChange={(e) => setConceptFormData({ ...conceptFormData, videoUrl: e.target.value })}
+                          className="w-full px-3.5 py-2 border border-[#E4D8C8] rounded-xl text-xs font-mono bg-white focus:ring-2 focus:ring-[#173B75] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Deliverables List (Comma-Separated) */}
+                    <div>
+                      <label className="block text-xs font-bold text-[#173B75] mb-1">
+                        Scope & Deliverables (Comma-separated list)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Logo Suite, Brand Guidelines, Retail Dielines, FSC Packaging Spec"
+                        value={deliverablesInput}
+                        onChange={(e) => setDeliverablesInput(e.target.value)}
+                        className="w-full px-3.5 py-2.5 border border-[#E4D8C8] rounded-xl text-xs focus:ring-2 focus:ring-[#173B75] focus:outline-none"
+                      />
+                      <div className="pt-2 flex flex-wrap gap-1.5">
+                        {deliverablesInput
+                          .split(',')
+                          .map(s => s.trim())
+                          .filter(Boolean)
+                          .map((item, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-0.5 rounded-md bg-[#EEF2F9] text-[#173B75] text-[10px] font-semibold flex items-center gap-1 border border-[#173B75]/15"
+                            >
+                              <Check className="w-2.5 h-2.5 text-[#F07822]" />
+                              <span>{item}</span>
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+
+                    {/* Published Toggle */}
+                    <div className="pt-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={conceptFormData.published !== false}
+                          onChange={(e) => setConceptFormData({ ...conceptFormData, published: e.target.checked })}
+                          className="w-4 h-4 text-[#F07822] rounded"
+                        />
+                        <span className="text-xs font-bold text-[#173B75]">
+                          Publish this concept live on the public Services page
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Modal Actions */}
+                    <div className="pt-4 border-t border-[#E4D8C8] flex items-center justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCreatingConcept(false);
+                          setEditingConcept(null);
+                        }}
+                        className="px-4 py-2 rounded-xl border border-[#E4D8C8] text-xs font-bold text-[#252A34] hover:bg-black/5 transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={savingConcept}
+                        className="px-5 py-2 rounded-xl bg-[#F07822] hover:bg-[#d65805] text-white text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        {savingConcept ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                        <span>{editingConcept ? 'Update Concept' : 'Create Concept'}</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* SECTION 5: FROM BRIEF TO DELIVERY METHODOLOGY */}
       <div className="bg-white rounded-3xl border border-[#E4D8C8] overflow-hidden shadow-xs">
         <button
           onClick={() => toggleSection('methodology')}
           className="w-full px-6 py-4 flex items-center justify-between bg-[#FFF9F1] hover:bg-[#F8EFE3] transition-colors border-b border-[#E4D8C8] cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">4</div>
+            <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">5</div>
             <div className="text-left">
-              <h3 className="text-sm font-bold text-[#173B75]">Section 4: Four-Step Collaboration Methodology</h3>
+              <h3 className="text-sm font-bold text-[#173B75]">Section 5: Four-Step Collaboration Methodology</h3>
               <p className="text-[11px] text-[#252A34]/70">01. Brief & Plan, 02. Explore & Create, 03. Review & Refine, 04. Delivery & Receipt</p>
             </div>
           </div>
@@ -787,16 +1626,16 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
         )}
       </div>
 
-      {/* SECTION 5: FOOTER CTA BANNER */}
+      {/* SECTION 6: FOOTER CTA BANNER */}
       <div className="bg-white rounded-3xl border border-[#E4D8C8] overflow-hidden shadow-xs">
         <button
           onClick={() => toggleSection('footerCta')}
           className="w-full px-6 py-4 flex items-center justify-between bg-[#FFF9F1] hover:bg-[#F8EFE3] transition-colors border-b border-[#E4D8C8] cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">5</div>
+            <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">6</div>
             <div className="text-left">
-              <h3 className="text-sm font-bold text-[#173B75]">Section 5: Services Footer CTA Banner</h3>
+              <h3 className="text-sm font-bold text-[#173B75]">Section 6: Services Footer CTA Banner</h3>
               <p className="text-[11px] text-[#252A34]/70">Full-width bottom banner headline, description, button text, and link</p>
             </div>
           </div>
@@ -891,16 +1730,16 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
         )}
       </div>
 
-      {/* SECTION 6: SECTION VISIBILITY TOGGLES */}
+      {/* SECTION 7: SECTION VISIBILITY TOGGLES */}
       <div className="bg-white rounded-3xl border border-[#E4D8C8] overflow-hidden shadow-xs">
         <button
           onClick={() => toggleSection('visibility')}
           className="w-full px-6 py-4 flex items-center justify-between bg-[#FFF9F1] hover:bg-[#F8EFE3] transition-colors border-b border-[#E4D8C8] cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">6</div>
+            <div className="w-8 h-8 rounded-xl bg-[#173B75] text-white flex items-center justify-center font-bold text-xs">7</div>
             <div className="text-left">
-              <h3 className="text-sm font-bold text-[#173B75]">Section 6: Services Page Section Visibility Toggles</h3>
+              <h3 className="text-sm font-bold text-[#173B75]">Section 7: Services Page Section Visibility Toggles</h3>
               <p className="text-[11px] text-[#252A34]/70">Hide or show entire sections on the public /services page</p>
             </div>
           </div>

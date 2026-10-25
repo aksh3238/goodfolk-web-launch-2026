@@ -92,10 +92,10 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
               {siteContent.servicesCapabilitiesEyebrow || 'Creative Capabilities'}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-[#173B75] mt-1 tracking-tight">
-              {siteContent.servicesCapabilitiesHeading || 'All 10 Specialized Creative Services'}
+              {(siteContent.servicesCapabilitiesHeading || 'Specialized Creative Services').replace(/All\s+10\s+/gi, '')}
             </h2>
             <p className="text-sm sm:text-base text-[#242832]/75 mt-2">
-              {siteContent.servicesCapabilitiesSubtitle || 'Explore our complete suite of 10 specialized creative capabilities.'}
+              {(siteContent.servicesCapabilitiesSubtitle || 'Explore our complete suite of specialized creative capabilities.').replace(/suite of 10/gi, 'suite of')}
             </p>
           </div>
 
@@ -104,7 +104,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
       </section>
 
       {/* 10 In-Depth Service Sections */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 lg:space-y-28">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16 lg:space-y-28">
         {servicesList.map((service, idx) => {
           const isEven = idx % 2 === 1;
           const isConceptsOpen = Boolean(expandedConcepts[service.id]);
@@ -121,25 +121,25 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
             <section
               key={service.id}
               id={service.id}
-              className="scroll-mt-28 border-t border-[#E6E8ED] pt-16 lg:pt-24 space-y-12"
+              className="scroll-mt-28 border-t border-[#E6E8ED] pt-10 sm:pt-16 lg:pt-24 space-y-6 sm:space-y-12"
             >
-              <div className={`grid grid-cols-1 lg:grid-cols-12 gap-12 items-center ${isEven ? 'lg:flex-row-reverse' : ''}`}>
+              <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-12 items-center ${isEven ? 'lg:flex-row-reverse' : ''}`}>
                 {/* Visual */}
                 <div className={`lg:col-span-6 ${isEven ? 'lg:order-2' : ''}`}>
-                  <div className="relative rounded-3xl overflow-hidden shadow-xl border border-[#E6E8ED] bg-white group">
+                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-[#E6E8ED] bg-white group">
                     <img
                       src={service.image}
                       alt={service.title}
-                      className="w-full h-80 sm:h-[460px] object-cover group-hover:scale-105 transition-transform duration-700"
+                      className="w-full h-64 sm:h-[420px] lg:h-[460px] object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute top-5 left-5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-extrabold text-[#173B75] shadow-sm">
+                    <div className="absolute top-4 left-4 sm:top-5 sm:left-5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-extrabold text-[#173B75] shadow-sm">
                       {service.title}
                     </div>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className={`lg:col-span-6 space-y-6 ${isEven ? 'lg:order-1' : ''}`}>
+                <div className={`lg:col-span-6 space-y-4 sm:space-y-6 ${isEven ? 'lg:order-1' : ''}`}>
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-[#F07822] uppercase tracking-wider font-mono">
                       Creative Discipline
@@ -205,14 +205,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
 
               {/* Functional Service-Specific Concepts Showcase (Expandable / Inline) */}
               {isConceptsOpen && (
-                <div className="bg-[#F7F7F5] rounded-3xl p-6 sm:p-10 border border-[#E6E8ED] space-y-6 animate-in fade-in duration-300">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E6E8ED] pb-4">
+                <div className="bg-[#F7F7F5] rounded-2xl sm:rounded-3xl p-4 sm:p-8 lg:p-10 border border-[#E6E8ED] space-y-4 sm:space-y-6 animate-in fade-in duration-300">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-[#E6E8ED] pb-3 sm:pb-4">
                     <div>
                       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#173B75]/10 text-[#173B75] text-[11px] font-bold uppercase tracking-wider mb-1">
                         <Sparkles className="w-3 h-3 text-[#F07822]" />
                         {service.title} Concepts
                       </div>
-                      <h3 className="text-xl font-bold text-[#173B75]">
+                      <h3 className="text-lg sm:text-xl font-bold text-[#173B75]">
                         Curated Concepts & Creative Case Studies
                       </h3>
                       <p className="text-xs text-[#242832]/70 mt-1">
@@ -233,14 +233,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
                       No concepts currently published for this discipline. New concepts can be added in the Admin Console.
                     </div>
                   ) : (
-                    <FocusCardGroup className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FocusCardGroup className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       {relevantConcepts.map((concept, cIdx) => (
                         <FocusCardItem key={concept.id} index={cIdx} className="h-full">
                           <div
                             onClick={() => setSelectedConcept(concept)}
                             className="bg-white rounded-2xl border border-[#E6E8ED] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full cursor-pointer group"
                           >
-                            <div className="relative h-56 overflow-hidden bg-[#EEF2F9]">
+                            <div className="relative h-48 sm:h-56 overflow-hidden bg-[#EEF2F9]">
                               <img
                                 src={concept.image}
                                 alt={concept.title}

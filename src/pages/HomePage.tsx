@@ -179,12 +179,25 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenLetsTalk }
                   className="group bg-white rounded-3xl border border-[#E6E8ED] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer h-full"
                 >
                   <div className="relative h-48 sm:h-52 overflow-hidden bg-[#EEF2F9]">
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
-                    />
+                    {(() => {
+                      const desktopImage = service.image || service.homepageImageDesktop || fallbackImage;
+                      const mobileImage = service.homepageImageMobile;
+                      const activeImage = desktopImage || fallbackImage;
+
+                      return (
+                        <picture className="w-full h-full block">
+                          {mobileImage && (
+                            <source media="(max-width: 767px)" srcSet={mobileImage} />
+                          )}
+                          <img
+                            src={activeImage}
+                            alt={service.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
+                          />
+                        </picture>
+                      );
+                    })()}
                   </div>
 
                   <div className="p-6 flex-1 flex flex-col justify-between">
@@ -238,7 +251,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenLetsTalk }
             onClick={() => onNavigate('/services')}
             className="inline-flex items-center gap-2 text-sm font-bold text-[#173B75] hover:text-[#F07822] transition-colors cursor-pointer"
           >
-            <span>Explore All 10 Creative Services</span>
+            <span>Explore All Creative Services</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

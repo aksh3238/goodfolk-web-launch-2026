@@ -22,18 +22,33 @@ export const ServicesSwipeableCarousel: React.FC<ServicesSwipeableCarouselProps>
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allServices = (siteContent?.services && siteContent.services.length >= 10)
-    ? siteContent.services
+  const allServices = (siteContent?.services && siteContent.services.length > 0)
+    ? siteContent.services.filter(s => s.published !== false)
     : SERVICES_DATA;
 
-  const slide1 = allServices.slice(0, 5);
-  const slide2 = allServices.slice(5, 10);
-  const slides = [
-    { id: 'slide-1', label: 'Slide 1', services: slide1 },
-    { id: 'slide-2', label: 'Slide 2', services: slide2 }
-  ];
+  const itemsPerSlide = 5;
+  const slides: { id: string; label: string; services: any[] }[] = [];
+  for (let i = 0; i < allServices.length; i += itemsPerSlide) {
+    slides.push({
+      id: `slide-${Math.floor(i / itemsPerSlide) + 1}`,
+      label: `Slide ${Math.floor(i / itemsPerSlide) + 1}`,
+      services: allServices.slice(i, i + itemsPerSlide)
+    });
+  }
+  if (slides.length === 0) {
+    slides.push({ id: 'slide-1', label: 'Slide 1', services: [] });
+  }
 
-  const currentGroup = slides[activeGroupIndex];
+  const safeIndex = activeGroupIndex < slides.length ? activeGroupIndex : 0;
+  const currentGroup = slides[safeIndex];
+
+  const handlePrev = () => {
+    setActiveGroupIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const handleNext = () => {
+    setActiveGroupIndex((prev) => (prev + 1) % slides.length);
+  };
 
   // Touch handlers for mobile swipe
   const minSwipeDistance = 50;
@@ -54,12 +69,10 @@ export const ServicesSwipeableCarousel: React.FC<ServicesSwipeableCarouselProps>
     const isRightSwipe = distance < -minSwipeDistance;
 
     if (isLeftSwipe) {
-      // Next slide
-      setActiveGroupIndex((prev) => (prev === 0 ? 1 : 0));
+      handleNext();
     }
     if (isRightSwipe) {
-      // Prev slide
-      setActiveGroupIndex((prev) => (prev === 1 ? 0 : 1));
+      handlePrev();
     }
   };
 
@@ -68,15 +81,15 @@ export const ServicesSwipeableCarousel: React.FC<ServicesSwipeableCarouselProps>
     const handleKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement && containerRef.current?.contains(document.activeElement)) {
         if (e.key === 'ArrowRight') {
-          setActiveGroupIndex((prev) => (prev === 0 ? 1 : 0));
+          handleNext();
         } else if (e.key === 'ArrowLeft') {
-          setActiveGroupIndex((prev) => (prev === 1 ? 0 : 1));
+          handlePrev();
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [slides.length]);
 
   const handleCardClick = (service: ServiceItem) => {
     if (onSelectService) {
@@ -99,14 +112,14 @@ export const ServicesSwipeableCarousel: React.FC<ServicesSwipeableCarouselProps>
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       tabIndex={0}
-      aria-label="All 10 Creative Services Carousel"
+      aria-label="Creative Services Carousel"
     >
       {/* Navigation Header Bar: Clean Previous and Next Navigation */}
       <div className="flex items-center justify-between gap-4 border-b border-[#E6E8ED] pb-4">
-        {/* Slide status counter */}
+        {/* Slide Indicators without hardcoded counts */}
         <div className="flex items-center gap-3">
-          <span className="text-xs sm:text-sm font-bold text-[#173B75] tracking-wide">
-            Showing Slide {activeGroupIndex + 1} of 2 ({currentGroup.services.length} Services)
+          <span className="text-xs font-bold text-[#173B75] tracking-wide">
+            Creative Disciplines
           </span>
           <div className="flex items-center gap-1.5">
             {slides.map((_, idx) => (
@@ -116,7 +129,7 @@ export const ServicesSwipeableCarousel: React.FC<ServicesSwipeableCarouselProps>
                 onClick={() => setActiveGroupIndex(idx)}
                 aria-label={`Switch to slide ${idx + 1}`}
                 className={`h-2 rounded-full transition-all cursor-pointer ${
-                  activeGroupIndex === idx ? 'w-6 bg-[#F07822]' : 'w-2 bg-[#173B75]/25 hover:bg-[#173B75]/50'
+                  safeIndex === idx ? 'w-6 bg-[#F07822]' : 'w-2 bg-[#173B75]/25 hover:bg-[#173B75]/50'
                 }`}
               />
             ))}
@@ -127,7 +140,7 @@ export const ServicesSwipeableCarousel: React.FC<ServicesSwipeableCarouselProps>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setActiveGroupIndex((prev) => (prev === 1 ? 0 : 1))}
+            onClick={handlePrev}
             aria-label="Previous slide"
             className="px-3 py-1.5 rounded-xl bg-white border border-[#E6E8ED] hover:border-[#173B75] text-[#173B75] flex items-center gap-1.5 text-xs font-bold transition-all hover:bg-[#EEF2F9] cursor-pointer shadow-xs active:scale-95"
           >
@@ -136,7 +149,7 @@ export const ServicesSwipeableCarousel: React.FC<ServicesSwipeableCarouselProps>
           </button>
           <button
             type="button"
-            onClick={() => setActiveGroupIndex((prev) => (prev === 0 ? 1 : 0))}
+            onClick={handleNext}
             aria-label="Next slide"
             className="px-3 py-1.5 rounded-xl bg-white border border-[#E6E8ED] hover:border-[#173B75] text-[#173B75] flex items-center gap-1.5 text-xs font-bold transition-all hover:bg-[#EEF2F9] cursor-pointer shadow-xs active:scale-95"
           >

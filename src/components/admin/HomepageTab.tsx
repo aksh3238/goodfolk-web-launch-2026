@@ -9,10 +9,12 @@ import type {
   CMSTrustedBrand,
   CMSTestimonial,
   CMSHeroSlide,
-  PageBannerConfig
+  PageBannerConfig,
+  CMSServiceItem
 } from '../../types';
 import { AssetUploadField } from './AssetUploadField';
 import { DEFAULT_HERO_SLIDES } from '../HeroShowcaseCarousel';
+import { SERVICES_DATA } from '../../data/services';
 
 export interface HomepageTabProps {
   token: string;
@@ -610,6 +612,50 @@ export const HomepageTab: React.FC<HomepageTabProps> = ({
                   onChange={(e) => onUpdateSiteContent({ ...siteContent, homeServicesCtaDesc: e.target.value })}
                   className="w-full px-3 py-1.5 border border-[#E4D8C8] rounded-xl text-xs bg-white"
                 />
+              </div>
+            </div>
+
+            {/* HOMEPAGE SERVICE TILES AUTOMATIC SYNCHRONIZATION */}
+            <div className="pt-4 border-t border-[#E4D8C8] space-y-4">
+              <div className="p-4 bg-white rounded-2xl border border-[#E4D8C8] space-y-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#F07822]" />
+                  <span className="text-xs font-bold text-[#173B75]">
+                    Automatic Service Image Synchronization (Single Source of Truth)
+                  </span>
+                </div>
+                <p className="text-xs text-[#252A34]/80 leading-relaxed">
+                  Homepage service preview tiles automatically inherit their images, titles, and descriptions directly from <strong className="text-[#173B75]">Website Content Manager → Services</strong>.
+                  When you replace or publish a service image in the Services editor, the homepage tile updates automatically without requiring a duplicate upload.
+                </p>
+                <div className="pt-2">
+                  <span className="text-[11px] font-bold text-[#173B75] uppercase tracking-wider block mb-2">
+                    Live Inherited Service Preview Tiles:
+                  </span>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {(((siteContent?.services && siteContent.services.length > 0)
+                      ? siteContent.services.filter(s => s.published !== false)
+                      : SERVICES_DATA
+                    ).slice(0, 5)).map((service, idx) => (
+                      <div key={service.id || idx} className="p-2.5 rounded-xl bg-[#F7F7F5] border border-[#E4D8C8] space-y-1.5">
+                        <div className="h-16 w-full rounded-lg overflow-hidden bg-[#EEF2F9]">
+                          <img
+                            src={service.image || 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=800&q=80'}
+                            alt={service.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=800&q=80'; }}
+                          />
+                        </div>
+                        <div className="text-[11px] font-bold text-[#173B75] truncate">
+                          {service.title.replace(/^\d+[\.\-\s]+/, '')}
+                        </div>
+                        <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono block text-center">
+                          Synced
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

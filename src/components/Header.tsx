@@ -13,6 +13,7 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate, onOpenL
   const [isScrolled, setIsScrolled] = useState(false);
   const [isServicesOpen, setIsServicesOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -178,9 +179,9 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate, onOpenL
                     <div className="px-3 pt-1 pb-2 border-b border-[#E6E8ED]/70 flex items-center justify-between">
                       <span className="text-[11px] font-bold text-[#173B75] uppercase tracking-wider flex items-center gap-1.5">
                         <Sparkles className="w-3 h-3 text-[#F07822]" />
-                        All 10 Creative Disciplines
+                        Creative Disciplines
                       </span>
-                      <span className="text-[10px] font-mono text-[#F07822] font-semibold">10 Dedicated Services</span>
+                      <span className="text-[10px] font-mono text-[#F07822] font-semibold">Specialized Capabilities</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-1 max-h-[360px] overflow-y-auto p-1">
@@ -209,7 +210,7 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate, onOpenL
                         onClick={() => handleNavClick('/services')}
                         className="w-full py-2 text-center text-xs font-bold text-[#173B75] hover:text-[#F07822] transition-colors block bg-[#F7F7F5] rounded-xl hover:bg-[#EEF2F9] cursor-pointer"
                       >
-                        Explore All 10 Service Suites & Detail Pages &rarr;
+                        Explore All Service Suites & Detail Pages &rarr;
                       </button>
                     </div>
                   </div>
@@ -296,25 +297,44 @@ export const Header: React.FC<HeaderProps> = ({ currentPath, onNavigate, onOpenL
             >
               Home
             </button>
-            <button
-              onClick={() => handleNavClick('/services')}
-              className={`text-left px-3 py-2 rounded-lg text-sm font-semibold ${
-                currentPath === '/services' ? 'bg-[#EEF2F9] text-[#173B75]' : 'text-[#242832]'
-              }`}
-            >
-              Services
-            </button>
-            <div className="pl-6 space-y-1.5 py-1">
-              {serviceLinks.map((s, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleNavClick(s.anchor)}
-                  className="block w-full text-left text-xs font-medium text-[#242832]/70 hover:text-[#F07822]"
-                >
-                  · {s.title}
-                </button>
-              ))}
+            <div className="flex items-center justify-between rounded-lg">
+              <button
+                onClick={() => handleNavClick('/services')}
+                className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-semibold ${
+                  currentPath === '/services' ? 'bg-[#EEF2F9] text-[#173B75]' : 'text-[#242832]'
+                }`}
+              >
+                Services
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMobileServicesOpen(!isMobileServicesOpen);
+                }}
+                aria-label={isMobileServicesOpen ? 'Collapse services list' : 'Expand services list'}
+                className="p-2 text-[#173B75] hover:text-[#F07822] rounded-lg transition-colors cursor-pointer"
+              >
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    isMobileServicesOpen ? 'rotate-180 text-[#F07822]' : ''
+                  }`}
+                />
+              </button>
             </div>
+            {isMobileServicesOpen && (
+              <div className="pl-6 space-y-1 py-1.5 bg-[#F7F7F5] rounded-xl border border-[#E6E8ED]/60 my-1 animate-in fade-in duration-200">
+                {serviceLinks.map((s, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleNavClick(s.anchor)}
+                    className="block w-full text-left text-xs font-medium text-[#242832]/80 hover:text-[#F07822] py-1"
+                  >
+                    · {s.title}
+                  </button>
+                ))}
+              </div>
+            )}
             <button
               onClick={() => handleNavClick('/portfolio')}
               className={`text-left px-3 py-2 rounded-lg text-sm font-semibold ${

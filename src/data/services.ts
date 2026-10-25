@@ -6,8 +6,12 @@ export interface ServiceItem {
   shortDesc: string;
   fullDesc: string;
   image: string;
+  homepageImageDesktop?: string;
+  homepageImageMobile?: string;
   deliverables: string[];
   keyHighlights: string[];
+  order?: number;
+  published?: boolean;
 }
 
 export const SERVICES_DATA: ServiceItem[] = [

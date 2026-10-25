@@ -1077,6 +1077,103 @@ app.put('/api/admin/services/:id', requireAdmin, (req, res) => {
   return res.json({ success: true, service: updated });
 });
 
+// Dedicated Service Concepts (Case Studies) REST endpoints
+app.get('/api/admin/service-concepts', requireAdmin, (req, res) => {
+  try {
+    const serviceId = req.query.serviceId ? String(req.query.serviceId) : undefined;
+    const concepts = db.getServiceConcepts(serviceId);
+    return res.json({ success: true, serviceConcepts: concepts });
+  } catch (error) {
+    console.error('Error fetching service concepts:', error);
+    return res.status(500).json({ success: false, error: 'Failed to fetch service concepts.' });
+  }
+});
+
+app.post('/api/admin/service-concepts', requireAdmin, (req, res) => {
+  try {
+    const { title, serviceId, image, description } = req.body || {};
+    if (!title || !serviceId) {
+      return res.status(400).json({ success: false, error: 'Title and Associated Service are required.' });
+    }
+    const concept = db.addServiceConcept({
+      serviceId: String(serviceId).trim(),
+      title: String(title).trim(),
+      category: req.body.category || 'Creative Concept',
+      tagline: req.body.tagline || req.body.description || '',
+      description: String(description || '').trim(),
+      image: String(image || 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1200&q=80').trim(),
+      videoUrl: req.body.videoUrl || '',
+      badge: req.body.badge || '',
+      deliverables: Array.isArray(req.body.deliverables)
+        ? req.body.deliverables
+        : typeof req.body.deliverables === 'string'
+        ? req.body.deliverables.split(',').map((s: string) => s.trim()).filter(Boolean)
+        : [],
+      clientName: req.body.clientName || '',
+      order: Number(req.body.order) || 1,
+      published: req.body.published !== false
+    });
+    return res.status(201).json({ success: true, concept });
+  } catch (error) {
+    console.error('Error adding service concept:', error);
+    return res.status(500).json({ success: false, error: 'Failed to add service concept.' });
+  }
+});
+
+app.put('/api/admin/service-concepts/:id', requireAdmin, (req, res) => {
+  try {
+    const updates = { ...req.body };
+    if (typeof updates.deliverables === 'string') {
+      updates.deliverables = updates.deliverables.split(',').map((s: string) => s.trim()).filter(Boolean);
+    }
+    const updated = db.updateServiceConcept(req.params.id, updates);
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'Concept not found.' });
+    }
+    return res.json({ success: true, concept: updated });
+  } catch (error) {
+    console.error('Error updating service concept:', error);
+    return res.status(500).json({ success: false, error: 'Failed to update service concept.' });
+  }
+});
+
+app.delete('/api/admin/service-concepts/:id', requireAdmin, (req, res) => {
+  try {
+    const deleted = db.deleteServiceConcept(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, error: 'Concept not found.' });
+    }
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting service concept:', error);
+    return res.status(500).json({ success: false, error: 'Failed to delete service concept.' });
+  }
+});
+
+app.post('/api/admin/service-concepts/:id/duplicate', requireAdmin, (req, res) => {
+  try {
+    const duplicated = db.duplicateServiceConcept(req.params.id);
+    if (!duplicated) {
+      return res.status(404).json({ success: false, error: 'Concept not found to duplicate.' });
+    }
+    return res.json({ success: true, concept: duplicated });
+  } catch (error) {
+    console.error('Error duplicating service concept:', error);
+    return res.status(500).json({ success: false, error: 'Failed to duplicate concept.' });
+  }
+});
+
+app.post('/api/admin/service-concepts/reorder', requireAdmin, (req, res) => {
+  try {
+    const { orderedIds } = req.body || {};
+    const updated = db.reorderServiceConcepts(orderedIds || []);
+    return res.json({ success: true, serviceConcepts: updated });
+  } catch (error) {
+    console.error('Error reordering service concepts:', error);
+    return res.status(500).json({ success: false, error: 'Failed to reorder concepts.' });
+  }
+});
+
 // ============================================================================
 // 10. API 404 CATCH-ALL & FRONTEND MOUNTING
 // ============================================================================

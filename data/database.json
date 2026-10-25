@@ -127,6 +127,10 @@
     "aec9fde4be4c75991fd4bc3ae4ddec71549eb076bb4d6fc7efe2cf41e02b17e0": {
       "userId": "owner-akshay",
       "expiresAt": 1793458957298
+    },
+    "02c663be8a385383db2e51ac38046a156bf0c5fbe939c7094606cda4291050cb": {
+      "userId": "owner-akshay",
+      "expiresAt": 1793534143901
     }
   },
   "enquiries": [],
@@ -915,7 +919,7 @@
     },
     "isDraft": false,
     "lastPublishedAt": "2026-10-23T08:44:24.893Z",
-    "logoUrl": "/uploads/1792414092115-WhatsAppImage2026-10-17at194819jpeg.jpg",
+    "logoUrl": "/logo.svg",
     "pageBanners": {
       "services": {
         "desktopImageUrl": "/uploads/1792576276580-test_bannerpng.png",
@@ -923,8 +927,8 @@
         "enabled": true
       }
     },
-    "headerLogoUrl": "https://images.unsplash.com/photo-header-test.jpg",
-    "footerLogoUrl": "https://images.unsplash.com/photo-footer-test.jpg",
+    "headerLogoUrl": "",
+    "footerLogoUrl": "",
     "servicesCapabilitiesEyebrow": "CREATIVE CAPABILITIES",
     "servicesCapabilitiesHeading": "All 10 Specialized Creative Services",
     "servicesCapabilitiesSubtitle": "Explore our complete suite of 10 specialized creative capabilities.",

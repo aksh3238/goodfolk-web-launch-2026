@@ -76,10 +76,17 @@ html {
   font-family: 'Poppins', sans-serif;
   background-color: #FFF9F1;
   color: #252A34;
-  font-size: 16.5px; /* Slightly increased text size across all 5 pages */
+  font-size: 16.5px; /* Desktop font size preserved */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Mobile-only typography refinement: reduce base font size by ~1px where text appears oversized */
+@media (max-width: 767px) {
+  html {
+    font-size: 15.25px;
+  }
 }
 
 body {

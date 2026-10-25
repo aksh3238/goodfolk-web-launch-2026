@@ -2,6 +2,7 @@ import React from 'react';
 import { Logo } from './Logo';
 import { ExternalLink, Mail, Phone, Lock } from 'lucide-react';
 import { useSiteContent } from '../context/SiteContentContext';
+import { SERVICES_DATA } from '../data/services';
 
 interface FooterProps {
   onNavigate: (path: string) => void;
@@ -111,89 +112,22 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenLetsTalk }) =>
           {/* Services */}
           <div>
             <h3 className="text-xs font-bold text-[#F07822] tracking-wider uppercase mb-4">
-              All 10 Services
+              Our Services
             </h3>
             <ul className="space-y-2 text-xs">
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#branding')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  01. Branding & Packaging
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#creative')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  02. Creative Design
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#performance')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  03. Performance Marketing
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#video')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  04. Video Production & Editing
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#digital')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  05. Digital Marketing & Social
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#uiux')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  06. Website & UI/UX Design
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#ecommerce')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  07. E-commerce Creative
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#motion')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  08. Motion Graphics & Animation
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#print')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  09. Print & Collateral
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('/services#presentation')}
-                  className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
-                >
-                  10. Presentation & Pitch Decks
-                </button>
-              </li>
+              {((siteContent?.services && siteContent.services.length > 0)
+                ? siteContent.services.filter(s => s.published !== false)
+                : SERVICES_DATA
+              ).slice(0, 10).map((srv, idx) => (
+                <li key={srv.id || idx}>
+                  <button
+                    onClick={() => onNavigate(`/services#${(srv as any).slug || srv.id}`)}
+                    className="text-left text-white/80 hover:text-white transition-colors cursor-pointer"
+                  >
+                    {String(idx + 1).padStart(2, '0')}. {srv.title.replace(/^\d+[\.\-\s]+/, '')}
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
 
