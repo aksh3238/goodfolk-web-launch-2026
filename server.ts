@@ -2,6 +2,8 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { db, verifyPassword, hashPassword } from './src/server/db';
+import { isCloudinaryConfigured, uploadToCloudinary } from './src/server/cloudinary';
+import { isPostgresConfigured } from './src/server/postgres';
 import type { BankAccount } from './src/types';
 
 const app = express();
@@ -993,8 +995,8 @@ app.delete('/api/admin/sections/:id', requireAdmin, (req, res) => {
   }
 });
 
-// Base64 media upload helper
-app.post('/api/admin/upload', requireAdmin, (req, res) => {
+// Base64 media upload helper (Cloudinary with local disk fallback)
+app.post('/api/admin/upload', requireAdmin, async (req, res) => {
   try {
     const { dataUrl, filename } = req.body || {};
     if (!dataUrl) {
@@ -1002,45 +1004,86 @@ app.post('/api/admin/upload', requireAdmin, (req, res) => {
     }
 
     let fileUrl = dataUrl;
-    const matches = dataUrl.match(/^data:([A-Za-z0-9\-+/]+);base64,(.+)$/);
-    if (matches && matches.length === 3) {
-      const mime = matches[1];
-      const base64Data = matches[2];
-      const buffer = Buffer.from(base64Data, 'base64');
-      const ext = mime.includes('png')
-        ? '.png'
-        : mime.includes('webp')
-        ? '.webp'
-        : mime.includes('svg')
-        ? '.svg'
-        : mime.includes('mp4')
-        ? '.mp4'
-        : mime.includes('gif')
-        ? '.gif'
-        : '.jpg';
-      const cleanBase = (filename || 'asset').replace(/[^a-zA-Z0-9.-]/g, '_');
-      const safeFilename = `${Date.now()}-${cleanBase}${cleanBase.endsWith(ext) ? '' : ext}`;
-      const destPath = path.join(UPLOADS_DIR, safeFilename);
-      fs.writeFileSync(destPath, buffer);
-      fileUrl = `/uploads/${safeFilename}`;
+    let fileSize = Math.round(dataUrl.length * 0.75);
+    let mimeType = dataUrl.startsWith('data:video') ? 'video/mp4' : 'image/jpeg';
+    let uploadedToCloudinary = false;
+
+    // 1. Try Cloudinary if configured
+    if (isCloudinaryConfigured()) {
+      try {
+        console.log(`[Upload] Uploading "${filename || 'asset'}" to Cloudinary...`);
+        const result = await uploadToCloudinary(dataUrl, {
+          filename,
+          folder: process.env.CLOUDINARY_FOLDER || 'goodfolk'
+        });
+        fileUrl = result.url;
+        fileSize = result.bytes;
+        mimeType = result.resourceType === 'video' ? 'video/mp4' : `image/${result.format}`;
+        uploadedToCloudinary = true;
+        console.log(`[Upload] Cloudinary upload successful: ${fileUrl}`);
+      } catch (cloudErr: any) {
+        console.warn('[Upload] Cloudinary upload failed, falling back to local storage:', cloudErr?.message || cloudErr);
+      }
+    }
+
+    // 2. Fall back to local disk storage if not uploaded to Cloudinary
+    if (!uploadedToCloudinary) {
+      const matches = dataUrl.match(/^data:([A-Za-z0-9\-+/]+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        const mime = matches[1];
+        const base64Data = matches[2];
+        const buffer = Buffer.from(base64Data, 'base64');
+        const ext = mime.includes('png')
+          ? '.png'
+          : mime.includes('webp')
+          ? '.webp'
+          : mime.includes('svg')
+          ? '.svg'
+          : mime.includes('mp4')
+          ? '.mp4'
+          : mime.includes('gif')
+          ? '.gif'
+          : '.jpg';
+        const cleanBase = (filename || 'asset').replace(/[^a-zA-Z0-9.-]/g, '_');
+        const safeFilename = `${Date.now()}-${cleanBase}${cleanBase.endsWith(ext) ? '' : ext}`;
+        const destPath = path.join(UPLOADS_DIR, safeFilename);
+        fs.writeFileSync(destPath, buffer);
+        fileUrl = `/uploads/${safeFilename}`;
+      }
     }
 
     const mediaItem = db.addMediaItem({
       name: filename || `Upload-${Date.now()}`,
       url: fileUrl,
-      size: Math.round(dataUrl.length * 0.75),
-      mimeType: dataUrl.startsWith('data:video') ? 'video/mp4' : 'image/jpeg'
+      size: fileSize,
+      mimeType: mimeType
     });
 
     return res.json({
       success: true,
       url: fileUrl,
+      uploadedToCloudinary,
       media: mediaItem
     });
   } catch (error) {
     console.error('Upload error:', error);
     return res.status(500).json({ success: false, error: 'Failed to process upload.' });
   }
+});
+
+// Storage and Database configuration status
+app.get('/api/admin/storage-status', requireAdmin, (_req, res) => {
+  res.json({
+    success: true,
+    postgres: {
+      configured: isPostgresConfigured(),
+      provider: isPostgresConfigured() ? 'Neon PostgreSQL' : 'Local JSON Document (fallback)'
+    },
+    cloudinary: {
+      configured: isCloudinaryConfigured(),
+      provider: isCloudinaryConfigured() ? 'Cloudinary CDN' : 'Local Disk Storage (/uploads fallback)'
+    }
+  });
 });
 
 // Dedicated Website Images

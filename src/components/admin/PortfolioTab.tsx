@@ -13,7 +13,7 @@ import type {
   PortfolioColorSwatch
 } from '../../types';
 import { AssetUploadField } from './AssetUploadField';
-import { PORTFOLIO_ITEMS } from '../../data/portfolio';
+import { PORTFOLIO_ITEMS, PORTFOLIO_CATEGORIES } from '../../data/portfolio';
 
 export interface PortfolioTabProps {
   token: string;
@@ -348,7 +348,7 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
     setEditingProject({
       id: `prj-${Date.now()}`,
       title: 'New Case Study Project',
-      category: 'Branding',
+      category: PORTFOLIO_CATEGORIES[0] || 'Packaging',
       tagline: 'Brand Direction, Visual Identity & Packaging',
       image: '',
       gallery: [],
@@ -684,9 +684,17 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
                   className="px-3 py-1.5 border border-[#E4D8C8] rounded-xl text-xs bg-white"
                 >
                   <option value="All">All Categories</option>
-                  {categories.filter(c => c !== 'All').map(c => (
+                  {PORTFOLIO_CATEGORIES.map(c => (
                     <option key={c} value={c}>{c}</option>
                   ))}
+                  {/* Safely handle filtering for any legacy or custom category outside standard 9 */}
+                  {projectsList
+                    .map(p => p.category)
+                    .filter(c => c && !PORTFOLIO_CATEGORIES.includes(c) && c !== 'All')
+                    .filter((c, idx, arr) => arr.indexOf(c) === idx)
+                    .map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
                 </select>
               </div>
 
@@ -862,7 +870,11 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
                     onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
                     className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs bg-white"
                   >
-                    {categories.filter(c => c !== 'All').map(c => (
+                    {/* Safely preserve existing project category if outside standard 9 */}
+                    {editingProject.category && !PORTFOLIO_CATEGORIES.includes(editingProject.category) && (
+                      <option value={editingProject.category}>{editingProject.category} (Current)</option>
+                    )}
+                    {PORTFOLIO_CATEGORIES.map(c => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>

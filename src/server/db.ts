@@ -7,6 +7,13 @@ import type {
   MediaItem, CMSCustomSection, CMSServiceConcept, CMSContentVersion,
   CMSImageSlot, CMSServiceItem, BankAccount
 } from '../types';
+import {
+  isPostgresConfigured,
+  initPostgresSchema,
+  ensureSchemaInitialized,
+  loadPostgresData,
+  syncPostgresData
+} from './postgres';
 
 const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.resolve(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'database.json');
@@ -84,7 +91,18 @@ function getInitialData(): DatabaseSchema {
       contactInstagram: 'https://www.instagram.com/goodfolksolution/',
       ctaHeadline: 'Ready to Build Something Great?',
       ctaSubheadline: "Have a project in mind? Let's turn your ideas into impactful creative work.",
-      portfolioCategories: ['All', 'Branding', 'Packaging', 'Creative Design', 'E-commerce', 'Performance Marketing', 'Video & Social'],
+      portfolioCategories: [
+        'All',
+        'Packaging',
+        'Branding',
+        'Creative Design',
+        'Performance Marketing',
+        'Video & Social',
+        'Website & UI/UX',
+        'Branding & Packaging',
+        'Motion Graphics',
+        'Presentation Design'
+      ],
       processSteps: [
         {
           id: 'step-1',
@@ -1456,23 +1474,67 @@ export class Database {
           }
         });
 
-        this.save();
+        this.saveToDiskOnly();
       } catch (err) {
         console.error('Error reading database, creating new data file', err);
         this.data = getInitialData();
-        this.save();
+        this.saveToDiskOnly();
       }
     } else {
       this.data = getInitialData();
-      this.save();
+      this.saveToDiskOnly();
     }
   }
+
+  private isPostgresReady = false;
 
   private save(): void {
     try {
       fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
     } catch (err) {
       console.error('Failed to write database file', err);
+    }
+
+    if (isPostgresConfigured() && this.isPostgresReady) {
+      syncPostgresData(this.data).catch(err => {
+        console.warn('[Database] Async PostgreSQL sync warning:', err?.message || err);
+      });
+    }
+  }
+
+  private saveToDiskOnly(): void {
+    try {
+      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
+    } catch (err) {
+      console.error('Failed to write local database backup file', err);
+    }
+  }
+
+  async initPostgres(): Promise<void> {
+    if (!isPostgresConfigured()) {
+      console.log('[Database] Operating with local JSON storage (DATABASE_URL not set).');
+      return;
+    }
+    try {
+      console.log('[Database] Connecting to Neon PostgreSQL...');
+      const schemaOk = await ensureSchemaInitialized();
+      if (!schemaOk) {
+        console.warn('[Database] PostgreSQL schema initialization failed, continuing with local storage.');
+        return;
+      }
+      const pgData = await loadPostgresData();
+      if (pgData && pgData.owner) {
+        console.log('[Database] Hydrated in-memory state from PostgreSQL.');
+        this.data = pgData;
+        this.saveToDiskOnly();
+      } else {
+        console.log('[Database] PostgreSQL database is empty. Auto-seeding from local database.json...');
+        await syncPostgresData(this.data);
+        console.log('[Database] Auto-seed to PostgreSQL complete.');
+      }
+      this.isPostgresReady = true;
+    } catch (err: any) {
+      console.warn('[Database] PostgreSQL connection error, falling back to local JSON storage:', err?.message || err);
     }
   }
 
@@ -2853,3 +2915,7 @@ export class Database {
 }
 
 export const db = new Database();
+// Hydrate or seed PostgreSQL asynchronously if DATABASE_URL is configured
+db.initPostgres().catch(err => {
+  console.warn('[Database] initPostgres unhandled error:', err);
+});

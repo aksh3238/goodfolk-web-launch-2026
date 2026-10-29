@@ -1,5 +1,17 @@
 import { PortfolioItem } from '../components/ProjectDetailModal';
 
+export const PORTFOLIO_CATEGORIES: string[] = [
+  'Packaging',
+  'Branding',
+  'Creative Design',
+  'Performance Marketing',
+  'Video & Social',
+  'Website & UI/UX',
+  'Branding & Packaging',
+  'Motion Graphics',
+  'Presentation Design'
+];
+
 export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     id: 'zenith-botanicals',

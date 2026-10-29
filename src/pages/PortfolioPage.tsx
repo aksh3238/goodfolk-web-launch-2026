@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PORTFOLIO_ITEMS } from '../data/portfolio';
+import { PORTFOLIO_ITEMS, PORTFOLIO_CATEGORIES } from '../data/portfolio';
 import { ProjectDetailModal, PortfolioItem } from '../components/ProjectDetailModal';
 import { ArrowRight, Eye, Sparkles, Layers, Tag, CheckCircle2, Play } from 'lucide-react';
 import { useSiteContent } from '../context/SiteContentContext';
@@ -19,15 +19,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ onOpenLetsTalk, on
 
   const filters = (siteContent.portfolioCategories && siteContent.portfolioCategories.length > 0)
     ? siteContent.portfolioCategories
-    : [
-        'All',
-        'Branding',
-        'Packaging',
-        'Creative Design',
-        'E-commerce',
-        'Performance Marketing',
-        'Video & Social'
-      ];
+    : ['All', ...PORTFOLIO_CATEGORIES];
 
   const sourceItems: PortfolioItem[] = (portfolioProjects && portfolioProjects.length > 0)
     ? portfolioProjects
