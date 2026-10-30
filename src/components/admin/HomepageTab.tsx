@@ -87,6 +87,43 @@ export const HomepageTab: React.FC<HomepageTabProps> = ({
     ? siteContent.heroSlides
     : DEFAULT_HERO_SLIDES;
 
+  // Services State for Homepage Service Tiles Image Management
+  const allServices: CMSServiceItem[] = (siteContent.services && siteContent.services.length > 0)
+    ? siteContent.services
+    : SERVICES_DATA.map((s, idx) => ({
+        id: s.id,
+        slug: (s as any).slug || s.id,
+        number: String(idx + 1).padStart(2, '0'),
+        title: s.title,
+        shortDesc: s.shortDesc,
+        fullDesc: s.fullDesc,
+        image: s.image,
+        deliverables: s.deliverables,
+        keyHighlights: s.keyHighlights,
+        order: idx + 1,
+        published: true
+      }));
+
+  const [expandedHomepageServices, setExpandedHomepageServices] = useState<Record<string, boolean>>({
+    [allServices[0]?.id || 'branding']: true
+  });
+
+  const toggleHomepageServiceExpand = (serviceId: string) => {
+    setExpandedHomepageServices(prev => ({
+      ...prev,
+      [serviceId]: !prev[serviceId]
+    }));
+  };
+
+  const handleUpdateServiceHomepageImage = (serviceIndex: number, updates: Partial<CMSServiceItem>) => {
+    const updated = [...allServices];
+    updated[serviceIndex] = { ...updated[serviceIndex], ...updates };
+    onUpdateSiteContent({
+      ...siteContent,
+      services: updated
+    });
+  };
+
   const handleUpdateSlide = (index: number, updates: Partial<CMSHeroSlide>) => {
     const updated = [...slides];
     updated[index] = { ...updated[index], ...updates };
@@ -615,47 +652,162 @@ export const HomepageTab: React.FC<HomepageTabProps> = ({
               </div>
             </div>
 
-            {/* HOMEPAGE SERVICE TILES AUTOMATIC SYNCHRONIZATION */}
+            {/* HOMEPAGE SERVICE TILES INDEPENDENT IMAGE MANAGEMENT */}
             <div className="pt-4 border-t border-[#E4D8C8] space-y-4">
-              <div className="p-4 bg-white rounded-2xl border border-[#E4D8C8] space-y-3">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#F07822]" />
-                  <span className="text-xs font-bold text-[#173B75]">
-                    Automatic Service Image Synchronization (Single Source of Truth)
-                  </span>
-                </div>
-                <p className="text-xs text-[#252A34]/80 leading-relaxed">
-                  Homepage service preview tiles automatically inherit their images, titles, and descriptions directly from <strong className="text-[#173B75]">Website Content Manager → Services</strong>.
-                  When you replace or publish a service image in the Services editor, the homepage tile updates automatically without requiring a duplicate upload.
-                </p>
-                <div className="pt-2">
-                  <span className="text-[11px] font-bold text-[#173B75] uppercase tracking-wider block mb-2">
-                    Live Inherited Service Preview Tiles:
-                  </span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                    {(((siteContent?.services && siteContent.services.length > 0)
-                      ? siteContent.services.filter(s => s.published !== false)
-                      : SERVICES_DATA
-                    ).slice(0, 5)).map((service, idx) => (
-                      <div key={service.id || idx} className="p-2.5 rounded-xl bg-[#F7F7F5] border border-[#E4D8C8] space-y-1.5">
-                        <div className="h-16 w-full rounded-lg overflow-hidden bg-[#EEF2F9]">
-                          <img
-                            src={service.image || 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=800&q=80'}
-                            alt={service.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=800&q=80'; }}
-                          />
-                        </div>
-                        <div className="text-[11px] font-bold text-[#173B75] truncate">
-                          {service.title.replace(/^\d+[\.\-\s]+/, '')}
-                        </div>
-                        <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-mono block text-center">
-                          Synced
-                        </span>
-                      </div>
-                    ))}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#F07822]" />
+                    <h4 className="text-xs font-bold text-[#173B75]">
+                      Homepage Service Tile Images ({allServices.length} Total Disciplines)
+                    </h4>
                   </div>
+                  <p className="text-[11px] text-[#252A34]/70 mt-0.5">
+                    Independent image uploads for every service tile on the homepage. Replacing or removing an image here only affects the Homepage tile and never modifies Services listing cards or individual detail pages.
+                  </p>
                 </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const allOpen: Record<string, boolean> = {};
+                      allServices.forEach(s => { allOpen[s.id] = true; });
+                      setExpandedHomepageServices(allOpen);
+                    }}
+                    className="px-2.5 py-1 bg-white border border-[#E4D8C8] hover:bg-[#EEF2F9] text-[#173B75] rounded-lg text-[11px] font-bold cursor-pointer transition-colors"
+                  >
+                    Expand All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedHomepageServices({})}
+                    className="px-2.5 py-1 bg-white border border-[#E4D8C8] hover:bg-[#EEF2F9] text-[#173B75] rounded-lg text-[11px] font-bold cursor-pointer transition-colors"
+                  >
+                    Collapse All
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {allServices.map((service, idx) => {
+                  const isExpanded = Boolean(expandedHomepageServices[service.id]);
+                  const hasCustomDesktop = Boolean(service.homepageImageDesktop);
+                  const hasCustomMobile = Boolean(service.homepageImageMobile);
+
+                  return (
+                    <div
+                      key={service.id || idx}
+                      className="p-5 rounded-2xl bg-[#F7F7F5] border border-[#E4D8C8] space-y-4 transition-all"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <span className="w-7 h-7 rounded-xl bg-[#173B75] text-white flex items-center justify-center text-xs font-mono font-bold">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h5 className="text-sm font-bold text-[#173B75]">
+                                {service.title.replace(/^\d+[\.\-\s]+/, '')}
+                              </h5>
+                              <span className="text-[10px] text-[#252A34]/50 font-mono">
+                                #{service.id}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                              <span
+                                className={`text-[10px] px-2 py-0.5 rounded-full font-semibold font-mono ${
+                                  hasCustomDesktop
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : service.image
+                                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                    : 'bg-gray-100 text-gray-500'
+                                }`}
+                              >
+                                Desktop: {hasCustomDesktop ? 'Custom Upload' : service.image ? 'Default Asset' : 'None'}
+                              </span>
+
+                              <span
+                                className={`text-[10px] px-2 py-0.5 rounded-full font-semibold font-mono ${
+                                  hasCustomMobile
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                }`}
+                              >
+                                Mobile: {hasCustomMobile ? 'Custom Upload' : 'Desktop Fallback'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => toggleHomepageServiceExpand(service.id)}
+                          className="px-3 py-1.5 bg-[#173B75] text-white text-xs font-semibold rounded-xl hover:bg-[#123163] cursor-pointer flex items-center gap-1.5 self-start sm:self-auto transition-colors"
+                        >
+                          <span>{isExpanded ? 'Done Editing' : 'Edit Tile Images'}</span>
+                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+
+                      {isExpanded && (
+                        <div className="pt-4 border-t border-[#E4D8C8] space-y-4 animate-in fade-in duration-200">
+                          <p className="text-[11px] text-[#252A34]/75">
+                            Upload independent artwork for this service tile on the homepage. Desktop container is 3-column (~384 × 208 px); mobile container is single-column (~343 × 192 px).
+                          </p>
+
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {/* Desktop Homepage Tile Image */}
+                            <AssetUploadField
+                              label="Homepage Tile Image (Desktop)"
+                              sectionName={`Homepage Services #${idx + 1} (${service.title})`}
+                              currentUrl={service.homepageImageDesktop !== undefined ? service.homepageImageDesktop : (service.image || '')}
+                              onUpload={async (file) => {
+                                const url = await uploadImageFile(file);
+                                if (url) {
+                                  handleUpdateServiceHomepageImage(idx, { homepageImageDesktop: url });
+                                  showToast(`Homepage desktop image updated for ${service.title}`, 'success');
+                                }
+                              }}
+                              onClear={() => {
+                                handleUpdateServiceHomepageImage(idx, { homepageImageDesktop: '' });
+                                showToast(`Homepage desktop image removed for ${service.title}`);
+                              }}
+                              recommendedDimensions="800 × 440 px (Recommended)"
+                              aspectRatio="16:9 / 1.85:1 Landscape"
+                              supportedFormats="JPG, PNG, WebP"
+                              maxFileSize="5 MB"
+                              helpText="Exact dimensions calculated from the Homepage 3-column card container (384 × 208 px rendered). Shown on laptops and desktop viewports."
+                            />
+
+                            {/* Mobile Homepage Tile Image */}
+                            <AssetUploadField
+                              label="Homepage Tile Image (Mobile Optional)"
+                              sectionName={`Homepage Services Mobile #${idx + 1} (${service.title})`}
+                              currentUrl={service.homepageImageMobile || ''}
+                              onUpload={async (file) => {
+                                const url = await uploadImageFile(file);
+                                if (url) {
+                                  handleUpdateServiceHomepageImage(idx, { homepageImageMobile: url });
+                                  showToast(`Homepage mobile image updated for ${service.title}`, 'success');
+                                }
+                              }}
+                              onClear={() => {
+                                handleUpdateServiceHomepageImage(idx, { homepageImageMobile: '' });
+                                showToast(`Homepage mobile image removed for ${service.title}`);
+                              }}
+                              recommendedDimensions="720 × 400 px (Recommended)"
+                              aspectRatio="16:9 Landscape"
+                              supportedFormats="JPG, PNG, WebP"
+                              maxFileSize="5 MB"
+                              isOptional={true}
+                              helpText="Exact dimensions calculated from the mobile card container (343 × 192 px rendered). If omitted, desktop homepage image scales responsively."
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

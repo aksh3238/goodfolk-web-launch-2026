@@ -8,6 +8,10 @@ export interface ServiceItem {
   image: string;
   homepageImageDesktop?: string;
   homepageImageMobile?: string;
+  listingImageDesktop?: string;
+  listingImageMobile?: string;
+  detailImageDesktop?: string;
+  detailImageMobile?: string;
   deliverables: string[];
   keyHighlights: string[];
   order?: number;

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Upload, Trash2, CheckCircle2, Image as ImageIcon, Video as VideoIcon, Info, Sliders } from 'lucide-react';
+import { Upload, Trash2, CheckCircle2, Image as ImageIcon, Video as VideoIcon, Info, Sliders, Eye, X } from 'lucide-react';
 
 export interface AssetUploadFieldProps {
   label: string;
@@ -39,6 +39,8 @@ export const AssetUploadField: React.FC<AssetUploadFieldProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isConfirmingRemove, setIsConfirmingRemove] = useState(false);
 
   const handleFile = async (file: File) => {
     setUploading(true);
@@ -81,60 +83,121 @@ export const AssetUploadField: React.FC<AssetUploadFieldProps> = ({
       {/* Main Grid: Upload & Preview on Left, Dimension Specs directly beside on Right */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
         {/* Preview & Upload Control (7 cols) */}
-        <div className="md:col-span-7 space-y-2">
+        <div className="md:col-span-7 space-y-2.5">
           {currentUrl ? (
-            <div className="relative group rounded-xl overflow-hidden border border-[#E4D8C8] bg-slate-900/5">
-              {mediaType === 'video' ? (
-                <video
-                  src={currentUrl}
-                  controls
-                  className="w-full h-36 object-cover bg-black"
-                />
-              ) : (
-                <div className="relative h-36 w-full overflow-hidden bg-[#FFF9F1]">
-                  <img
+            <div className="space-y-2">
+              <div className="relative group rounded-xl overflow-hidden border border-[#E4D8C8] bg-slate-900/5">
+                {mediaType === 'video' ? (
+                  <video
                     src={currentUrl}
-                    alt={label}
-                    className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                      focalPoint === 'top'
-                        ? 'object-top'
-                        : focalPoint === 'bottom'
-                        ? 'object-bottom'
-                        : focalPoint === 'left'
-                        ? 'object-left'
-                        : focalPoint === 'right'
-                        ? 'object-right'
-                        : 'object-center'
-                    }`}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80';
-                    }}
+                    controls
+                    className="w-full h-36 object-cover bg-black"
                   />
-                </div>
-              )}
+                ) : (
+                  <div className="relative h-36 w-full overflow-hidden bg-[#FFF9F1]">
+                    <img
+                      src={currentUrl}
+                      alt={label}
+                      className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+                        focalPoint === 'top'
+                          ? 'object-top'
+                          : focalPoint === 'bottom'
+                          ? 'object-bottom'
+                          : focalPoint === 'left'
+                          ? 'object-left'
+                          : focalPoint === 'right'
+                          ? 'object-right'
+                          : 'object-center'
+                      }`}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80';
+                      }}
+                    />
+                  </div>
+                )}
 
-              {/* Action Buttons Overlay */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-3">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="px-3 py-1.5 rounded-lg bg-white text-[#173B75] text-xs font-bold hover:bg-[#FFF9F1] transition-all flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-50"
-                >
-                  <Upload className="w-3.5 h-3.5 text-[#F07822]" />
-                  <span>{uploading ? 'Uploading...' : 'Replace Asset'}</span>
-                </button>
-                {onClear && (
+                {/* Quick overlay actions on hover */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-3">
                   <button
                     type="button"
-                    onClick={onClear}
-                    className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 transition-all flex items-center gap-1.5 shadow-md cursor-pointer"
+                    onClick={() => setIsPreviewOpen(true)}
+                    className="px-3 py-1.5 rounded-lg bg-white text-[#173B75] text-xs font-bold hover:bg-[#FFF9F1] transition-all flex items-center gap-1.5 shadow-md cursor-pointer"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Clear</span>
+                    <Eye className="w-3.5 h-3.5 text-[#F07822]" />
+                    <span>Preview</span>
                   </button>
-                )}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="px-3 py-1.5 rounded-lg bg-white text-[#173B75] text-xs font-bold hover:bg-[#FFF9F1] transition-all flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-50"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-[#F07822]" />
+                    <span>{uploading ? 'Uploading...' : 'Replace'}</span>
+                  </button>
+                </div>
               </div>
+
+              {/* Dedicated persistent action bar below preview */}
+              {isConfirmingRemove ? (
+                <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 flex items-center justify-between gap-2 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-2 text-xs font-bold text-red-800">
+                    <Trash2 className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                    <span>Remove image from this location?</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClear?.();
+                        setIsConfirmingRemove(false);
+                      }}
+                      className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold rounded-lg cursor-pointer transition-colors"
+                    >
+                      Confirm Remove
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsConfirmingRemove(false)}
+                      className="px-2.5 py-1 bg-white hover:bg-gray-100 text-gray-700 text-[11px] font-bold rounded-lg border border-gray-300 cursor-pointer transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsPreviewOpen(true)}
+                    className="px-3 py-1.5 rounded-lg bg-[#EEF2F9] text-[#173B75] hover:bg-[#173B75] hover:text-white transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-[#F07822]" />
+                    <span>Preview Image</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="px-3 py-1.5 rounded-lg bg-white border border-[#E4D8C8] hover:border-[#173B75] text-[#173B75] transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-[#F07822]" />
+                    <span>{uploading ? 'Uploading...' : 'Replace Image'}</span>
+                  </button>
+
+                  {onClear && (
+                    <button
+                      type="button"
+                      onClick={() => setIsConfirmingRemove(true)}
+                      className="px-3 py-1.5 rounded-lg bg-white border border-red-200 hover:bg-red-50 text-red-600 transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Remove Image</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             <div
@@ -142,21 +205,23 @@ export const AssetUploadField: React.FC<AssetUploadFieldProps> = ({
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`h-36 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-1.5 p-4 text-center cursor-pointer transition-all ${
+              className={`h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 p-4 text-center cursor-pointer transition-all ${
                 dragOver
                   ? 'border-[#F07822] bg-[#FFF9F1]'
                   : 'border-[#E4D8C8] hover:border-[#173B75] bg-[#FFF9F1]/40 hover:bg-[#FFF9F1]'
               }`}
             >
-              <div className="w-8 h-8 rounded-full bg-[#173B75]/10 text-[#173B75] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-full bg-[#173B75]/10 text-[#173B75] flex items-center justify-center">
                 <Upload className="w-4 h-4 text-[#F07822]" />
               </div>
-              <div className="text-xs font-bold text-[#173B75]">
-                {uploading ? 'Processing & Saving...' : 'Click or Drop File to Upload'}
+              <div className="space-y-0.5">
+                <span className="inline-block px-3 py-1 rounded-lg bg-[#173B75] text-white text-xs font-bold shadow-xs">
+                  {uploading ? 'Processing & Saving...' : 'Upload Image'}
+                </span>
+                <p className="text-[11px] text-[#252A34]/60 pt-1">
+                  Click to select file or drag and drop here
+                </p>
               </div>
-              <p className="text-[10px] text-[#252A34]/60">
-                {mediaType === 'video' ? 'Select an MP4/WebM video asset' : 'Select high-resolution image'}
-              </p>
             </div>
           )}
 
@@ -237,6 +302,56 @@ export const AssetUploadField: React.FC<AssetUploadFieldProps> = ({
           )}
         </div>
       </div>
+
+      {/* Image Preview Inspection Modal */}
+      {isPreviewOpen && currentUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-[#E4D8C8]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#E4D8C8] bg-[#FFF9F1]">
+              <div>
+                <h4 className="text-sm font-bold text-[#173B75]">{label}</h4>
+                <p className="text-[11px] text-[#252A34]/70">
+                  Target: <span className="font-semibold">{sectionName}</span> · Specs: {recommendedDimensions} ({aspectRatio})
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPreviewOpen(false)}
+                className="w-8 h-8 rounded-full bg-white hover:bg-[#EEF2F9] text-[#173B75] flex items-center justify-center border border-[#E4D8C8] transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6 overflow-auto flex items-center justify-center bg-slate-950/10 min-h-[300px]">
+              {mediaType === 'video' ? (
+                <video src={currentUrl} controls className="max-h-[70vh] w-auto max-w-full rounded-xl shadow-lg" />
+              ) : (
+                <img
+                  src={currentUrl}
+                  alt={label}
+                  className="max-h-[70vh] w-auto max-w-full object-contain rounded-xl shadow-lg"
+                />
+              )}
+            </div>
+            <div className="px-6 py-3 border-t border-[#E4D8C8] bg-white flex items-center justify-between text-xs text-[#252A34]/70">
+              <span className="font-mono truncate max-w-md">{currentUrl}</span>
+              <button
+                type="button"
+                onClick={() => setIsPreviewOpen(false)}
+                className="px-4 py-1.5 bg-[#173B75] text-white rounded-xl text-xs font-bold hover:bg-[#123163] cursor-pointer"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

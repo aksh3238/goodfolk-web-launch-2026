@@ -180,7 +180,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenLetsTalk }
                 >
                   <div className="relative h-48 sm:h-52 overflow-hidden bg-[#EEF2F9]">
                     {(() => {
-                      const desktopImage = service.image || service.homepageImageDesktop || fallbackImage;
+                      const desktopImage = service.homepageImageDesktop || service.image || fallbackImage;
                       const mobileImage = service.homepageImageMobile;
                       const activeImage = desktopImage || fallbackImage;
 

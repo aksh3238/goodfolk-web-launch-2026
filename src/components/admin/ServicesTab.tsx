@@ -221,6 +221,40 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
     handleUpdateService(serviceIndex, { deliverables: updatedDeliverables });
   };
 
+  // Supporting Points Handlers (Bullet highlights below deliverables)
+  const handleAddSupportingPoint = (serviceIndex: number) => {
+    const targetService = services[serviceIndex];
+    const currentHighlights = Array.isArray(targetService.keyHighlights) ? targetService.keyHighlights : [];
+    const updatedHighlights = [...currentHighlights, 'New supporting point'];
+    handleUpdateService(serviceIndex, { keyHighlights: updatedHighlights });
+  };
+
+  const handleUpdateSupportingPoint = (serviceIndex: number, pIdx: number, val: string) => {
+    const targetService = services[serviceIndex];
+    const currentHighlights = Array.isArray(targetService.keyHighlights) ? [...targetService.keyHighlights] : [];
+    currentHighlights[pIdx] = val;
+    handleUpdateService(serviceIndex, { keyHighlights: currentHighlights });
+  };
+
+  const handleDeleteSupportingPoint = (serviceIndex: number, pIdx: number) => {
+    const targetService = services[serviceIndex];
+    const currentHighlights = Array.isArray(targetService.keyHighlights) ? targetService.keyHighlights : [];
+    const updatedHighlights = currentHighlights.filter((_, i) => i !== pIdx);
+    handleUpdateService(serviceIndex, { keyHighlights: updatedHighlights });
+  };
+
+  const handleMoveSupportingPoint = (serviceIndex: number, pIdx: number, direction: 'up' | 'down') => {
+    const targetService = services[serviceIndex];
+    const currentHighlights = Array.isArray(targetService.keyHighlights) ? [...targetService.keyHighlights] : [];
+    if (direction === 'up' && pIdx === 0) return;
+    if (direction === 'down' && pIdx === currentHighlights.length - 1) return;
+    const targetIdx = direction === 'up' ? pIdx - 1 : pIdx + 1;
+    const temp = currentHighlights[pIdx];
+    currentHighlights[pIdx] = currentHighlights[targetIdx];
+    currentHighlights[targetIdx] = temp;
+    handleUpdateService(serviceIndex, { keyHighlights: currentHighlights });
+  };
+
   // Methodology Steps (Section 4)
   const defaultMethodologySteps = [
     {
@@ -852,7 +886,7 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
                         </span>
                         <div>
                           <h4 className="text-sm font-bold text-[#173B75]">{service.title}</h4>
-                          <span className="text-[10px] text-[#252A34]/60 font-mono">ID: #{service.id} · Deliverables: {service.deliverables.length}</span>
+                          <span className="text-[10px] text-[#252A34]/60 font-mono">ID: #{service.id} · Deliverables: {service.deliverables.length} · Points: {(service.keyHighlights || []).length} · Listing: {service.listingImageDesktop ? 'Custom' : 'Default'} · Detail: {service.detailImageDesktop ? 'Custom' : 'Default'}</span>
                         </div>
                       </div>
 
@@ -947,38 +981,208 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
                           </div>
                         </div>
 
-                        {/* Service Visual Asset Upload with Side-by-Side Dimension Specs */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                          <AssetUploadField
-                            label="Main Service Artwork (Desktop & Shared)"
-                            sectionName={`Services Section #${idx + 1} (Desktop & Shared)`}
-                            currentUrl={service.image}
-                            onUpload={(file) => handleServiceImageUpload(idx, file)}
-                            onClear={() => handleUpdateService(idx, { image: '' })}
-                            recommendedDimensions="1000 × 750 px (Recommended)"
-                            aspectRatio="4:3 / 16:10 Landscape"
-                            supportedFormats="JPG, PNG, WebP"
-                            maxFileSize="5 MB"
-                            helpText="Single source of truth. Rendered on the Services page and automatically shared to homepage service preview tiles."
-                          />
+                        {/* Supporting Points Manager (Bullet highlights below deliverables) */}
+                        <div className="p-4 bg-white rounded-xl border border-[#E4D8C8] space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-[#173B75]" />
+                                <span className="text-xs font-bold text-[#173B75]">
+                                  Supporting Points (Public Bullet Highlights)
+                                </span>
+                                <span className="text-[10px] font-mono bg-[#EEF2F9] text-[#173B75] px-2 py-0.5 rounded-full font-bold">
+                                  {(service.keyHighlights || []).length} { (service.keyHighlights || []).length === 1 ? 'Point' : 'Points' }
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-[#252A34]/65 mt-0.5">
+                                Bullet points displayed directly below the Scope & Deliverables cards on the public Services page.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleAddSupportingPoint(idx)}
+                              className="px-2.5 py-1 bg-[#EEF2F9] text-[#173B75] hover:bg-[#173B75] hover:text-white rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>Add Point</span>
+                            </button>
+                          </div>
 
-                          <AssetUploadField
-                            label="Optional Mobile Artwork"
-                            sectionName={`Services Section #${idx + 1} (Mobile)`}
-                            currentUrl={service.homepageImageMobile}
-                            onUpload={async (file) => {
-                              const url = await uploadImageFile(file);
-                              if (url) {
-                                handleUpdateService(idx, { homepageImageMobile: url });
-                              }
-                            }}
-                            onClear={() => handleUpdateService(idx, { homepageImageMobile: '' })}
-                            recommendedDimensions="600 × 380 px (Recommended)"
-                            aspectRatio="16:10 Landscape"
-                            supportedFormats="JPG, PNG, WebP"
-                            maxFileSize="5 MB"
-                            helpText="Optional mobile composition. Rendered on mobile viewports. If omitted, the main artwork is responsively scaled."
-                          />
+                          {(!service.keyHighlights || service.keyHighlights.length === 0) ? (
+                            <div className="p-3 text-center text-xs text-[#252A34]/50 border border-dashed border-[#E4D8C8] rounded-lg">
+                              No supporting points added. Click &quot;Add Point&quot; to create one.
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              {service.keyHighlights.map((hl, hIdx) => (
+                                <div key={hIdx} className="flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-[#173B75] shrink-0" />
+                                  <input
+                                    type="text"
+                                    value={hl}
+                                    onChange={(e) => handleUpdateSupportingPoint(idx, hIdx, e.target.value)}
+                                    placeholder="Enter supporting point text..."
+                                    className="flex-1 px-3 py-1.5 border border-[#E4D8C8] rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-[#173B75]"
+                                  />
+                                  <div className="flex items-center gap-0.5 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMoveSupportingPoint(idx, hIdx, 'up')}
+                                      disabled={hIdx === 0}
+                                      title="Move point up"
+                                      aria-label="Move point up"
+                                      className="p-1 text-[#173B75] hover:bg-[#EEF2F9] rounded cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                                    >
+                                      <ArrowUp className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMoveSupportingPoint(idx, hIdx, 'down')}
+                                      disabled={hIdx === service.keyHighlights.length - 1}
+                                      title="Move point down"
+                                      aria-label="Move point down"
+                                      className="p-1 text-[#173B75] hover:bg-[#EEF2F9] rounded cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed"
+                                    >
+                                      <ArrowDown className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteSupportingPoint(idx, hIdx)}
+                                      title="Delete supporting point"
+                                      aria-label="Delete supporting point"
+                                      className="p-1 text-red-500 hover:bg-red-50 rounded cursor-pointer ml-1"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* LOCATION 2: Services Listing Images (Creative Disciplines Swipeable Listing) */}
+                        <div className="p-4 bg-white rounded-xl border border-[#E4D8C8] space-y-3">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-[#173B75]" />
+                            <h5 className="text-xs font-bold text-[#173B75]">
+                              Services Listing Image (Creative Disciplines Carousel)
+                            </h5>
+                          </div>
+                          <p className="text-[11px] text-[#252A34]/70">
+                            Independent image uploads for the service card in the swipeable listing. Desktop container is 5-column (227 × 192 px); mobile container is single-column (343 × 176 px). Replacing or removing this image never modifies Homepage tile images or Individual Detail images.
+                          </p>
+
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
+                            {/* Desktop Listing Card Image */}
+                            <AssetUploadField
+                              label="Services Listing Image (Desktop)"
+                              sectionName={`Services Listing #${idx + 1} (${service.title})`}
+                              currentUrl={service.listingImageDesktop !== undefined ? service.listingImageDesktop : (service.image || '')}
+                              onUpload={async (file) => {
+                                const url = await uploadImageFile(file);
+                                if (url) {
+                                  handleUpdateService(idx, { listingImageDesktop: url });
+                                  showToast(`Listing desktop image updated for ${service.title}`, 'success');
+                                }
+                              }}
+                              onClear={() => {
+                                handleUpdateService(idx, { listingImageDesktop: '' });
+                                showToast(`Listing desktop image removed for ${service.title}`);
+                              }}
+                              recommendedDimensions="500 × 420 px (Recommended)"
+                              aspectRatio="6:5 / 5:4 Compact Card"
+                              supportedFormats="JPG, PNG, WebP"
+                              maxFileSize="5 MB"
+                              helpText="Exact dimensions calculated from the Services swipeable card container (227 × 192 px rendered). Rendered on laptops and desktop viewports."
+                            />
+
+                            {/* Mobile Listing Card Image */}
+                            <AssetUploadField
+                              label="Services Listing Image (Mobile Optional)"
+                              sectionName={`Services Listing Mobile #${idx + 1} (${service.title})`}
+                              currentUrl={service.listingImageMobile || ''}
+                              onUpload={async (file) => {
+                                const url = await uploadImageFile(file);
+                                if (url) {
+                                  handleUpdateService(idx, { listingImageMobile: url });
+                                  showToast(`Listing mobile image updated for ${service.title}`, 'success');
+                                }
+                              }}
+                              onClear={() => {
+                                handleUpdateService(idx, { listingImageMobile: '' });
+                                showToast(`Listing mobile image removed for ${service.title}`);
+                              }}
+                              recommendedDimensions="700 × 360 px (Recommended)"
+                              aspectRatio="2:1 / 16:9 Widescreen"
+                              supportedFormats="JPG, PNG, WebP"
+                              maxFileSize="5 MB"
+                              isOptional={true}
+                              helpText="Exact dimensions calculated from the mobile card container (343 × 176 px rendered). If omitted, desktop listing image scales responsively."
+                            />
+                          </div>
+                        </div>
+
+                        {/* LOCATION 3: Individual Service Detail Image (Discipline Showcase Main Visual) */}
+                        <div className="p-4 bg-white rounded-xl border border-[#E4D8C8] space-y-3">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-[#F07822]" />
+                            <h5 className="text-xs font-bold text-[#173B75]">
+                              Individual Service Detail Image (Discipline Showcase Main Visual)
+                            </h5>
+                          </div>
+                          <p className="text-[11px] text-[#252A34]/70">
+                            Independent image uploads for the full-width in-depth discipline section and service detail modal. Desktop container is 6-column (584 × 460 px); mobile container is single-column (343 × 256 px). Replacing or removing this image never modifies Homepage tile images or Services listing images.
+                          </p>
+
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
+                            {/* Desktop Detail Main Visual */}
+                            <AssetUploadField
+                              label="Individual Service Detail Image (Desktop)"
+                              sectionName={`Service Detail #${idx + 1} (${service.title})`}
+                              currentUrl={service.detailImageDesktop !== undefined ? service.detailImageDesktop : (service.image || '')}
+                              onUpload={async (file) => {
+                                const url = await uploadImageFile(file);
+                                if (url) {
+                                  handleUpdateService(idx, { detailImageDesktop: url, image: url });
+                                  showToast(`Detail desktop image updated for ${service.title}`, 'success');
+                                }
+                              }}
+                              onClear={() => {
+                                handleUpdateService(idx, { detailImageDesktop: '' });
+                                showToast(`Detail desktop image removed for ${service.title}`);
+                              }}
+                              recommendedDimensions="1200 × 920 px (Recommended)"
+                              aspectRatio="4:3 Large Landscape"
+                              supportedFormats="JPG, PNG, WebP"
+                              maxFileSize="10 MB"
+                              helpText="Exact dimensions calculated from the in-depth service detail container (584 × 460 px rendered). Rendered on desktop viewports and in the detail modal."
+                            />
+
+                            {/* Mobile Detail Main Visual */}
+                            <AssetUploadField
+                              label="Individual Service Detail Image (Mobile Optional)"
+                              sectionName={`Service Detail Mobile #${idx + 1} (${service.title})`}
+                              currentUrl={service.detailImageMobile || ''}
+                              onUpload={async (file) => {
+                                const url = await uploadImageFile(file);
+                                if (url) {
+                                  handleUpdateService(idx, { detailImageMobile: url });
+                                  showToast(`Detail mobile image updated for ${service.title}`, 'success');
+                                }
+                              }}
+                              onClear={() => {
+                                handleUpdateService(idx, { detailImageMobile: '' });
+                                showToast(`Detail mobile image removed for ${service.title}`);
+                              }}
+                              recommendedDimensions="750 × 560 px (Recommended)"
+                              aspectRatio="4:3 Responsive Visual"
+                              supportedFormats="JPG, PNG, WebP"
+                              maxFileSize="10 MB"
+                              isOptional={true}
+                              helpText="Exact dimensions calculated from the mobile detail container (343 × 256 px rendered). If omitted, desktop detail visual scales responsively."
+                            />
+                          </div>
                         </div>
                       </div>
                     )}

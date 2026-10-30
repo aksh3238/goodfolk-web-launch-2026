@@ -33,7 +33,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
   });
   const [selectedConcept, setSelectedConcept] = useState<CMSServiceConcept | null>(null);
 
-  const servicesList = (siteContent?.services && siteContent.services.length >= 10)
+  const servicesList = (siteContent?.services && siteContent.services.length > 0)
     ? siteContent.services
     : SERVICES_DATA;
 
@@ -127,11 +127,28 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
                 {/* Visual */}
                 <div className={`lg:col-span-6 ${isEven ? 'lg:order-2' : ''}`}>
                   <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-[#E6E8ED] bg-white group">
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      className="w-full h-64 sm:h-[420px] lg:h-[460px] object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
+                    {(() => {
+                      const fallbackImg = 'https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80';
+                      const desktopImg = service.detailImageDesktop || service.image || fallbackImg;
+                      const mobileImg = service.detailImageMobile;
+                      const activeImg = desktopImg || fallbackImg;
+
+                      return (
+                        <picture className="w-full h-full block">
+                          {mobileImg && (
+                            <source media="(max-width: 767px)" srcSet={mobileImg} />
+                          )}
+                          <img
+                            src={activeImg}
+                            alt={service.title}
+                            className="w-full h-64 sm:h-[420px] lg:h-[460px] object-cover group-hover:scale-105 transition-transform duration-700"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = fallbackImg;
+                            }}
+                          />
+                        </picture>
+                      );
+                    })()}
                     <div className="absolute top-4 left-4 sm:top-5 sm:left-5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs font-extrabold text-[#173B75] shadow-sm">
                       {service.title}
                     </div>
@@ -169,15 +186,19 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
                     </FocusCardGroup>
                   </div>
 
-                  {/* Highlights */}
-                  <div className="space-y-1.5 pt-1 text-xs text-[#242832]/70">
-                    {service.keyHighlights.map((hl, hIdx) => (
-                      <div key={hIdx} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#173B75]" />
-                        <span>{hl}</span>
-                      </div>
-                    ))}
-                  </div>
+                  {/* Highlights / Supporting Points */}
+                  {Array.isArray(service.keyHighlights) && service.keyHighlights.filter(hl => typeof hl === 'string' && hl.trim().length > 0).length > 0 && (
+                    <div className="space-y-1.5 pt-1 text-xs text-[#242832]/70">
+                      {service.keyHighlights
+                        .filter(hl => typeof hl === 'string' && hl.trim().length > 0)
+                        .map((hl, hIdx) => (
+                          <div key={hIdx} className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#173B75] shrink-0" />
+                            <span>{hl}</span>
+                          </div>
+                        ))}
+                    </div>
+                  )}
 
                   {/* Actions */}
                   <div className="pt-4 flex flex-wrap items-center gap-4">

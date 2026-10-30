@@ -51,17 +51,30 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
         className="bg-white rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl border border-[#E6E8ED] my-8 relative animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header Bar */}
+        {/* Header Bar with Independent Detail Image */}
         <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-[#173B75]">
-          <img
-            src={service.image}
-            alt={service.title}
-            className="w-full h-full object-cover opacity-60"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                'https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80';
-            }}
-          />
+          {(() => {
+            const fallbackImg = 'https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80';
+            const desktopImg = service.detailImageDesktop || service.image || fallbackImg;
+            const mobileImg = service.detailImageMobile;
+            const activeImg = desktopImg || fallbackImg;
+
+            return (
+              <picture className="w-full h-full block">
+                {mobileImg && (
+                  <source media="(max-width: 767px)" srcSet={mobileImg} />
+                )}
+                <img
+                  src={activeImg}
+                  alt={service.title}
+                  className="w-full h-full object-cover opacity-60"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = fallbackImg;
+                  }}
+                />
+              </picture>
+            );
+          })()}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628] via-[#0A1628]/40 to-transparent" />
 
           {/* Close button */}
@@ -119,18 +132,20 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
           </div>
 
           {/* Key Highlights */}
-          {service.keyHighlights && service.keyHighlights.length > 0 && (
+          {Array.isArray(service.keyHighlights) && service.keyHighlights.filter(hl => typeof hl === 'string' && hl.trim().length > 0).length > 0 && (
             <div className="space-y-3 pt-4 border-t border-[#E6E8ED]">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[#173B75]">
                 Quality Commitments & Standards
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {service.keyHighlights.map((hl, idx) => (
-                  <div key={idx} className="p-3.5 rounded-xl bg-[#EEF2F9] text-xs font-semibold text-[#173B75] flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#F07822] shrink-0" />
-                    <span>{hl}</span>
-                  </div>
-                ))}
+                {service.keyHighlights
+                  .filter(hl => typeof hl === 'string' && hl.trim().length > 0)
+                  .map((hl, idx) => (
+                    <div key={idx} className="p-3.5 rounded-xl bg-[#EEF2F9] text-xs font-semibold text-[#173B75] flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#F07822] shrink-0" />
+                      <span>{hl}</span>
+                    </div>
+                  ))}
               </div>
             </div>
           )}

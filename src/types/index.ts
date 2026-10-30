@@ -416,6 +416,10 @@ export interface CMSServiceItem {
   image: string;
   homepageImageDesktop?: string;
   homepageImageMobile?: string;
+  listingImageDesktop?: string;
+  listingImageMobile?: string;
+  detailImageDesktop?: string;
+  detailImageMobile?: string;
   bannerImage?: string;
   deliverables: string[];
   keyHighlights: string[];
