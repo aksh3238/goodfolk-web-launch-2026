@@ -126,7 +126,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
               <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-12 items-center ${isEven ? 'lg:flex-row-reverse' : ''}`}>
                 {/* Visual */}
                 <div className={`lg:col-span-6 ${isEven ? 'lg:order-2' : ''}`}>
-                  <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-[#E6E8ED] bg-white group">
+                  <div className="relative w-full aspect-[750/560] sm:aspect-auto rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border border-[#E6E8ED] bg-white group">
                     {(() => {
                       const fallbackImg = 'https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80';
                       const desktopImg = service.detailImageDesktop || service.image || fallbackImg;
@@ -141,7 +141,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenLetsTalk, onNa
                           <img
                             src={activeImg}
                             alt={service.title}
-                            className="w-full h-64 sm:h-[420px] lg:h-[460px] object-cover group-hover:scale-105 transition-transform duration-700"
+                            className="w-full h-full sm:h-[420px] lg:h-[460px] object-cover object-center group-hover:scale-105 transition-transform duration-700"
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = fallbackImg;
                             }}

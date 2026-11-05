@@ -52,7 +52,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Bar with Independent Detail Image */}
-        <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-[#173B75]">
+        <div className="relative w-full aspect-[750/560] sm:aspect-auto sm:h-80 overflow-hidden bg-[#173B75]">
           {(() => {
             const fallbackImg = 'https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80';
             const desktopImg = service.detailImageDesktop || service.image || fallbackImg;
@@ -67,7 +67,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                 <img
                   src={activeImg}
                   alt={service.title}
-                  className="w-full h-full object-cover opacity-60"
+                  className="w-full h-full object-cover object-center opacity-60"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = fallbackImg;
                   }}

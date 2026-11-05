@@ -178,7 +178,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenLetsTalk }
                   onClick={() => onNavigate(`/services#${serviceSlug}`)}
                   className="group bg-white rounded-3xl border border-[#E6E8ED] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer h-full"
                 >
-                  <div className="relative h-48 sm:h-52 overflow-hidden bg-[#EEF2F9]">
+                  <div className="relative w-full aspect-[16/9] sm:aspect-auto sm:h-52 overflow-hidden bg-[#EEF2F9]">
                     {(() => {
                       const desktopImage = service.homepageImageDesktop || service.image || fallbackImage;
                       const mobileImage = service.homepageImageMobile;
@@ -192,7 +192,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenLetsTalk }
                           <img
                             src={activeImage}
                             alt={service.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                             onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
                           />
                         </picture>

@@ -168,7 +168,7 @@ export const ServicesSwipeableCarousel: React.FC<ServicesSwipeableCarouselProps>
             className="group bg-white rounded-2xl border border-[#E6E8ED] hover:border-[#F07822] overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between cursor-pointer h-full"
           >
             {/* Image Header with Independent Services Listing Image */}
-            <div className="relative h-44 sm:h-48 overflow-hidden bg-[#EEF2F9]">
+            <div className="relative w-full aspect-[700/360] sm:aspect-auto sm:h-48 overflow-hidden bg-[#EEF2F9]">
               {(() => {
                 const fallbackImg = 'https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80';
                 const desktopImg = service.listingImageDesktop || service.image || fallbackImg;
@@ -183,7 +183,7 @@ export const ServicesSwipeableCarousel: React.FC<ServicesSwipeableCarouselProps>
                     <img
                       src={activeImg}
                       alt={service.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = fallbackImg;
                       }}
