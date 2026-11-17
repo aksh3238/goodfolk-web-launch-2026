@@ -10,11 +10,12 @@ export default defineConfig(() => {
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve(import.meta.dirname, '.'),
       },
     },
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
+      ws: process.env.DISABLE_HMR === 'true' ? (false as const) : undefined,
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
   };

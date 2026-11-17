@@ -137,16 +137,18 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ onOpenLetsTalk, on
               onClick={() => setSelectedProject(filteredItems[0])}
               className="group bg-white rounded-3xl border border-[#E6E8ED] hover:border-[#173B75]/40 overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer grid grid-cols-1 lg:grid-cols-12"
             >
-              <div className="lg:col-span-7 relative h-80 sm:h-[460px] overflow-hidden bg-[#EEF2F9]">
-                <img
-                  src={filteredItems[0].image}
-                  alt={filteredItems[0].title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80';
-                  }}
-                />
+              <div className="lg:col-span-7 relative overflow-hidden bg-[#EEF2F9] flex items-center justify-center">
+                <div className="w-full aspect-4/3 overflow-hidden flex items-center justify-center">
+                  <img
+                    src={filteredItems[0].image}
+                    alt={filteredItems[0].title}
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80';
+                    }}
+                  />
+                </div>
                 <div className="absolute top-4 left-4 flex items-center gap-2">
                   <span className="bg-white/95 backdrop-blur-md px-3 py-1 rounded-md text-xs font-bold text-[#173B75] shadow-sm">
                     {filteredItems[0].category}
@@ -219,11 +221,11 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ onOpenLetsTalk, on
                 onClick={() => setSelectedProject(item)}
                 className="group bg-white rounded-3xl border border-[#E6E8ED] hover:border-[#173B75]/40 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col cursor-pointer"
               >
-                <div className="relative h-72 sm:h-80 overflow-hidden bg-[#EEF2F9]">
+                <div className="relative w-full aspect-4/3 overflow-hidden bg-[#EEF2F9] flex items-center justify-center">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src =
                         'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80';

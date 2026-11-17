@@ -242,9 +242,9 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
 
           {/* MAIN MEDIA SHOWCASE (IMAGE / VIDEO) */}
           <div className="space-y-3">
-            <div className="relative rounded-2xl overflow-hidden bg-[#EEF2F9] border border-[#E6E8ED] shadow-md aspect-video sm:aspect-16/9 flex items-center justify-center">
+            <div className="relative w-full flex items-center justify-center rounded-2xl overflow-hidden bg-[#F7F7F5] border border-[#E6E8ED] shadow-md">
               {currentMedia?.type === 'video' ? (
-                <div className="relative w-full h-full bg-black flex items-center justify-center">
+                <div className="relative w-full aspect-video max-h-[min(72vh,760px)] lg:max-h-none bg-black flex items-center justify-center">
                   <video
                     src={currentMedia.url}
                     poster={currentMedia.poster}
@@ -257,9 +257,10 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                 </div>
               ) : (
                 <img
+                  key={currentMedia?.url || activeMediaIndex}
                   src={currentMedia?.url}
                   alt={currentMedia?.altText || project.title}
-                  className="w-full h-full object-cover"
+                  className="w-auto h-auto max-w-full max-h-[min(72vh,760px)] lg:w-full lg:h-auto lg:max-h-none object-contain"
                 />
               )}
 

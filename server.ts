@@ -7,7 +7,17 @@ import { isPostgresConfigured } from './src/server/postgres';
 import type { BankAccount } from './src/types';
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
+const portArgIdx = process.argv.indexOf('--port');
+const cliPort = portArgIdx !== -1 ? Number(process.argv[portArgIdx + 1]) : NaN;
+const envPort = Number(process.env.PORT);
+const nginxPort = Number(process.env.NGINX_PORT);
+const defaultDevPort = Number(process.env.DEFAULT_APP_PORT) || 3000;
+
+const PORT = Number.isFinite(cliPort) && cliPort > 0
+  ? cliPort
+  : (process.env.NODE_ENV !== 'production' && envPort && nginxPort && envPort === nginxPort)
+    ? defaultDevPort
+    : (envPort || defaultDevPort);
 
 // CORS setup
 app.use((req, res, next) => {
@@ -1246,9 +1256,14 @@ app.use((
 async function startServer(): Promise<void> {
   // Mount Vite SPA middlewares in development mode
   if (process.env.NODE_ENV !== 'production') {
+    const disableHmr = process.env.DISABLE_HMR === 'true';
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: !disableHmr,
+        ws: disableHmr ? false : undefined
+      },
       appType: 'spa'
     });
     app.use(vite.middlewares);
@@ -1268,4 +1283,7 @@ async function startServer(): Promise<void> {
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});

@@ -104,366 +104,33 @@
   "receipts": [],
   "bankAccounts": [],
   "siteContent": {
-    "faqs": [
-      {
-        "id": "faq-1",
-        "order": 1,
-        "active": true,
-        "answer": "Helpful details include your current brand stage, core products or services, key deliverables required (such as packaging dielines, logo, or ad creatives), preferred timeline, and any existing brand assets or reference styles you admire.",
-        "question": "What information should I include in my enquiry?",
-        "published": true
-      },
-      {
-        "id": "faq-2",
-        "order": 2,
-        "active": true,
-        "answer": "Pricing is customized based on project scope, number of SKUs or creative variations, complexity, and timeline. After reviewing your brief, we provide an itemized formal quotation with transparent milestone terms.",
-        "question": "How do you determine project pricing?",
-        "published": true
-      },
-      {
-        "id": "faq-3",
-        "order": 3,
-        "active": true,
-        "answer": "Yes, standard industry practice for creative production is an initial milestone advance (typically 50% before work commences), with the balance due upon final review and approval before master print-ready assets are transferred. All payments are verified via direct UPI.",
-        "question": "Do you require an advance payment?",
-        "published": true
-      },
-      {
-        "id": "faq-4",
-        "order": 4,
-        "active": true,
-        "answer": "Absolutely. Many of our clients combine branding, packaging, Amazon A+ content, and paid advertising creatives into a unified project. Simply outline your multi-disciplinary needs in the project details field.",
-        "question": "Can I discuss multiple services in one enquiry?",
-        "published": true
-      },
-      {
-        "id": "faq-5",
-        "order": 5,
-        "active": true,
-        "answer": "Yes! We collaborate with brands across the globe. We coordinate via video calls, email, and WhatsApp, and handle international timezones with structured project management.",
-        "question": "Do you work with international clients?",
-        "published": true
-      }
-    ],
-    "isDraft": false,
-    "logoUrl": "/logo.svg",
     "logoText": "good folk",
-    "services": [
-      {
-        "id": "branding",
-        "slug": "branding-and-packaging",
-        "image": "https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80",
-        "order": 1,
-        "title": "Branding & Packaging",
-        "number": "01",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "We craft comprehensive visual identity systems and tangible packaging that stand out on retail shelves and e-commerce screens. Every element is engineered to communicate your core values, evoke emotion, and build enduring brand equity.",
-        "published": true,
-        "shortDesc": "Brand identity, logo design and product packaging.",
-        "deliverables": [
-          "Brand identity and visual systems",
-          "Logo design and brand applications",
-          "Product packaging and label design",
-          "Print-ready dielines & production finishes (foil, spot UV, embossing)",
-          "Comprehensive brand guideline books & digital asset kits",
-          "Brand consistency across physical and digital touchpoints"
-        ],
-        "keyHighlights": [
-          "Custom typographic marks and bespoke iconography",
-          "Shelf-impact analysis for physical and retail products",
-          "Certified dielines for manufacturers & offset printers"
-        ],
-        "ctaDestination": "/contact"
-      },
-      {
-        "id": "creative",
-        "slug": "creative-design",
-        "image": "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80",
-        "order": 2,
-        "title": "Creative Design",
-        "number": "02",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "From high-converting Amazon storefronts to scroll-stopping social visuals, we create purposeful digital and print collateral that elevates your brand perception and engages your target audience.",
-        "published": true,
-        "shortDesc": "Social media posts, Amazon A+ content, website assets, image editing and photo albums.",
-        "deliverables": [
-          "Social media posts and campaign assets",
-          "Amazon A+ content and e-commerce creatives",
-          "Website banners, hero visuals and digital assets",
-          "Professional image editing, color grading and photo albums",
-          "Digital brochures, flyers, lookbooks and print collateral",
-          "Custom vector illustrations and branded infographics"
-        ],
-        "keyHighlights": [
-          "Conversion-optimized marketplace layouts (Amazon, Flipkart, Shopify)",
-          "Multi-format export optimized for web speed and high DPI displays",
-          "Unified aesthetic across all brand customer touchpoints"
-        ],
-        "ctaDestination": "/contact"
-      },
-      {
-        "id": "performance",
-        "slug": "performance-marketing-creatives",
-        "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
-        "order": 3,
-        "title": "Performance Marketing Creatives",
-        "number": "03",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "Creative is the new targeting. We develop ad creatives specifically engineered to stop the scroll, clarify the value proposition within 3 seconds, and trigger profitable action across Meta, Google, and digital display channels.",
-        "published": true,
-        "shortDesc": "Ad creatives designed to capture attention and drive conversions.",
-        "deliverables": [
-          "Paid advertising creatives (static banners, carousels, video overlays)",
-          "Campaign concepts and systematic visual variations",
-          "Product-focused advertising layouts with clear value pillars",
-          "Creative adaptations for 9:16 Stories/Reels, 4:5 Feeds, and 1:1 Displays",
-          "A/B testing creative variations to lower customer acquisition cost (CAC)",
-          "Seasonal promotional and festive campaign creative suites"
-        ],
-        "keyHighlights": [
-          "Framework-driven hook and headline variations",
-          "Direct-response visual psychology applied to each asset",
-          "Rapid iteration based on campaign performance metrics"
-        ],
-        "ctaDestination": "/contact"
-      },
-      {
-        "id": "video",
-        "slug": "video-production-and-editing",
-        "image": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=80",
-        "order": 4,
-        "title": "Video Production & Editing",
-        "number": "04",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "Video is the most powerful medium for brand storytelling. We shoot, edit, color grade, and polish promotional videos, commercial reels, and product demonstrations that captivate audiences and inspire confidence.",
-        "published": true,
-        "shortDesc": "Promotional videos, reels and product videos.",
-        "deliverables": [
-          "Promotional videos and brand films",
-          "Short-form reels, TikToks, and YouTube Shorts",
-          "Product showcase videos and unboxing motion assets",
-          "Video editing, sound design, and color grading",
-          "Kinetic motion typography, 2D animation and logo stingers",
-          "Campaign video adaptations across all social aspect ratios"
-        ],
-        "keyHighlights": [
-          "Paced for short attention spans with dynamic motion retention hooks",
-          "Studio-grade sound mixing and licensed commercial soundtracking",
-          "Platform-native subtitle styling and high-retention editing"
-        ],
-        "ctaDestination": "/contact"
-      },
-      {
-        "id": "digital",
-        "slug": "digital-marketing-and-social-media",
-        "image": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1200&q=80",
-        "order": 5,
-        "title": "Digital Marketing & Social Media Management",
-        "number": "05",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "We manage your brand presence with structured content planning, strategic narrative building, and proactive community engagement. Transform your social channels from passive profiles into authoritative growth engines.",
-        "published": true,
-        "shortDesc": "Social media management, content planning and campaign execution.",
-        "deliverables": [
-          "Social media channel management & curation",
-          "Strategic content calendar development & visual roadmaps",
-          "Campaign execution and coordination across platforms",
-          "Brand voice, copywriting and caption frameworks",
-          "Community engagement strategies and hashtag optimization",
-          "Monthly performance analysis and creative optimization reports"
-        ],
-        "keyHighlights": [
-          "Consistent publishing schedule and premium visual aesthetic",
-          "Cross-channel cohesive brand voice and messaging",
-          "Data-driven insights to refine future creative strategy"
-        ],
-        "ctaDestination": "/contact"
-      },
-      {
-        "id": "uiux",
-        "slug": "website-and-uiux-design",
-        "image": "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80",
-        "order": 6,
-        "title": "Website & UI/UX Design",
-        "number": "06",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "We design intuitive, conversion-focused websites and digital product interfaces. From wireframing frictionless user journeys to responsive design systems, we build digital experiences that turn visitors into loyal customers.",
-        "published": true,
-        "shortDesc": "Website interfaces, landing pages, user journeys, responsive layouts and digital experiences.",
-        "deliverables": [
-          "Website interfaces and landing page design",
-          "User journey mapping, wireframing and interactive prototypes",
-          "Mobile-responsive layouts optimized for speed and conversion",
-          "Component design systems and UI style guides in Figma",
-          "E-commerce storefront UI and checkout experience optimization",
-          "Design handoff specifications ready for development"
-        ],
-        "keyHighlights": [
-          "Frictionless user experience engineered for business conversion",
-          "Design systems built with reusable components and tokens",
-          "Thorough testing across desktop, tablet and mobile viewports"
-        ],
-        "ctaDestination": "/contact"
-      },
-      {
-        "id": "ecommerce",
-        "slug": "ecommerce-and-marketplace-creative",
-        "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80",
-        "order": 7,
-        "title": "E-commerce & Marketplace Creative Design",
-        "number": "07",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "In crowded online marketplaces, standout imagery is the primary sales driver. We design high-converting Amazon A+ Content, keyword-aligned listing image stacks, branded storefronts, and product feature infographics that build immediate buyer trust and multiply conversion rates.",
-        "published": true,
-        "shortDesc": "Amazon A+ Content, product listing images, storefront graphics, product infographics and e-commerce banners.",
-        "deliverables": [
-          "Amazon A+ Enhanced Brand Content modules & brand stories",
-          "7-image listing stack (hero, benefits, scale, lifestyle, comparison chart)",
-          "Custom marketplace storefront banner graphics and navigation tiles",
-          "Feature callout infographics and technical specification graphics",
-          "Shopify, Flipkart, and Quick-Commerce banner suites",
-          "Product 3D packaging renders and digital photorealistic mockups"
-        ],
-        "keyHighlights": [
-          "Engineered to improve click-through-rate (CTR) and conversion rate (CVR)",
-          "Strict adherence to Amazon and marketplace image guidelines",
-          "Visual objection handling integrated directly into the image carousel"
-        ],
-        "ctaDestination": "/contact"
-      },
-      {
-        "id": "motion",
-        "slug": "motion-graphics-and-animation",
-        "image": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80",
-        "order": 8,
-        "title": "Motion Graphics & Animation",
-        "number": "08",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "Bring your brand to life with dynamic motion design. We create animated advertisements, polished logo reveals, kinetic typographic messaging, and engaging social motion graphics that hold viewer attention in fast-scrolling environments.",
-        "published": true,
-        "shortDesc": "Animated advertisements, logo animations, kinetic typography, promotional motion graphics and social media animations.",
-        "deliverables": [
-          "Animated digital advertisements for paid media campaigns",
-          "Signature brand logo animations and video intro/outro stingers",
-          "Kinetic typography sequences for product storytelling",
-          "Promotional motion graphics and UI interaction showcases",
-          "Micro-animations and animated icon sets for websites and apps",
-          "Lottie, GIF, and MP4 animated deliverables for all platforms"
-        ],
-        "keyHighlights": [
-          "Fluid 60fps animations crafted with precise easing curves",
-          "Optimized file sizes for rapid loading in web and mobile environments",
-          "Seamless brand consistency matching your typography and colors"
-        ],
-        "ctaDestination": "/contact"
-      },
-      {
-        "id": "print",
-        "slug": "print-and-marketing-collateral",
-        "image": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=1200&q=80",
-        "order": 9,
-        "title": "Print & Marketing Collateral",
-        "number": "09",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "Tangible physical collateral creates lasting real-world brand impressions. We design exquisite brochures, comprehensive product catalogues, premium stationery suites, exhibition event booths, and promotional posters with zero print-tolerance guesswork.",
-        "published": true,
-        "shortDesc": "Brochures, catalogues, business stationery, flyers, posters, event graphics and print-ready artwork.",
-        "deliverables": [
-          "Corporate brochures, company profiles, and product catalogues",
-          "Premium business stationery (business cards, letterheads, presentation folders)",
-          "Flyers, promotional leaflets, and direct mailers",
-          "Event graphics, exhibition trade-show booths, and rollup pull-up banners",
-          "Retail posters, point-of-sale (POS) materials, and window decals",
-          "Manufacturer-certified print-ready PDF artwork with bleed and Pantone specs"
-        ],
-        "keyHighlights": [
-          "Rigorous CMYK color separations and Pantone spot color matching",
-          "Finishing specifications (matte/gloss lamination, spot UV, embossing, foils)",
-          "Zero production guesswork for printers and fabrication teams"
-        ],
-        "ctaDestination": "/contact"
-      },
-      {
-        "id": "presentation",
-        "slug": "presentation-and-pitch-deck-design",
-        "image": "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
-        "order": 10,
-        "title": "Presentation & Pitch Deck Design",
-        "number": "10",
-        "ctaText": "Discuss Your Project",
-        "fullDesc": "Winning pitches require both clarity of thought and stunning visual craft. We design persuasive investor pitch decks, high-stakes enterprise sales presentations, and company profile decks that command executive attention and close high-value deals.",
-        "published": true,
-        "shortDesc": "Business presentations, sales decks, company profiles, investor pitch decks and branded presentation systems.",
-        "deliverables": [
-          "Investor pitch decks for seed, Series A/B, and growth funding rounds",
-          "Enterprise sales decks and product capability presentations",
-          "Company profile credentials and annual report presentations",
-          "Modular master slide templates in PowerPoint, Keynote, and Google Slides",
-          "Custom data visualization, bespoke financial charts, and process diagrams",
-          "Presenter-ready guidelines and editable vector asset kits"
-        ],
-        "keyHighlights": [
-          "Compelling narrative arc and executive-level visual hierarchy",
-          "Complex data translated into intuitive visual charts and frameworks",
-          "Fully editable master slides with branded fonts and color themes"
-        ],
-        "ctaDestination": "/contact"
-      }
-    ],
-    "aboutStory": "Goodfolk Solution was built around a simple belief: thoughtful creative work can make a meaningful difference to a business. We bring branding, design and digital communication together to help businesses express their identity and connect with their audience.",
-    "heroSlides": [
-      {
-        "id": "branding-packaging",
-        "title": "Packaging & Brand Identity",
-        "category": "Branding & Packaging",
-        "imageUrl": "https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80",
-        "targetPath": "/services#branding"
-      },
-      {
-        "id": "performance-marketing",
-        "title": "Performance Ad Creatives & Growth",
-        "category": "Performance Marketing",
-        "imageUrl": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
-        "targetPath": "/services#performance"
-      },
-      {
-        "id": "promotional-videos",
-        "title": "Cinematic Product Reels & Motion",
-        "category": "Video Production",
-        "imageUrl": "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80",
-        "targetPath": "/services#video"
-      },
-      {
-        "id": "cost-efficiency",
-        "title": "Ad Spend & CAC Optimization",
-        "category": "Creative Optimization",
-        "imageUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
-        "targetPath": "/services#performance"
-      },
-      {
-        "id": "brand-projects",
-        "title": "Comprehensive Brand Direction",
-        "category": "Creative Portfolio",
-        "imageUrl": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80",
-        "targetPath": "/portfolio"
-      }
-    ],
-    "accentColor": "#F07822",
-    "ctaHeadline": "Ready to Build Something Great?",
-    "pageBanners": {
-      "services": {
-        "ctaType": "enquiry",
-        "enabled": true,
-        "desktopImageUrl": "/uploads/1792576276580-test_bannerpng.png"
-      }
-    },
+    "logoSubtitle": "Solution",
+    "heroHeadline": "We Build Brands That Move Businesses Forward.",
+    "heroSubheadline": "We combine strategy, creative design, branding, and digital marketing to help businesses stand out, connect with the right audience, and grow.",
+    "aboutHeadline": "Good Ideas Deserve Good Folks.",
     "aboutTagline": "Goodfolk Solution brings strategy, creativity and thoughtful design together to help brands communicate clearly and grow with purpose.",
+    "aboutStory": "Goodfolk Solution was built around a simple belief: thoughtful creative work can make a meaningful difference to a business. We bring branding, design and digital communication together to help businesses express their identity and connect with their audience.",
+    "aboutApproach": "We begin by understanding the business, the audience and the objective. From there, we develop creative solutions that are relevant, consistent and purposeful.",
     "contactEmail": "akshay@goodfolksolution.in",
     "contactPhone": "0000000",
-    "heroHeadline": "We Build Brands That Move Businesses Forward.",
-    "logoSubtitle": "Solution",
-    "primaryColor": "#173B75",
+    "functionalPhoneDestination": "+91 9318443238",
+    "contactWhatsapp": "+91 9318443238",
+    "contactInstagram": "https://www.instagram.com/goodfolksolution/",
+    "ctaHeadline": "Ready to Build Something Great?",
+    "ctaSubheadline": "Have a project in mind? Let's turn your ideas into impactful creative work.",
+    "portfolioCategories": [
+      "All",
+      "Packaging",
+      "Branding",
+      "Creative Design",
+      "Performance Marketing",
+      "Video & Social",
+      "Website & UI/UX",
+      "Branding & Packaging",
+      "Motion Graphics",
+      "Presentation Design"
+    ],
     "processSteps": [
       {
         "id": "step-1",
@@ -502,11 +169,43 @@
         "subtitle": "Master Assets & Direct UPI"
       }
     ],
-    "aboutApproach": "We begin by understanding the business, the audience and the objective. From there, we develop creative solutions that are relevant, consistent and purposeful.",
-    "aboutHeadline": "Good Ideas Deserve Good Folks.",
-    "charcoalColor": "#252A34",
-    "footerLogoUrl": "",
-    "headerLogoUrl": "",
+    "heroSlides": [
+      {
+        "id": "branding-packaging",
+        "title": "Packaging & Brand Identity",
+        "category": "Branding & Packaging",
+        "imageUrl": "https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80",
+        "targetPath": "/services#branding"
+      },
+      {
+        "id": "performance-marketing",
+        "title": "Performance Ad Creatives & Growth",
+        "category": "Performance Marketing",
+        "imageUrl": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+        "targetPath": "/services#performance"
+      },
+      {
+        "id": "promotional-videos",
+        "title": "Cinematic Product Reels & Motion",
+        "category": "Video Production",
+        "imageUrl": "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80",
+        "targetPath": "/services#video"
+      },
+      {
+        "id": "cost-efficiency",
+        "title": "Ad Spend & CAC Optimization",
+        "category": "Creative Optimization",
+        "imageUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+        "targetPath": "/services#performance"
+      },
+      {
+        "id": "brand-projects",
+        "title": "Comprehensive Brand Direction",
+        "category": "Creative Portfolio",
+        "imageUrl": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80",
+        "targetPath": "/portfolio"
+      }
+    ],
     "websiteImages": [
       {
         "id": "slot-brand-logo",
@@ -892,7 +591,287 @@
         "recommendedDimensions": "800 × 800 px"
       }
     ],
-    "ctaSubheadline": "Have a project in mind? Let's turn your ideas into impactful creative work.",
+    "services": [
+      {
+        "id": "branding",
+        "slug": "branding-and-packaging",
+        "image": "https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80",
+        "order": 1,
+        "title": "Branding & Packaging",
+        "number": "01",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "We craft comprehensive visual identity systems and tangible packaging that stand out on retail shelves and e-commerce screens. Every element is engineered to communicate your core values, evoke emotion, and build enduring brand equity.",
+        "published": true,
+        "shortDesc": "Brand identity, logo design and product packaging.",
+        "deliverables": [
+          "Brand identity and visual systems",
+          "Logo design and brand applications",
+          "Product packaging and label design",
+          "Print-ready dielines & production finishes (foil, spot UV, embossing)",
+          "Comprehensive brand guideline books & digital asset kits",
+          "Brand consistency across physical and digital touchpoints"
+        ],
+        "keyHighlights": [
+          "Custom typographic marks and bespoke iconography",
+          "Shelf-impact analysis for physical and retail products",
+          "Certified dielines for manufacturers & offset printers"
+        ],
+        "ctaDestination": "/contact"
+      },
+      {
+        "id": "creative",
+        "slug": "creative-design",
+        "image": "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80",
+        "order": 2,
+        "title": "Creative Design",
+        "number": "02",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "From high-converting Amazon storefronts to scroll-stopping social visuals, we create purposeful digital and print collateral that elevates your brand perception and engages your target audience.",
+        "published": true,
+        "shortDesc": "Social media posts, Amazon A+ content, website assets, image editing and photo albums.",
+        "deliverables": [
+          "Social media posts and campaign assets",
+          "Amazon A+ content and e-commerce creatives",
+          "Website banners, hero visuals and digital assets",
+          "Professional image editing, color grading and photo albums",
+          "Digital brochures, flyers, lookbooks and print collateral",
+          "Custom vector illustrations and branded infographics"
+        ],
+        "keyHighlights": [
+          "Conversion-optimized marketplace layouts (Amazon, Flipkart, Shopify)",
+          "Multi-format export optimized for web speed and high DPI displays",
+          "Unified aesthetic across all brand customer touchpoints"
+        ],
+        "ctaDestination": "/contact"
+      },
+      {
+        "id": "performance",
+        "slug": "performance-marketing-creatives",
+        "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+        "order": 3,
+        "title": "Performance Marketing Creatives",
+        "number": "03",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "Creative is the new targeting. We develop ad creatives specifically engineered to stop the scroll, clarify the value proposition within 3 seconds, and trigger profitable action across Meta, Google, and digital display channels.",
+        "published": true,
+        "shortDesc": "Ad creatives designed to capture attention and drive conversions.",
+        "deliverables": [
+          "Paid advertising creatives (static banners, carousels, video overlays)",
+          "Campaign concepts and systematic visual variations",
+          "Product-focused advertising layouts with clear value pillars",
+          "Creative adaptations for 9:16 Stories/Reels, 4:5 Feeds, and 1:1 Displays",
+          "A/B testing creative variations to lower customer acquisition cost (CAC)",
+          "Seasonal promotional and festive campaign creative suites"
+        ],
+        "keyHighlights": [
+          "Framework-driven hook and headline variations",
+          "Direct-response visual psychology applied to each asset",
+          "Rapid iteration based on campaign performance metrics"
+        ],
+        "ctaDestination": "/contact"
+      },
+      {
+        "id": "video",
+        "slug": "video-production-and-editing",
+        "image": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=80",
+        "order": 4,
+        "title": "Video Production & Editing",
+        "number": "04",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "Video is the most powerful medium for brand storytelling. We shoot, edit, color grade, and polish promotional videos, commercial reels, and product demonstrations that captivate audiences and inspire confidence.",
+        "published": true,
+        "shortDesc": "Promotional videos, reels and product videos.",
+        "deliverables": [
+          "Promotional videos and brand films",
+          "Short-form reels, TikToks, and YouTube Shorts",
+          "Product showcase videos and unboxing motion assets",
+          "Video editing, sound design, and color grading",
+          "Kinetic motion typography, 2D animation and logo stingers",
+          "Campaign video adaptations across all social aspect ratios"
+        ],
+        "keyHighlights": [
+          "Paced for short attention spans with dynamic motion retention hooks",
+          "Studio-grade sound mixing and licensed commercial soundtracking",
+          "Platform-native subtitle styling and high-retention editing"
+        ],
+        "ctaDestination": "/contact"
+      },
+      {
+        "id": "digital",
+        "slug": "digital-marketing-and-social-media",
+        "image": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1200&q=80",
+        "order": 5,
+        "title": "Digital Marketing & Social Media Management",
+        "number": "05",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "We manage your brand presence with structured content planning, strategic narrative building, and proactive community engagement. Transform your social channels from passive profiles into authoritative growth engines.",
+        "published": true,
+        "shortDesc": "Social media management, content planning and campaign execution.",
+        "deliverables": [
+          "Social media channel management & curation",
+          "Strategic content calendar development & visual roadmaps",
+          "Campaign execution and coordination across platforms",
+          "Brand voice, copywriting and caption frameworks",
+          "Community engagement strategies and hashtag optimization",
+          "Monthly performance analysis and creative optimization reports"
+        ],
+        "keyHighlights": [
+          "Consistent publishing schedule and premium visual aesthetic",
+          "Cross-channel cohesive brand voice and messaging",
+          "Data-driven insights to refine future creative strategy"
+        ],
+        "ctaDestination": "/contact"
+      },
+      {
+        "id": "uiux",
+        "slug": "website-and-uiux-design",
+        "image": "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80",
+        "order": 6,
+        "title": "Website & UI/UX Design",
+        "number": "06",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "We design intuitive, conversion-focused websites and digital product interfaces. From wireframing frictionless user journeys to responsive design systems, we build digital experiences that turn visitors into loyal customers.",
+        "published": true,
+        "shortDesc": "Website interfaces, landing pages, user journeys, responsive layouts and digital experiences.",
+        "deliverables": [
+          "Website interfaces and landing page design",
+          "User journey mapping, wireframing and interactive prototypes",
+          "Mobile-responsive layouts optimized for speed and conversion",
+          "Component design systems and UI style guides in Figma",
+          "E-commerce storefront UI and checkout experience optimization",
+          "Design handoff specifications ready for development"
+        ],
+        "keyHighlights": [
+          "Frictionless user experience engineered for business conversion",
+          "Design systems built with reusable components and tokens",
+          "Thorough testing across desktop, tablet and mobile viewports"
+        ],
+        "ctaDestination": "/contact"
+      },
+      {
+        "id": "ecommerce",
+        "slug": "ecommerce-and-marketplace-creative",
+        "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80",
+        "order": 7,
+        "title": "E-commerce & Marketplace Creative Design",
+        "number": "07",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "In crowded online marketplaces, standout imagery is the primary sales driver. We design high-converting Amazon A+ Content, keyword-aligned listing image stacks, branded storefronts, and product feature infographics that build immediate buyer trust and multiply conversion rates.",
+        "published": true,
+        "shortDesc": "Amazon A+ Content, product listing images, storefront graphics, product infographics and e-commerce banners.",
+        "deliverables": [
+          "Amazon A+ Enhanced Brand Content modules & brand stories",
+          "7-image listing stack (hero, benefits, scale, lifestyle, comparison chart)",
+          "Custom marketplace storefront banner graphics and navigation tiles",
+          "Feature callout infographics and technical specification graphics",
+          "Shopify, Flipkart, and Quick-Commerce banner suites",
+          "Product 3D packaging renders and digital photorealistic mockups"
+        ],
+        "keyHighlights": [
+          "Engineered to improve click-through-rate (CTR) and conversion rate (CVR)",
+          "Strict adherence to Amazon and marketplace image guidelines",
+          "Visual objection handling integrated directly into the image carousel"
+        ],
+        "ctaDestination": "/contact"
+      },
+      {
+        "id": "motion",
+        "slug": "motion-graphics-and-animation",
+        "image": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80",
+        "order": 8,
+        "title": "Motion Graphics & Animation",
+        "number": "08",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "Bring your brand to life with dynamic motion design. We create animated advertisements, polished logo reveals, kinetic typographic messaging, and engaging social motion graphics that hold viewer attention in fast-scrolling environments.",
+        "published": true,
+        "shortDesc": "Animated advertisements, logo animations, kinetic typography, promotional motion graphics and social media animations.",
+        "deliverables": [
+          "Animated digital advertisements for paid media campaigns",
+          "Signature brand logo animations and video intro/outro stingers",
+          "Kinetic typography sequences for product storytelling",
+          "Promotional motion graphics and UI interaction showcases",
+          "Micro-animations and animated icon sets for websites and apps",
+          "Lottie, GIF, and MP4 animated deliverables for all platforms"
+        ],
+        "keyHighlights": [
+          "Fluid 60fps animations crafted with precise easing curves",
+          "Optimized file sizes for rapid loading in web and mobile environments",
+          "Seamless brand consistency matching your typography and colors"
+        ],
+        "ctaDestination": "/contact"
+      },
+      {
+        "id": "print",
+        "slug": "print-and-marketing-collateral",
+        "image": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=1200&q=80",
+        "order": 9,
+        "title": "Print & Marketing Collateral",
+        "number": "09",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "Tangible physical collateral creates lasting real-world brand impressions. We design exquisite brochures, comprehensive product catalogues, premium stationery suites, exhibition event booths, and promotional posters with zero print-tolerance guesswork.",
+        "published": true,
+        "shortDesc": "Brochures, catalogues, business stationery, flyers, posters, event graphics and print-ready artwork.",
+        "deliverables": [
+          "Corporate brochures, company profiles, and product catalogues",
+          "Premium business stationery (business cards, letterheads, presentation folders)",
+          "Flyers, promotional leaflets, and direct mailers",
+          "Event graphics, exhibition trade-show booths, and rollup pull-up banners",
+          "Retail posters, point-of-sale (POS) materials, and window decals",
+          "Manufacturer-certified print-ready PDF artwork with bleed and Pantone specs"
+        ],
+        "keyHighlights": [
+          "Rigorous CMYK color separations and Pantone spot color matching",
+          "Finishing specifications (matte/gloss lamination, spot UV, embossing, foils)",
+          "Zero production guesswork for printers and fabrication teams"
+        ],
+        "ctaDestination": "/contact"
+      },
+      {
+        "id": "presentation",
+        "slug": "presentation-and-pitch-deck-design",
+        "image": "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
+        "order": 10,
+        "title": "Presentation & Pitch Deck Design",
+        "number": "10",
+        "ctaText": "Discuss Your Project",
+        "fullDesc": "Winning pitches require both clarity of thought and stunning visual craft. We design persuasive investor pitch decks, high-stakes enterprise sales presentations, and company profile decks that command executive attention and close high-value deals.",
+        "published": true,
+        "shortDesc": "Business presentations, sales decks, company profiles, investor pitch decks and branded presentation systems.",
+        "deliverables": [
+          "Investor pitch decks for seed, Series A/B, and growth funding rounds",
+          "Enterprise sales decks and product capability presentations",
+          "Company profile credentials and annual report presentations",
+          "Modular master slide templates in PowerPoint, Keynote, and Google Slides",
+          "Custom data visualization, bespoke financial charts, and process diagrams",
+          "Presenter-ready guidelines and editable vector asset kits"
+        ],
+        "keyHighlights": [
+          "Compelling narrative arc and executive-level visual hierarchy",
+          "Complex data translated into intuitive visual charts and frameworks",
+          "Fully editable master slides with branded fonts and color themes"
+        ],
+        "ctaDestination": "/contact"
+      }
+    ],
+    "primaryColor": "#173B75",
+    "brightBlueColor": "#2458A6",
+    "accentColor": "#F07822",
+    "backgroundColor": "#FFF9F1",
+    "charcoalColor": "#252A34",
+    "brandProportions": {
+      "navy": 35,
+      "softCream": 30,
+      "warmOrange": 15,
+      "brightBlue": 12,
+      "charcoal": 8
+    },
+    "ctaAnimationType": "wavy",
+    "aboutSectionOrder": [
+      "principles",
+      "capabilities",
+      "methodology",
+      "partnerships"
+    ],
     "servicesBanner": {
       "badge": "Creative Direction & Campaign Art",
       "enabled": true,
@@ -905,19 +884,60 @@
       "subheading": "From packaging dielines to performance ad creative, we design campaign assets that command attention and drive commercial results.",
       "ctaDestination": "#branding"
     },
-    "backgroundColor": "#FFF9F1",
-    "brightBlueColor": "#2458A6",
-    "contactWhatsapp": "+91 9318443238",
-    "heroSubheadline": "We combine strategy, creative design, branding, and digital marketing to help businesses stand out, connect with the right audience, and grow.",
+    "isDraft": false,
     "lastPublishedAt": "2026-10-23T08:44:24.893Z",
-    "brandProportions": {
-      "navy": 35,
-      "charcoal": 8,
-      "softCream": 30,
-      "brightBlue": 12,
-      "warmOrange": 15
+    "faqs": [
+      {
+        "id": "faq-1",
+        "order": 1,
+        "active": true,
+        "answer": "Helpful details include your current brand stage, core products or services, key deliverables required (such as packaging dielines, logo, or ad creatives), preferred timeline, and any existing brand assets or reference styles you admire.",
+        "question": "What information should I include in my enquiry?",
+        "published": true
+      },
+      {
+        "id": "faq-2",
+        "order": 2,
+        "active": true,
+        "answer": "Pricing is customized based on project scope, number of SKUs or creative variations, complexity, and timeline. After reviewing your brief, we provide an itemized formal quotation with transparent milestone terms.",
+        "question": "How do you determine project pricing?",
+        "published": true
+      },
+      {
+        "id": "faq-3",
+        "order": 3,
+        "active": true,
+        "answer": "Yes, standard industry practice for creative production is an initial milestone advance (typically 50% before work commences), with the balance due upon final review and approval before master print-ready assets are transferred. All payments are verified via direct UPI.",
+        "question": "Do you require an advance payment?",
+        "published": true
+      },
+      {
+        "id": "faq-4",
+        "order": 4,
+        "active": true,
+        "answer": "Absolutely. Many of our clients combine branding, packaging, Amazon A+ content, and paid advertising creatives into a unified project. Simply outline your multi-disciplinary needs in the project details field.",
+        "question": "Can I discuss multiple services in one enquiry?",
+        "published": true
+      },
+      {
+        "id": "faq-5",
+        "order": 5,
+        "active": true,
+        "answer": "Yes! We collaborate with brands across the globe. We coordinate via video calls, email, and WhatsApp, and handle international timezones with structured project management.",
+        "question": "Do you work with international clients?",
+        "published": true
+      }
+    ],
+    "logoUrl": "/logo.svg",
+    "pageBanners": {
+      "services": {
+        "ctaType": "enquiry",
+        "enabled": true,
+        "desktopImageUrl": "/uploads/1792576276580-test_bannerpng.png"
+      }
     },
-    "contactInstagram": "https://www.instagram.com/goodfolksolution/",
+    "footerLogoUrl": "",
+    "headerLogoUrl": "",
     "contactNextSteps": [
       {
         "id": "step-1",
@@ -944,13 +964,6 @@
         "number": "4"
       }
     ],
-    "ctaAnimationType": "wavy",
-    "aboutSectionOrder": [
-      "principles",
-      "capabilities",
-      "methodology",
-      "partnerships"
-    ],
     "contactNextHeading": "What Happens Next?",
     "aboutStandardsCards": [
       {
@@ -974,18 +987,6 @@
         "title": "Transparent Collaboration",
         "subtitle": "Direct Partner Access"
       }
-    ],
-    "portfolioCategories": [
-      "All",
-      "Packaging",
-      "Branding",
-      "Creative Design",
-      "Performance Marketing",
-      "Video & Social",
-      "Website & UI/UX",
-      "Branding & Packaging",
-      "Motion Graphics",
-      "Presentation Design"
     ],
     "aboutPrinciplesCards": [
       {
@@ -1042,7 +1043,6 @@
         "subtitle": "Production-ready asset packages & verified handover"
       }
     ],
-    "functionalPhoneDestination": "+91 9318443238",
     "servicesCapabilitiesEyebrow": "CREATIVE CAPABILITIES",
     "servicesCapabilitiesHeading": "All 10 Specialized Creative Services",
     "servicesCapabilitiesSubtitle": "Explore our complete suite of 10 specialized creative capabilities."
@@ -1407,6 +1407,255 @@
       "typographyNotes": "Poppins for bold executive headings paired with Inter for clean financial data tables."
     }
   ],
+  "trustedBrands": [
+    {
+      "id": "tb-1",
+      "name": "Zenith Organics",
+      "logoUrl": "/uploads/1792312138176-careerflow_logo1png.png",
+      "order": 1,
+      "active": true
+    },
+    {
+      "id": "tb-2",
+      "name": "Kaveri Botanicals",
+      "logoUrl": "",
+      "order": 2,
+      "active": true
+    },
+    {
+      "id": "tb-3",
+      "name": "Kaviar Nitro Cold Brew",
+      "logoUrl": "",
+      "order": 3,
+      "active": true
+    },
+    {
+      "id": "tb-4",
+      "name": "Lumina Wireless Audio",
+      "logoUrl": "",
+      "order": 4,
+      "active": true
+    },
+    {
+      "id": "tb-5",
+      "name": "Roast Republic",
+      "logoUrl": "",
+      "order": 5,
+      "active": true
+    },
+    {
+      "id": "tb-6",
+      "name": "Aura Sustainable Apparel",
+      "logoUrl": "",
+      "order": 6,
+      "active": true
+    },
+    {
+      "id": "tb-7",
+      "name": "Nova Nutrition Labs",
+      "logoUrl": "",
+      "order": 7,
+      "active": true
+    },
+    {
+      "id": "tb-8",
+      "name": "Apex Consumer Goods",
+      "logoUrl": "",
+      "order": 8,
+      "active": true
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "test-1",
+      "text": "Working with Goodfolk Solution transformed our packaging dielines. Their team balanced retail shelf presence with sustainable glass bottling standards.",
+      "order": 1,
+      "rating": 5,
+      "company": "Zenith Organics",
+      "category": "Branding & Packaging",
+      "photoUrl": "",
+      "published": true,
+      "clientName": "Client Review (In Progress)",
+      "designation": "Founder & Managing Director",
+      "isPlaceholder": true
+    },
+    {
+      "id": "test-2",
+      "text": "The performance ad creatives and luxury skincare boxes delivered immediate clarity to our audience. Turnaround on revisions was transparent and structured.",
+      "order": 2,
+      "rating": 5,
+      "company": "Kaveri Botanicals",
+      "category": "Performance Marketing",
+      "photoUrl": "",
+      "published": true,
+      "clientName": "Client Review (In Progress)",
+      "designation": "Head of Brand & Growth",
+      "isPlaceholder": true
+    },
+    {
+      "id": "test-3",
+      "text": "From Amazon A+ content modules to high-retention video reels, having one creative studio partner ensured complete brand cohesion across all sales channels.",
+      "order": 3,
+      "rating": 5,
+      "company": "Nova Nutrition",
+      "category": "Creative Design & E-commerce",
+      "photoUrl": "",
+      "published": true,
+      "clientName": "Client Review (In Progress)",
+      "designation": "Co-Founder",
+      "isPlaceholder": true
+    }
+  ],
+  "mediaLibrary": [
+    {
+      "id": "media-1792741686721",
+      "name": "test-banner.png",
+      "url": "/uploads/1792741686721-test-banner.png",
+      "size": 89,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-23T07:48:06.721Z"
+    },
+    {
+      "id": "media-1792576276581",
+      "name": "test_banner.png",
+      "url": "/uploads/1792576276580-test_bannerpng.png",
+      "size": 70,
+      "mimeType": "image/png",
+      "uploadedAt": "2026-10-21T09:51:16.581Z"
+    },
+    {
+      "id": "media-1792576261303",
+      "name": "test_banner.png",
+      "url": "/uploads/1792576261302-test_bannerpng.png",
+      "size": 70,
+      "mimeType": "image/png",
+      "uploadedAt": "2026-10-21T09:51:01.303Z"
+    },
+    {
+      "id": "media-1792576206557",
+      "name": "test_banner.png",
+      "url": "/uploads/1792576206557-test_bannerpng.png",
+      "size": 70,
+      "mimeType": "image/png",
+      "uploadedAt": "2026-10-21T09:50:06.558Z"
+    },
+    {
+      "id": "media-1792570622871",
+      "name": "test-case-study-reel.mp4",
+      "url": "/uploads/1792570622871-test-case-study-reelmp4.mp4",
+      "size": 40,
+      "mimeType": "video/mp4",
+      "uploadedAt": "2026-10-21T08:17:02.871Z"
+    },
+    {
+      "id": "media-1792418473799",
+      "name": "images (1).jfif",
+      "url": "/uploads/1792418473798-images1jfif.jpg",
+      "size": 20058,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-19T14:01:13.799Z"
+    },
+    {
+      "id": "media-1792414103538",
+      "name": "WhatsApp Image 2026-10-17 at 18.51.11.jpeg",
+      "url": "/uploads/1792414103537-WhatsAppImage2026-10-17at185111jpeg.jpg",
+      "size": 17152,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-19T12:48:23.538Z"
+    },
+    {
+      "id": "media-1792414092115",
+      "name": "WhatsApp Image 2026-10-17 at 19.48.19.jpeg",
+      "url": "/uploads/1792414092115-WhatsAppImage2026-10-17at194819jpeg.jpg",
+      "size": 23949,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-19T12:48:12.115Z"
+    },
+    {
+      "id": "media-6",
+      "name": "Amazon A+ Storefront Layouts",
+      "url": "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80",
+      "size": 340000,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-15T16:20:00.000Z"
+    },
+    {
+      "id": "media-5",
+      "name": "Brand Identity Editorial Showcase",
+      "url": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80",
+      "size": 380000,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-14T11:45:00.000Z"
+    },
+    {
+      "id": "media-4",
+      "name": "Cost Efficiency & Strategy Blueprint",
+      "url": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+      "size": 290000,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-13T09:15:00.000Z"
+    },
+    {
+      "id": "media-3",
+      "name": "Cinematic Studio Reel Camera & Lighting",
+      "url": "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80",
+      "size": 420000,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-12T14:30:00.000Z"
+    },
+    {
+      "id": "media-2",
+      "name": "Performance Ad Campaign Analytics & Growth",
+      "url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+      "size": 312000,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-11T12:00:00.000Z"
+    },
+    {
+      "id": "media-1",
+      "name": "Zenith Cold Pressed Packaging Bottle",
+      "url": "https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80",
+      "size": 245000,
+      "mimeType": "image/jpeg",
+      "uploadedAt": "2026-10-10T10:00:00.000Z"
+    }
+  ],
+  "customSections": [
+    {
+      "id": "sec-standards",
+      "page": "about",
+      "badge": "Enterprise Quality Standards",
+      "cards": [
+        {
+          "id": "sc-1",
+          "badge": "Print Production",
+          "title": "Manufacturer Certified Files",
+          "subtitle": "Zero Print Guesswork",
+          "description": "Every dieline is built to manufacturer specifications with exact bleed lines, Pantone swatches, and foil/emboss separation plates."
+        },
+        {
+          "id": "sc-2",
+          "badge": "Conversion Rate",
+          "title": "Data-Backed Visual Psychology",
+          "subtitle": "Tested Ad Variations",
+          "description": "Performance ads are designed around high-retention hooks and value proposition hierarchy proven across Meta and Google."
+        },
+        {
+          "id": "sc-3",
+          "badge": "Client Assurance",
+          "title": "Transparent Collaboration",
+          "subtitle": "Direct Partner Access",
+          "description": "Direct communication with seasoned design leads, milestone-based UPI billing, and complete vector asset ownership upon delivery."
+        }
+      ],
+      "order": 1,
+      "title": "Built For Real Business Growth",
+      "layout": "cards",
+      "subtitle": "Our Commitments",
+      "published": true,
+      "description": "From tactile print tolerances to performance creative variation architecture, every asset is rigorously engineered for lasting commercial impact."
+    }
+  ],
   "serviceConcepts": [
     {
       "id": "sc-dig-1",
@@ -1578,255 +1827,6 @@
         "Website Hero Loop",
         "Full Audio Master"
       ]
-    }
-  ],
-  "trustedBrands": [
-    {
-      "id": "tb-1",
-      "name": "Zenith Organics",
-      "logoUrl": "/uploads/1792312138176-careerflow_logo1png.png",
-      "order": 1,
-      "active": true
-    },
-    {
-      "id": "tb-2",
-      "name": "Kaveri Botanicals",
-      "logoUrl": "",
-      "order": 2,
-      "active": true
-    },
-    {
-      "id": "tb-3",
-      "name": "Kaviar Nitro Cold Brew",
-      "logoUrl": "",
-      "order": 3,
-      "active": true
-    },
-    {
-      "id": "tb-4",
-      "name": "Lumina Wireless Audio",
-      "logoUrl": "",
-      "order": 4,
-      "active": true
-    },
-    {
-      "id": "tb-5",
-      "name": "Roast Republic",
-      "logoUrl": "",
-      "order": 5,
-      "active": true
-    },
-    {
-      "id": "tb-6",
-      "name": "Aura Sustainable Apparel",
-      "logoUrl": "",
-      "order": 6,
-      "active": true
-    },
-    {
-      "id": "tb-7",
-      "name": "Nova Nutrition Labs",
-      "logoUrl": "",
-      "order": 7,
-      "active": true
-    },
-    {
-      "id": "tb-8",
-      "name": "Apex Consumer Goods",
-      "logoUrl": "",
-      "order": 8,
-      "active": true
-    }
-  ],
-  "testimonials": [
-    {
-      "id": "test-1",
-      "text": "Working with Goodfolk Solution transformed our packaging dielines. Their team balanced retail shelf presence with sustainable glass bottling standards.",
-      "order": 1,
-      "rating": 5,
-      "company": "Zenith Organics",
-      "category": "Branding & Packaging",
-      "photoUrl": "",
-      "published": true,
-      "clientName": "Client Review (In Progress)",
-      "designation": "Founder & Managing Director",
-      "isPlaceholder": true
-    },
-    {
-      "id": "test-2",
-      "text": "The performance ad creatives and luxury skincare boxes delivered immediate clarity to our audience. Turnaround on revisions was transparent and structured.",
-      "order": 2,
-      "rating": 5,
-      "company": "Kaveri Botanicals",
-      "category": "Performance Marketing",
-      "photoUrl": "",
-      "published": true,
-      "clientName": "Client Review (In Progress)",
-      "designation": "Head of Brand & Growth",
-      "isPlaceholder": true
-    },
-    {
-      "id": "test-3",
-      "text": "From Amazon A+ content modules to high-retention video reels, having one creative studio partner ensured complete brand cohesion across all sales channels.",
-      "order": 3,
-      "rating": 5,
-      "company": "Nova Nutrition",
-      "category": "Creative Design & E-commerce",
-      "photoUrl": "",
-      "published": true,
-      "clientName": "Client Review (In Progress)",
-      "designation": "Co-Founder",
-      "isPlaceholder": true
-    }
-  ],
-  "customSections": [
-    {
-      "id": "sec-standards",
-      "page": "about",
-      "badge": "Enterprise Quality Standards",
-      "cards": [
-        {
-          "id": "sc-1",
-          "badge": "Print Production",
-          "title": "Manufacturer Certified Files",
-          "subtitle": "Zero Print Guesswork",
-          "description": "Every dieline is built to manufacturer specifications with exact bleed lines, Pantone swatches, and foil/emboss separation plates."
-        },
-        {
-          "id": "sc-2",
-          "badge": "Conversion Rate",
-          "title": "Data-Backed Visual Psychology",
-          "subtitle": "Tested Ad Variations",
-          "description": "Performance ads are designed around high-retention hooks and value proposition hierarchy proven across Meta and Google."
-        },
-        {
-          "id": "sc-3",
-          "badge": "Client Assurance",
-          "title": "Transparent Collaboration",
-          "subtitle": "Direct Partner Access",
-          "description": "Direct communication with seasoned design leads, milestone-based UPI billing, and complete vector asset ownership upon delivery."
-        }
-      ],
-      "order": 1,
-      "title": "Built For Real Business Growth",
-      "layout": "cards",
-      "subtitle": "Our Commitments",
-      "published": true,
-      "description": "From tactile print tolerances to performance creative variation architecture, every asset is rigorously engineered for lasting commercial impact."
-    }
-  ],
-  "mediaLibrary": [
-    {
-      "id": "media-1792741686721",
-      "name": "test-banner.png",
-      "url": "/uploads/1792741686721-test-banner.png",
-      "size": 89,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-23T07:48:06.721Z"
-    },
-    {
-      "id": "media-1792576276581",
-      "name": "test_banner.png",
-      "url": "/uploads/1792576276580-test_bannerpng.png",
-      "size": 70,
-      "mimeType": "image/png",
-      "uploadedAt": "2026-10-21T09:51:16.581Z"
-    },
-    {
-      "id": "media-1792576261303",
-      "name": "test_banner.png",
-      "url": "/uploads/1792576261302-test_bannerpng.png",
-      "size": 70,
-      "mimeType": "image/png",
-      "uploadedAt": "2026-10-21T09:51:01.303Z"
-    },
-    {
-      "id": "media-1792576206557",
-      "name": "test_banner.png",
-      "url": "/uploads/1792576206557-test_bannerpng.png",
-      "size": 70,
-      "mimeType": "image/png",
-      "uploadedAt": "2026-10-21T09:50:06.558Z"
-    },
-    {
-      "id": "media-1792570622871",
-      "name": "test-case-study-reel.mp4",
-      "url": "/uploads/1792570622871-test-case-study-reelmp4.mp4",
-      "size": 40,
-      "mimeType": "video/mp4",
-      "uploadedAt": "2026-10-21T08:17:02.871Z"
-    },
-    {
-      "id": "media-1792418473799",
-      "name": "images (1).jfif",
-      "url": "/uploads/1792418473798-images1jfif.jpg",
-      "size": 20058,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-19T14:01:13.799Z"
-    },
-    {
-      "id": "media-1792414103538",
-      "name": "WhatsApp Image 2026-10-17 at 18.51.11.jpeg",
-      "url": "/uploads/1792414103537-WhatsAppImage2026-10-17at185111jpeg.jpg",
-      "size": 17152,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-19T12:48:23.538Z"
-    },
-    {
-      "id": "media-1792414092115",
-      "name": "WhatsApp Image 2026-10-17 at 19.48.19.jpeg",
-      "url": "/uploads/1792414092115-WhatsAppImage2026-10-17at194819jpeg.jpg",
-      "size": 23949,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-19T12:48:12.115Z"
-    },
-    {
-      "id": "media-6",
-      "name": "Amazon A+ Storefront Layouts",
-      "url": "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80",
-      "size": 340000,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-15T16:20:00.000Z"
-    },
-    {
-      "id": "media-5",
-      "name": "Brand Identity Editorial Showcase",
-      "url": "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80",
-      "size": 380000,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-14T11:45:00.000Z"
-    },
-    {
-      "id": "media-4",
-      "name": "Cost Efficiency & Strategy Blueprint",
-      "url": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
-      "size": 290000,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-13T09:15:00.000Z"
-    },
-    {
-      "id": "media-3",
-      "name": "Cinematic Studio Reel Camera & Lighting",
-      "url": "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80",
-      "size": 420000,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-12T14:30:00.000Z"
-    },
-    {
-      "id": "media-2",
-      "name": "Performance Ad Campaign Analytics & Growth",
-      "url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
-      "size": 312000,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-11T12:00:00.000Z"
-    },
-    {
-      "id": "media-1",
-      "name": "Zenith Cold Pressed Packaging Bottle",
-      "url": "https://images.unsplash.com/photo-1589365278144-c9e705f843ba?auto=format&fit=crop&w=1200&q=80",
-      "size": 245000,
-      "mimeType": "image/jpeg",
-      "uploadedAt": "2026-10-10T10:00:00.000Z"
     }
   ],
   "contentVersions": [
