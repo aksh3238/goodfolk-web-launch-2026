@@ -2,8 +2,19 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { db, verifyPassword, hashPassword } from './src/server/db';
-import { isCloudinaryConfigured, uploadToCloudinary } from './src/server/cloudinary';
+import {
+  isCloudinaryConfigured,
+  uploadToCloudinary,
+  getCloudinaryVideoUploadSignature,
+  uploadVideoBufferToCloudinary,
+  MAX_VIDEO_UPLOAD_BYTES
+} from './src/server/cloudinary';
 import { isPostgresConfigured } from './src/server/postgres';
+import {
+  validateVideoFile,
+  computeAspectRatioLabel,
+  getCloudinaryVideoPosterUrl
+} from './src/utils/videoMedia';
 import type { BankAccount } from './src/types';
 
 const app = express();
@@ -36,7 +47,7 @@ app.use((req, res, next) => {
   }
 
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Video-Filename');
 
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
@@ -876,9 +887,10 @@ app.post('/api/admin/publish', requireAdmin, (req, res) => {
 });
 
 // Portfolio Projects REST endpoints
-app.post('/api/admin/content/portfolio', requireAdmin, (req, res) => {
+app.post('/api/admin/content/portfolio', requireAdmin, async (req, res) => {
   try {
     const project = db.addPortfolioProject(req.body);
+    await db.syncPortfolioProjectToPostgres(project);
     return res.json({ success: true, project });
   } catch (error) {
     console.error('Error adding project:', error);
@@ -886,10 +898,11 @@ app.post('/api/admin/content/portfolio', requireAdmin, (req, res) => {
   }
 });
 
-app.put('/api/admin/content/portfolio/:id', requireAdmin, (req, res) => {
+app.put('/api/admin/content/portfolio/:id', requireAdmin, async (req, res) => {
   try {
     const project = db.updatePortfolioProject(req.params.id, req.body);
     if (!project) return res.status(404).json({ success: false, error: 'Project not found.' });
+    await db.syncPortfolioProjectToPostgres(project);
     return res.json({ success: true, project });
   } catch (error) {
     console.error('Error updating project:', error);
@@ -1080,6 +1093,160 @@ app.post('/api/admin/upload', requireAdmin, async (req, res) => {
     return res.status(500).json({ success: false, error: 'Failed to process upload.' });
   }
 });
+
+// Signed direct-to-Cloudinary video upload signature (supports up to 100 MB, real-time progress, never uses ephemeral local disk)
+app.post('/api/admin/upload/video-signature', requireAdmin, (req, res) => {
+  try {
+    const { filename, fileSize, mimeType } = req.body || {};
+
+    if (!isCloudinaryConfigured()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Cloud media storage (Cloudinary) is not configured. Video uploads require permanent cloud storage and cannot be saved to temporary local disk.'
+      });
+    }
+
+    if (filename && typeof fileSize === 'number') {
+      const validation = validateVideoFile(
+        { name: String(filename), size: fileSize, type: String(mimeType || '') },
+        MAX_VIDEO_UPLOAD_BYTES
+      );
+      if (!validation.valid) {
+        return res.status(400).json({
+          success: false,
+          error: validation.error || 'Invalid video file.'
+        });
+      }
+    }
+
+    const signed = getCloudinaryVideoUploadSignature();
+    return res.json({
+      success: true,
+      ...signed
+    });
+  } catch (error: any) {
+    console.error('[Video Upload Signature] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: error?.message || 'Failed to generate cloud video upload signature.'
+    });
+  }
+});
+
+// Register a video uploaded directly to Cloudinary into the media library & PostgreSQL
+app.post('/api/admin/upload/video-register', requireAdmin, async (req, res) => {
+  try {
+    const { url, filename, size, format, mimeType } = req.body || {};
+    if (!url || typeof url !== 'string' || !/^https:\/\//i.test(url)) {
+      return res.status(400).json({
+        success: false,
+        error: 'A valid permanent HTTPS cloud video URL is required.'
+      });
+    }
+
+    const normalizedFormat = String(format || 'mp4').toLowerCase();
+    const resolvedMime =
+      mimeType ||
+      (normalizedFormat === 'mov'
+        ? 'video/quicktime'
+        : normalizedFormat === 'webm'
+        ? 'video/webm'
+        : 'video/mp4');
+
+    const mediaItem = db.addMediaItem({
+      name: filename || `Video-${Date.now()}.${normalizedFormat}`,
+      url,
+      size: Number(size) || 0,
+      mimeType: resolvedMime
+    });
+    await db.syncMediaItemToPostgres(mediaItem);
+
+    return res.json({
+      success: true,
+      media: mediaItem
+    });
+  } catch (error: any) {
+    console.error('[Video Register] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: error?.message || 'Failed to register uploaded video.'
+    });
+  }
+});
+
+// Direct raw-binary server-side streaming video upload to Cloudinary (strict cloud-only, never saves to local /uploads/)
+app.post(
+  '/api/admin/upload/video',
+  requireAdmin,
+  express.raw({
+    type: ['video/mp4', 'video/quicktime', 'video/webm', 'application/octet-stream'],
+    limit: '100mb'
+  }),
+  async (req, res) => {
+    try {
+      if (!isCloudinaryConfigured()) {
+        return res.status(503).json({
+          success: false,
+          error: 'Cloud media storage (Cloudinary) is not configured. Video uploads cannot fall back to temporary local storage.'
+        });
+      }
+
+      const buffer = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
+      const rawFilename = String(req.headers['x-video-filename'] || 'portfolio-video.mp4');
+      const filename = decodeURIComponent(rawFilename);
+      const mimeType = String(req.headers['content-type'] || 'video/mp4');
+
+      const validation = validateVideoFile(
+        { name: filename, size: buffer.length, type: mimeType },
+        MAX_VIDEO_UPLOAD_BYTES
+      );
+      if (!validation.valid) {
+        return res.status(400).json({
+          success: false,
+          error: validation.error || 'Invalid video file.'
+        });
+      }
+
+      const result = await uploadVideoBufferToCloudinary(buffer, { filename });
+      const width = result.width;
+      const height = result.height;
+      const resolution = width && height ? `${width} × ${height} px` : undefined;
+      const aspectRatio = width && height ? computeAspectRatioLabel(width, height) : undefined;
+      const poster = result.poster || getCloudinaryVideoPosterUrl(result.url);
+
+      const mediaItem = db.addMediaItem({
+        name: filename,
+        url: result.url,
+        size: result.bytes,
+        mimeType: mimeType.startsWith('video/') ? mimeType : `video/${result.format}`
+      });
+      await db.syncMediaItemToPostgres(mediaItem);
+
+      return res.json({
+        success: true,
+        url: result.url,
+        publicId: result.publicId,
+        filename,
+        format: (result.format || validation.format || 'MP4').toUpperCase(),
+        size: result.bytes,
+        width,
+        height,
+        resolution,
+        aspectRatio,
+        duration: result.duration,
+        poster,
+        uploadedToCloudinary: true,
+        media: mediaItem
+      });
+    } catch (error: any) {
+      console.error('[Video Stream Upload] Error:', error);
+      return res.status(502).json({
+        success: false,
+        error: error?.message || 'Cloudinary video upload failed. No temporary local file was saved.'
+      });
+    }
+  }
+);
 
 // Storage and Database configuration status
 app.get('/api/admin/storage-status', requireAdmin, (_req, res) => {

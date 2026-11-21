@@ -10,10 +10,13 @@ import type {
   CMSPortfolioItem,
   PageBannerConfig,
   PortfolioMediaItem,
-  PortfolioColorSwatch
+  PortfolioColorSwatch,
+  ProjectVideoItem
 } from '../../types';
 import { AssetUploadField } from './AssetUploadField';
+import { PortfolioVideoManager } from './PortfolioVideoManager';
 import { PORTFOLIO_ITEMS, PORTFOLIO_CATEGORIES } from '../../data/portfolio';
+import { getVideoCategoryVariant, getCloudinaryVideoPosterUrl } from '../../utils/videoMedia';
 
 export interface PortfolioTabProps {
   token: string;
@@ -25,6 +28,7 @@ export interface PortfolioTabProps {
   setPortfolioProjects: React.Dispatch<React.SetStateAction<CMSPortfolioItem[]>>;
   onSaveDraft: () => Promise<void>;
   onPublishLive: () => Promise<void>;
+  onRefreshPublicContent?: () => Promise<void>;
   saving: boolean;
 }
 
@@ -38,6 +42,7 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
   setPortfolioProjects,
   onSaveDraft,
   onPublishLive,
+  onRefreshPublicContent,
   saving
 }) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -352,6 +357,7 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
       tagline: 'Brand Direction, Visual Identity & Packaging',
       image: '',
       gallery: [],
+      videos: [],
       clientName: 'Client Brand Name',
       projectYear: '2026',
       isConcept: false,
@@ -398,31 +404,48 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
       return;
     }
 
+    const normalizedVideos: ProjectVideoItem[] = (editingProject.videos || []).map((v, idx) => ({
+      ...v,
+      order: idx + 1
+    }));
+
+    const payload: CMSPortfolioItem = {
+      ...editingProject,
+      videos: normalizedVideos
+    };
+
     try {
       if (isNewProject) {
         const res = await fetch('/api/admin/content/portfolio', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify(editingProject)
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (data.success && data.project) {
-          setPortfolioProjects([...projectsList, data.project]);
-          showToast(`Case study "${data.project.title}" created successfully!`);
-        } else {
-          setPortfolioProjects([...projectsList, editingProject]);
-          showToast(`Case study "${editingProject.title}" saved!`);
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to create case study.');
         }
+        const savedProject = data.project || payload;
+        setPortfolioProjects([...projectsList, savedProject]);
+        showToast(`Case study "${savedProject.title}" created successfully!`);
       } else {
-        await fetch(`/api/admin/content/portfolio/${editingProject.id}`, {
+        const res = await fetch(`/api/admin/content/portfolio/${payload.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify(editingProject)
+          body: JSON.stringify(payload)
         });
-        setPortfolioProjects(projectsList.map(p => p.id === editingProject.id ? editingProject : p));
-        showToast(`Case study "${editingProject.title}" updated successfully!`);
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to update case study.');
+        }
+        const savedProject = data.project || payload;
+        setPortfolioProjects(projectsList.map(p => p.id === savedProject.id ? savedProject : p));
+        showToast(`Case study "${savedProject.title}" updated successfully!`);
       }
       setEditingProject(null);
+      if (onRefreshPublicContent) {
+        await onRefreshPublicContent();
+      }
     } catch (err: any) {
       showToast(err.message || 'Error saving project', 'error');
     }
@@ -431,12 +454,16 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
   const handleDeleteProject = async (id: string, title: string) => {
     if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
     try {
-      await fetch(`/api/admin/content/portfolio/${id}`, {
+      const res = await fetch(`/api/admin/content/portfolio/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (!res.ok) throw new Error('Failed to delete project');
       setPortfolioProjects(projectsList.filter(p => p.id !== id));
       showToast(`Case study "${title}" removed.`);
+      if (onRefreshPublicContent) {
+        await onRefreshPublicContent();
+      }
     } catch (err) {
       showToast('Failed to delete project', 'error');
     }
@@ -788,8 +815,34 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
                                 'Retail Display Counter Visuals'
                               ];
 
+                          const existingVideos: ProjectVideoItem[] = [...(project.videos || [])]
+                            .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+                          // Preserve any legacy single videoUrl inside the multi-video manager for video categories
+                          if (
+                            getVideoCategoryVariant(project.category) &&
+                            project.videoUrl &&
+                            !existingVideos.some(v => v.url === project.videoUrl)
+                          ) {
+                            existingVideos.unshift({
+                              id: `vid-legacy-${project.id}`,
+                              url: project.videoUrl,
+                              title: project.videoTitle || `${project.title} Video`,
+                              caption: project.videoCaption || project.videoTitle || `${project.title} — Showcase Video`,
+                              poster: project.videoPoster || getCloudinaryVideoPosterUrl(project.videoUrl),
+                              order: 1
+                            });
+                          }
+
+                          const normalizedVideos = existingVideos.map((v, idx) => ({
+                            ...v,
+                            order: idx + 1
+                          }));
+
                           setEditingProject({
                             ...project,
+                            videos: normalizedVideos,
+                            videoUrl: getVideoCategoryVariant(project.category) ? '' : project.videoUrl,
                             strategyHeading: project.strategyHeading || 'Brand Strategy & Commercial Problem',
                             strategyDescription: project.strategyDescription || project.brief || '',
                             executionHeading: project.executionHeading || 'Visual Architecture & Creative Execution',
@@ -1167,24 +1220,31 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
                 )}
               </div>
 
-              {/* Optional Video Reel File */}
-              <AssetUploadField
-                label="Optional Video Showcase Reel"
-                sectionName="Portfolio Project Video Reel"
-                mediaType="video"
-                isOptional={true}
-                currentUrl={editingProject.videoUrl}
-                onUpload={async (file) => {
-                  const url = await uploadImageFile(file);
-                  if (url) setEditingProject({ ...editingProject, videoUrl: url });
-                }}
-                onClear={() => setEditingProject({ ...editingProject, videoUrl: '' })}
-                recommendedDimensions="1920 × 1080 px Full HD (Recommended)"
-                aspectRatio="16:9 Widescreen"
-                supportedFormats="MP4, WebM"
-                maxFileSize="100 MB"
-                helpText="Plays inside the project case study detail modal with full audio & fullscreen controls."
-              />
+              {/* Category-Specific Video Upload Manager (Video & Social and Motion Graphic categories only) */}
+              {(() => {
+                const videoVariant = getVideoCategoryVariant(editingProject.category);
+                if (!videoVariant) return null;
+                return (
+                  <PortfolioVideoManager
+                    variant={videoVariant}
+                    token={token}
+                    projectTitle={editingProject.title}
+                    videos={editingProject.videos || []}
+                    onChange={(updatedVideos) =>
+                      setEditingProject((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              videos: updatedVideos,
+                              videoUrl: ''
+                            }
+                          : prev
+                      )
+                    }
+                    showToast={showToast}
+                  />
+                );
+              })()}
 
               {/* PART C: DYNAMIC COLOR PALETTE MANAGER */}
               <div className="p-5 bg-[#F7F7F5] rounded-2xl border border-[#E4D8C8] space-y-4">

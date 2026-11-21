@@ -761,3 +761,59 @@ export async function syncPostgresData(data: DatabaseSchema): Promise<boolean> {
     client.release();
   }
 }
+
+/**
+ * Durably upserts a single portfolio project (including its full videos metadata array)
+ * directly to Neon PostgreSQL so changes survive server restarts immediately.
+ */
+export async function upsertPortfolioProjectToPostgres(project: CMSPortfolioItem): Promise<boolean> {
+  const p = getPostgresPool();
+  if (!p) return false;
+
+  const schemaOk = await ensureSchemaInitialized();
+  if (!schemaOk) return false;
+
+  try {
+    await p.query(
+      `INSERT INTO portfolio_projects (id, data, order_num)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (id) DO UPDATE SET
+         data = EXCLUDED.data,
+         order_num = EXCLUDED.order_num;`,
+      [project.id, JSON.stringify(project), project.order || 1]
+    );
+    return true;
+  } catch (err) {
+    console.error('[Postgres] Error upserting portfolio project:', err);
+    return false;
+  }
+}
+
+/**
+ * Durably upserts a single media_library entry directly to Neon PostgreSQL.
+ */
+export async function upsertMediaItemToPostgres(item: MediaItem): Promise<boolean> {
+  const p = getPostgresPool();
+  if (!p) return false;
+
+  const schemaOk = await ensureSchemaInitialized();
+  if (!schemaOk) return false;
+
+  try {
+    await p.query(
+      `INSERT INTO media_library (id, name, url, size, mime_type, uploaded_at)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (id) DO UPDATE SET
+         name = EXCLUDED.name,
+         url = EXCLUDED.url,
+         size = EXCLUDED.size,
+         mime_type = EXCLUDED.mime_type;`,
+      [item.id, item.name, item.url, item.size || 0, item.mimeType || '', item.uploadedAt || new Date().toISOString()]
+    );
+    return true;
+  } catch (err) {
+    console.error('[Postgres] Error upserting media item:', err);
+    return false;
+  }
+}
+

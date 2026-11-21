@@ -12,7 +12,9 @@ import {
   initPostgresSchema,
   ensureSchemaInitialized,
   loadPostgresData,
-  syncPostgresData
+  syncPostgresData,
+  upsertPortfolioProjectToPostgres,
+  upsertMediaItemToPostgres
 } from './postgres';
 
 const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.resolve(process.cwd(), 'data');
@@ -2469,6 +2471,16 @@ export class Database {
     return this.data.portfolioProjects[idx];
   }
 
+  async syncPortfolioProjectToPostgres(project: CMSPortfolioItem): Promise<boolean> {
+    if (!isPostgresConfigured()) return false;
+    return upsertPortfolioProjectToPostgres(project);
+  }
+
+  async syncMediaItemToPostgres(item: MediaItem): Promise<boolean> {
+    if (!isPostgresConfigured()) return false;
+    return upsertMediaItemToPostgres(item);
+  }
+
   deletePortfolioProject(id: string): boolean {
     const idx = this.data.portfolioProjects.findIndex(p => p.id === id);
     if (idx === -1) return false;
@@ -2604,7 +2616,12 @@ export class Database {
     let inUse = false;
     const itemUrl = item.url;
     if (this.data.siteContent.heroSlides?.some(s => s.imageUrl === itemUrl)) inUse = true;
-    if (this.data.portfolioProjects.some(p => p.image === itemUrl)) inUse = true;
+    if (this.data.portfolioProjects.some(p =>
+      p.image === itemUrl ||
+      p.videoUrl === itemUrl ||
+      p.gallery?.some(g => g.url === itemUrl) ||
+      p.videos?.some(v => v.url === itemUrl)
+    )) inUse = true;
     if (this.data.serviceConcepts?.some(c => c.image === itemUrl)) inUse = true;
 
     if (inUse) {

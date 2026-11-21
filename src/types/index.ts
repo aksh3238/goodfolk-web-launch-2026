@@ -202,10 +202,20 @@ export interface AdminStats {
 export interface ProjectVideoItem {
   id: string;
   url: string;
+  publicId?: string;
+  filename?: string;
+  format?: string;
+  size?: number;
+  width?: number;
+  height?: number;
+  resolution?: string;
+  aspectRatio?: '16:9' | '9:16' | '1:1' | string;
+  duration?: number;
+  order?: number;
   title?: string;
   caption?: string;
   poster?: string;
-  aspectRatio?: '16:9' | '9:16' | '1:1';
+  uploadedAt?: string;
 }
 
 export interface PortfolioMediaItem {

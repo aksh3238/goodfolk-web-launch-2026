@@ -3,7 +3,12 @@ import {
   X, Check, ArrowRight, Play, Pause, Volume2, VolumeX,
   ChevronLeft, ChevronRight, Layers, Sparkles, Tag, ExternalLink, Image as ImageIcon, Video as VideoIcon
 } from 'lucide-react';
-import type { PortfolioMediaItem, CaseStudySection, PortfolioColorSwatch } from '../types';
+import type { PortfolioMediaItem, CaseStudySection, PortfolioColorSwatch, ProjectVideoItem } from '../types';
+import {
+  getVideoOrientation,
+  getCloudinaryVideoPosterUrl,
+  getCloudinaryMp4PlaybackUrl
+} from '../utils/videoMedia';
 
 export interface PortfolioItem {
   id: string;
@@ -16,14 +21,7 @@ export interface PortfolioItem {
   videoPoster?: string;
   videoTitle?: string;
   videoCaption?: string;
-  videos?: Array<{
-    id: string;
-    url: string;
-    title?: string;
-    caption?: string;
-    poster?: string;
-    aspectRatio?: '16:9' | '9:16' | '1:1';
-  }>;
+  videos?: ProjectVideoItem[];
   caseStudySections?: CaseStudySection[];
   associatedServices?: string[];
   brandStrategy?: string;
@@ -60,8 +58,7 @@ interface ProjectDetailModalProps {
 
 export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project, onClose, onOpenLetsTalk }) => {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
-  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [videoMetaDimensions, setVideoMetaDimensions] = useState<Record<string, { width: number; height: number }>>({});
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -72,7 +69,6 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleKeyDown);
       setActiveMediaIndex(0);
-      setIsPlayingVideo(false);
     } else {
       document.body.style.overflow = '';
     }
@@ -85,8 +81,18 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
 
   if (!project) return null;
 
-  // Aggregate media items: primary image + gallery items + video
-  const mediaList: Array<{ type: 'image' | 'video'; url: string; poster?: string; caption?: string; altText?: string }> = [];
+  // Aggregate media items: primary image + ordered videos + gallery items
+  const mediaList: Array<{
+    type: 'image' | 'video';
+    url: string;
+    poster?: string;
+    caption?: string;
+    altText?: string;
+    width?: number;
+    height?: number;
+    aspectRatio?: string;
+    format?: string;
+  }> = [];
 
   // Add primary image
   if (project.image) {
@@ -98,29 +104,37 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
     });
   }
 
-  // Add primary video if present
-  if (project.videoUrl) {
-    mediaList.push({
-      type: 'video',
-      url: project.videoUrl,
-      poster: project.videoPoster || project.image,
-      caption: project.videoCaption || project.videoTitle || `${project.title} — Brand Presentation & Motion Showcase`,
-      altText: project.videoTitle || `${project.title} Brand Video`
-    });
-  }
-
-  // Add multiple custom project videos if configured
+  // Add multiple custom project videos in display order
+  const seenVideoUrls = new Set<string>();
   if (project.videos && project.videos.length > 0) {
-    project.videos.forEach((vid, vIdx) => {
-      if (vid.url && vid.url !== project.videoUrl) {
+    const orderedVideos = [...project.videos].sort((a, b) => (a.order || 0) - (b.order || 0));
+    orderedVideos.forEach((vid, vIdx) => {
+      if (vid.url && !seenVideoUrls.has(vid.url)) {
+        seenVideoUrls.add(vid.url);
         mediaList.push({
           type: 'video',
           url: vid.url,
-          poster: vid.poster || project.videoPoster || project.image,
-          caption: vid.caption || vid.title || `${project.title} — Video Reel 0${vIdx + 1}`,
-          altText: vid.title || `${project.title} Video Reel`
+          poster: vid.poster || getCloudinaryVideoPosterUrl(vid.url) || project.videoPoster || project.image,
+          caption: vid.caption || vid.title || `${project.title} — Video ${vIdx + 1}`,
+          altText: vid.title || `${project.title} Video ${vIdx + 1}`,
+          width: vid.width,
+          height: vid.height,
+          aspectRatio: vid.aspectRatio,
+          format: vid.format
         });
       }
+    });
+  }
+
+  // Add legacy primary video if present and not already included in project.videos
+  if (project.videoUrl && !seenVideoUrls.has(project.videoUrl)) {
+    seenVideoUrls.add(project.videoUrl);
+    mediaList.push({
+      type: 'video',
+      url: project.videoUrl,
+      poster: project.videoPoster || getCloudinaryVideoPosterUrl(project.videoUrl) || project.image,
+      caption: project.videoCaption || project.videoTitle || `${project.title} — Brand Presentation & Motion Showcase`,
+      altText: project.videoTitle || `${project.title} Brand Video`
     });
   }
 
@@ -138,6 +152,18 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
   }
 
   const currentMedia = mediaList[activeMediaIndex] || mediaList[0];
+
+  const handleVideoLoadedMetadata = (url: string, e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const { videoWidth, videoHeight } = e.currentTarget;
+    if (!videoWidth || !videoHeight) return;
+    setVideoMetaDimensions((prev) => {
+      const existing = prev[url];
+      if (existing && existing.width === videoWidth && existing.height === videoHeight) {
+        return prev;
+      }
+      return { ...prev, [url]: { width: videoWidth, height: videoHeight } };
+    });
+  };
 
   // Dynamic Case Study Sections: Brand Strategy & Creative Execution
   const strategyTitle = project.strategyHeading || 'Brand Strategy & Commercial Problem';
@@ -244,17 +270,41 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
           <div className="space-y-3">
             <div className="relative w-full flex items-center justify-center rounded-2xl overflow-hidden bg-[#F7F7F5] border border-[#E6E8ED] shadow-md">
               {currentMedia?.type === 'video' ? (
-                <div className="relative w-full aspect-video max-h-[min(72vh,760px)] lg:max-h-none bg-black flex items-center justify-center">
-                  <video
-                    src={currentMedia.url}
-                    poster={currentMedia.poster}
-                    controls
-                    autoPlay
-                    muted={isMuted}
-                    playsInline
-                    className="w-full h-full object-contain"
-                  />
-                </div>
+                (() => {
+                  const detectedDims = videoMetaDimensions[currentMedia.url];
+                  const resolvedWidth = currentMedia.width || detectedDims?.width;
+                  const resolvedHeight = currentMedia.height || detectedDims?.height;
+                  const orientation = getVideoOrientation(resolvedWidth, resolvedHeight, currentMedia.aspectRatio);
+                  const mp4PlaybackUrl = getCloudinaryMp4PlaybackUrl(currentMedia.url);
+
+                  const videoSizeClasses =
+                    orientation === 'landscape'
+                      ? 'w-full h-auto max-h-[72vh] sm:max-h-[75vh] object-contain'
+                      : orientation === 'portrait'
+                      ? 'w-auto h-auto max-w-full max-h-[72vh] sm:max-h-[76vh] object-contain mx-auto'
+                      : 'w-auto h-auto max-w-full max-h-[70vh] sm:max-h-[72vh] object-contain mx-auto';
+
+                  return (
+                    <div
+                      className={`relative w-full bg-[#0F172A] flex items-center justify-center ${
+                        orientation === 'landscape' ? '' : 'py-2 sm:py-3 px-2'
+                      }`}
+                    >
+                      <video
+                        key={currentMedia.url}
+                        poster={currentMedia.poster}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        onLoadedMetadata={(e) => handleVideoLoadedMetadata(currentMedia.url, e)}
+                        className={videoSizeClasses}
+                      >
+                        {mp4PlaybackUrl && <source src={mp4PlaybackUrl} type="video/mp4" />}
+                        <source src={currentMedia.url} />
+                      </video>
+                    </div>
+                  );
+                })()
               ) : (
                 <img
                   key={currentMedia?.url || activeMediaIndex}
@@ -269,14 +319,14 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                 <>
                   <button
                     onClick={() => setActiveMediaIndex((prev) => (prev > 0 ? prev - 1 : mediaList.length - 1))}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-sm transition-all cursor-pointer shadow-md"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-sm transition-all cursor-pointer shadow-md"
                     aria-label="Previous media"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setActiveMediaIndex((prev) => (prev < mediaList.length - 1 ? prev + 1 : 0))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-sm transition-all cursor-pointer shadow-md"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-sm transition-all cursor-pointer shadow-md"
                     aria-label="Next media"
                   >
                     <ChevronRight className="w-5 h-5" />
@@ -302,20 +352,36 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                   <button
                     key={idx}
                     onClick={() => setActiveMediaIndex(idx)}
-                    className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                    className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer bg-[#0F172A] ${
                       activeMediaIndex === idx
                         ? 'border-[#F07822] shadow-md scale-105'
                         : 'border-[#E6E8ED] opacity-65 hover:opacity-100'
                     }`}
                   >
-                    <img
-                      src={m.type === 'video' ? (m.poster || m.url) : m.url}
-                      alt={`Thumbnail ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    {m.type === 'video' ? (
+                      m.poster ? (
+                        <img
+                          src={m.poster}
+                          alt={`Video thumbnail ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-[#173B75] flex items-center justify-center">
+                          <VideoIcon className="w-5 h-5 text-white/80" />
+                        </div>
+                      )
+                    ) : (
+                      <img
+                        src={m.url}
+                        alt={`Thumbnail ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                     {m.type === 'video' && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <VideoIcon className="w-4 h-4 text-white" />
+                        <div className="w-6 h-6 rounded-full bg-white/90 text-[#173B75] flex items-center justify-center shadow-xs">
+                          <Play className="w-3 h-3 fill-[#F07822] text-[#F07822] ml-0.5" />
+                        </div>
                       </div>
                     )}
                   </button>

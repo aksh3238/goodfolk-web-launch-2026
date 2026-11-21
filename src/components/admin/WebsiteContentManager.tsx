@@ -437,6 +437,7 @@ export const WebsiteContentManager: React.FC<WebsiteContentManagerProps> = ({ to
             {...commonTabProps}
             portfolioProjects={portfolioProjects}
             setPortfolioProjects={setPortfolioProjects}
+            onRefreshPublicContent={refreshContent}
           />
         )}
 
