@@ -16,6 +16,7 @@ import {
   upsertPortfolioProjectToPostgres,
   upsertMediaItemToPostgres
 } from './postgres';
+import { PORTFOLIO_CATEGORIES, mapLegacyPortfolioCategory } from '../data/portfolio';
 
 const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.resolve(process.cwd(), 'data');
 const DB_FILE = path.join(DATA_DIR, 'database.json');
@@ -93,18 +94,7 @@ function getInitialData(): DatabaseSchema {
       contactInstagram: 'https://www.instagram.com/goodfolksolution/',
       ctaHeadline: 'Ready to Build Something Great?',
       ctaSubheadline: "Have a project in mind? Let's turn your ideas into impactful creative work.",
-      portfolioCategories: [
-        'All',
-        'Packaging',
-        'Branding',
-        'Creative Design',
-        'Performance Marketing',
-        'Video & Social',
-        'Website & UI/UX',
-        'Branding & Packaging',
-        'Motion Graphics',
-        'Presentation Design'
-      ],
+      portfolioCategories: ['All', ...PORTFOLIO_CATEGORIES],
       processSteps: [
         {
           id: 'step-1',
@@ -773,7 +763,7 @@ function getInitialData(): DatabaseSchema {
       {
         id: 'zenith-botanicals',
         title: 'Zenith Artisanal Elixirs',
-        category: 'Packaging',
+        category: 'Branding & Packaging',
         tagline: 'Luxury cold-pressed juice packaging, tactile label dielines and brand identity system.',
         // Fixed reliable working Unsplash packaging image (verified HTTP 200)
         image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80',
@@ -799,7 +789,7 @@ function getInitialData(): DatabaseSchema {
       {
         id: 'aeris-skincare',
         title: 'Aeris Botanical Skincare',
-        category: 'Branding',
+        category: 'Branding & Packaging',
         tagline: 'Minimalist skincare visual identity, frosted cosmetic bottles and retail visual system.',
         image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1200&q=80',
         isConcept: true,
@@ -849,7 +839,7 @@ function getInitialData(): DatabaseSchema {
       {
         id: 'lumina-sound',
         title: 'Lumina Wireless Audio Campaign',
-        category: 'Performance Marketing',
+        category: 'Performance Marketing Creatives',
         tagline: 'Conversion-engineered Meta and Google paid ad creative matrix featuring motion variations.',
         image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80',
         isConcept: true,
@@ -874,7 +864,7 @@ function getInitialData(): DatabaseSchema {
       {
         id: 'roast-republic',
         title: 'Roast Republic Coffee Roasters',
-        category: 'Packaging',
+        category: 'Branding & Packaging',
         tagline: 'Artisanal compostable coffee pouch packaging, roast level iconography and retail boxes.',
         image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=1200&q=80',
         isConcept: true,
@@ -899,7 +889,7 @@ function getInitialData(): DatabaseSchema {
       {
         id: 'aurora-fashion',
         title: 'Aurora Studio Summer Campaign',
-        category: 'Video & Social',
+        category: 'Digital Marketing & Social Media Management',
         tagline: 'High-energy fashion reels, lookbook photography editing and organic social campaign rollout.',
         image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80',
         isConcept: true,
@@ -924,7 +914,7 @@ function getInitialData(): DatabaseSchema {
       {
         id: 'veloce-mobility',
         title: 'Veloce Urban Mobility Platform',
-        category: 'Website & UI/UX',
+        category: 'Website & UI/UX Design',
         tagline: 'Modern electric mobility booking web application, responsive dashboard and brand design system.',
         image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80',
         isConcept: true,
@@ -980,7 +970,7 @@ function getInitialData(): DatabaseSchema {
       {
         id: 'stride-performance',
         title: 'Stride Athletic Motion Graphics',
-        category: 'Motion Graphics',
+        category: 'Motion Graphics & Animation',
         tagline: 'Kinetic 3D footwear motion ads, dynamic typography reveals and 60fps social campaign visuals.',
         image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
         isConcept: true,
@@ -1008,7 +998,7 @@ function getInitialData(): DatabaseSchema {
       {
         id: 'novanutrition-deck',
         title: 'Nova Nutrition Series A Investor Deck',
-        category: 'Presentation Design',
+        category: 'Presentation & Pitch Deck Design',
         tagline: '28-slide investor pitch presentation, market opportunity models and branded presentation system.',
         image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80',
         isConcept: true,
@@ -1476,6 +1466,8 @@ export class Database {
           }
         });
 
+        // Standardize portfolio categories and safely map existing project categories
+        this.normalizePortfolioCategories();
         this.saveToDiskOnly();
       } catch (err) {
         console.error('Error reading database, creating new data file', err);
@@ -1512,6 +1504,68 @@ export class Database {
     }
   }
 
+  private normalizePortfolioCategories(): { changed: boolean; migratedProjects: CMSPortfolioItem[] } {
+    let changed = false;
+    const migratedProjects: CMSPortfolioItem[] = [];
+    const expectedCategories = ['All', ...PORTFOLIO_CATEGORIES];
+    const currentCategories = this.data.siteContent?.portfolioCategories || [];
+
+    const categoriesMatch =
+      currentCategories.length === expectedCategories.length &&
+      currentCategories.every((cat, idx) => cat === expectedCategories[idx]);
+
+    if (!categoriesMatch) {
+      this.data.siteContent.portfolioCategories = expectedCategories;
+      changed = true;
+    }
+
+    for (const project of this.data.portfolioProjects || []) {
+      let projectChanged = false;
+      const result = mapLegacyPortfolioCategory(project.category);
+
+      if (result.mapped && result.wasMapped) {
+        console.log(
+          `[Database] Mapped portfolio project "${project.id}" category: "${project.category}" -> "${result.mapped}"`
+        );
+        project.category = result.mapped;
+        projectChanged = true;
+      } else if (!result.isStandard) {
+        console.warn(
+          `[Database] Portfolio project "${project.id}" has unrecognized category "${project.category}". Retained intact for manual selection.`
+        );
+      }
+
+      if (Array.isArray(project.associatedServices) && project.associatedServices.length > 0) {
+        const normalizedServices: string[] = [];
+        for (const svc of project.associatedServices) {
+          const svcMap = mapLegacyPortfolioCategory(svc);
+          const resolved = svcMap.mapped || svc;
+          if (
+            PORTFOLIO_CATEGORIES.includes(resolved) &&
+            resolved !== project.category &&
+            !normalizedServices.includes(resolved)
+          ) {
+            normalizedServices.push(resolved);
+          }
+        }
+        const sameServices =
+          normalizedServices.length === project.associatedServices.length &&
+          normalizedServices.every((s, idx) => s === project.associatedServices![idx]);
+        if (!sameServices) {
+          project.associatedServices = normalizedServices;
+          projectChanged = true;
+        }
+      }
+
+      if (projectChanged) {
+        changed = true;
+        migratedProjects.push(project);
+      }
+    }
+
+    return { changed, migratedProjects };
+  }
+
   async initPostgres(): Promise<void> {
     if (!isPostgresConfigured()) {
       console.log('[Database] Operating with local JSON storage (DATABASE_URL not set).');
@@ -1528,9 +1582,21 @@ export class Database {
       if (pgData && pgData.owner) {
         console.log('[Database] Hydrated in-memory state from PostgreSQL.');
         this.data = pgData;
+        const migration = this.normalizePortfolioCategories();
         this.saveToDiskOnly();
+        if (migration.changed) {
+          console.log(
+            `[Database] Persisting standardized portfolio categories & ${migration.migratedProjects.length} mapped project(s) to PostgreSQL...`
+          );
+          for (const proj of migration.migratedProjects) {
+            await upsertPortfolioProjectToPostgres(proj);
+          }
+          await syncPostgresData(this.data);
+          console.log('[Database] Portfolio category migration persisted to PostgreSQL.');
+        }
       } else {
         console.log('[Database] PostgreSQL database is empty. Auto-seeding from local database.json...');
+        this.normalizePortfolioCategories();
         await syncPostgresData(this.data);
         console.log('[Database] Auto-seed to PostgreSQL complete.');
       }

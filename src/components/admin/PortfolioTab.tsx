@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   ChevronDown, ChevronUp, Save, Eye, EyeOff, Upload, Trash2, Plus,
   Sparkles, Layers, Image as ImageIcon, ArrowUp, ArrowDown, Edit,
   RefreshCw, CheckCircle2, Tag, Video as VideoIcon, X, Star, Check,
-  Palette, RotateCcw
+  Palette, RotateCcw, AlertCircle
 } from 'lucide-react';
 import type {
   CMSSiteContent,
@@ -55,9 +55,10 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
 
   const [editingProject, setEditingProject] = useState<CMSPortfolioItem | null>(null);
   const [isNewProject, setIsNewProject] = useState(false);
-  const [newCategoryInput, setNewCategoryInput] = useState('');
   const [selectedFilterCategory, setSelectedFilterCategory] = useState('All');
   const [galleryUploading, setGalleryUploading] = useState(false);
+  const [replacingGalleryIdx, setReplacingGalleryIdx] = useState<number | null>(null);
+  const replaceGalleryInputRef = useRef<HTMLInputElement>(null);
   const [newGalleryUrlInput, setNewGalleryUrlInput] = useState('');
   const [newDeliverableInput, setNewDeliverableInput] = useState('');
 
@@ -128,6 +129,56 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
     const currentGallery = [...(editingProject.gallery || [])];
     currentGallery[gIdx] = { ...currentGallery[gIdx], caption };
     setEditingProject({ ...editingProject, gallery: currentGallery });
+  };
+
+  const handleReplaceGalleryImage = async (file: File | null, gIdx: number) => {
+    if (!file || !editingProject) return;
+    setGalleryUploading(true);
+    try {
+      const url = await uploadImageFile(file);
+      if (url) {
+        setEditingProject((prev) => {
+          if (!prev) return prev;
+          const currentGallery = [...(prev.gallery || [])];
+          const oldItem = currentGallery[gIdx];
+          if (!oldItem) return prev;
+          const wasCover = prev.image === oldItem.url;
+          currentGallery[gIdx] = {
+            ...oldItem,
+            url,
+            title: file.name.replace(/\.[^/.]+$/, '') || oldItem.title
+          };
+          return {
+            ...prev,
+            gallery: currentGallery,
+            image: wasCover ? url : prev.image
+          };
+        });
+        showToast(`Gallery image #${gIdx + 1} replaced!`, 'success');
+      }
+    } catch (err) {
+      console.error('Failed to replace gallery image', err);
+      showToast('Failed to replace gallery image.', 'error');
+    } finally {
+      setGalleryUploading(false);
+      setReplacingGalleryIdx(null);
+    }
+  };
+
+  const handleToggleAdditionalService = (serviceName: string) => {
+    setEditingProject((prev) => {
+      if (!prev) return prev;
+      if (serviceName === prev.category) return prev;
+      const current = prev.associatedServices || [];
+      const exists = current.includes(serviceName);
+      const updated = exists
+        ? current.filter((s) => s !== serviceName)
+        : [...current, serviceName];
+      return {
+        ...prev,
+        associatedServices: updated
+      };
+    });
   };
 
   const handleAddGalleryUrl = () => {
@@ -287,39 +338,8 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
     });
   };
 
-  // Categories
-  const categories: string[] = (siteContent.portfolioCategories && siteContent.portfolioCategories.length > 0)
-    ? siteContent.portfolioCategories
-    : ['All', 'Branding', 'Packaging', 'Creative Design', 'E-commerce', 'Performance Marketing', 'Video & Social'];
-
-  const handleAddCategory = () => {
-    if (!newCategoryInput.trim()) return;
-    const clean = newCategoryInput.trim();
-    if (!categories.includes(clean)) {
-      const updated = [...categories, clean];
-      onUpdateSiteContent({
-        ...siteContent,
-        portfolioCategories: updated
-      });
-      fetch('/api/admin/content/portfolio/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ category: clean })
-      }).catch(console.error);
-      showToast(`Category "${clean}" added!`);
-    }
-    setNewCategoryInput('');
-  };
-
-  const handleDeleteCategory = (cat: string) => {
-    if (cat === 'All') return;
-    const updated = categories.filter(c => c !== cat);
-    onUpdateSiteContent({
-      ...siteContent,
-      portfolioCategories: updated
-    });
-    showToast(`Category "${cat}" removed.`);
-  };
+  // Standardized Portfolio Categories (10 Services-aligned categories + 'All')
+  const categories: string[] = ['All', ...PORTFOLIO_CATEGORIES];
 
   // Projects CRUD
   const initialProjects: CMSPortfolioItem[] = (portfolioProjects && portfolioProjects.length > 0)
@@ -353,11 +373,12 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
     setEditingProject({
       id: `prj-${Date.now()}`,
       title: 'New Case Study Project',
-      category: PORTFOLIO_CATEGORIES[0] || 'Packaging',
+      category: PORTFOLIO_CATEGORIES[0] || 'Branding & Packaging',
       tagline: 'Brand Direction, Visual Identity & Packaging',
       image: '',
       gallery: [],
       videos: [],
+      associatedServices: [],
       clientName: 'Client Brand Name',
       projectYear: '2026',
       isConcept: false,
@@ -403,14 +424,23 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
       showToast('Project title is required', 'error');
       return;
     }
+    if (!editingProject.category || !PORTFOLIO_CATEGORIES.includes(editingProject.category)) {
+      showToast('Please select a valid Primary Category from the 10 standardized categories.', 'error');
+      return;
+    }
 
     const normalizedVideos: ProjectVideoItem[] = (editingProject.videos || []).map((v, idx) => ({
       ...v,
       order: idx + 1
     }));
 
+    const cleanedAdditionalServices = (editingProject.associatedServices || []).filter(
+      (s) => PORTFOLIO_CATEGORIES.includes(s) && s !== editingProject.category
+    );
+
     const payload: CMSPortfolioItem = {
       ...editingProject,
+      associatedServices: cleanedAdditionalServices,
       videos: normalizedVideos
     };
 
@@ -643,42 +673,27 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
 
         {openSections.categories && (
           <div className="p-6 space-y-4">
+            <p className="text-xs text-[#252A34]/75">
+              Portfolio categories are synchronized with the 10 standardized Goodfolk Solution Services to keep case studies cleanly organized across the Admin Console and public Portfolio filters.
+            </p>
             <div className="flex flex-wrap items-center gap-2">
-              {categories.map((cat) => (
+              {categories.map((cat, idx) => (
                 <div
                   key={cat}
-                  className="px-3.5 py-1.5 rounded-full bg-[#F7F7F5] border border-[#E4D8C8] text-xs font-semibold text-[#173B75] flex items-center gap-2"
+                  className={`px-3.5 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 ${
+                    cat === 'All'
+                      ? 'bg-[#173B75] text-white border-[#173B75]'
+                      : 'bg-[#F7F7F5] border-[#E4D8C8] text-[#173B75]'
+                  }`}
                 >
-                  <span>{cat}</span>
                   {cat !== 'All' && (
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteCategory(cat)}
-                      className="text-[#252A34]/40 hover:text-red-500 cursor-pointer"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+                    <span className="font-mono text-[10px] text-[#F07822] font-bold">
+                      {String(idx).padStart(2, '0')}
+                    </span>
                   )}
+                  <span>{cat}</span>
                 </div>
               ))}
-            </div>
-
-            <div className="flex items-center gap-2 pt-2">
-              <input
-                type="text"
-                placeholder="Enter new category name (e.g. 3D Animation, FMCG Packaging)..."
-                value={newCategoryInput}
-                onChange={(e) => setNewCategoryInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
-                className="flex-1 px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs bg-white"
-              />
-              <button
-                type="button"
-                onClick={handleAddCategory}
-                className="px-4 py-2 bg-[#173B75] text-white text-xs font-bold rounded-xl hover:bg-[#123163] cursor-pointer"
-              >
-                Add Category
-              </button>
             </div>
           </div>
         )}
@@ -711,17 +726,12 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
                   className="px-3 py-1.5 border border-[#E4D8C8] rounded-xl text-xs bg-white"
                 >
                   <option value="All">All Categories</option>
-                  {PORTFOLIO_CATEGORIES.map(c => (
+                  {PORTFOLIO_CATEGORIES.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
-                  {/* Safely handle filtering for any legacy or custom category outside standard 9 */}
-                  {projectsList
-                    .map(p => p.category)
-                    .filter(c => c && !PORTFOLIO_CATEGORIES.includes(c) && c !== 'All')
-                    .filter((c, idx, arr) => arr.indexOf(c) === idx)
-                    .map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
+                  {projectsList.some(p => !PORTFOLIO_CATEGORIES.includes(p.category)) && (
+                    <option value="__NEEDS_REVIEW__">Needs Category Selection</option>
+                  )}
                 </select>
               </div>
 
@@ -737,11 +747,23 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
 
             <div className="space-y-4">
               {projectsList
-                .filter(p => selectedFilterCategory === 'All' || p.category === selectedFilterCategory)
-                .map((project, idx) => (
+                .filter(p => {
+                  if (selectedFilterCategory === 'All') return true;
+                  if (selectedFilterCategory === '__NEEDS_REVIEW__') {
+                    return !PORTFOLIO_CATEGORIES.includes(p.category);
+                  }
+                  return p.category === selectedFilterCategory;
+                })
+                .map((project, idx) => {
+                  const needsCategorySelection = !PORTFOLIO_CATEGORIES.includes(project.category);
+                  return (
                   <div
                     key={project.id || idx}
-                    className="p-5 rounded-2xl bg-[#F7F7F5] border border-[#E4D8C8] flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    className={`p-5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                      needsCategorySelection
+                        ? 'bg-amber-50/70 border-amber-300'
+                        : 'bg-[#F7F7F5] border-[#E4D8C8]'
+                    }`}
                   >
                     <div className="flex items-start gap-4 flex-1">
                       {project.image ? (
@@ -759,8 +781,19 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#173B75] text-white">
-                            {project.category}
+                            {project.category || 'Uncategorized'}
                           </span>
+                          {needsCategorySelection && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3" />
+                              Needs Category Selection
+                            </span>
+                          )}
+                          {project.associatedServices && project.associatedServices.length > 0 && (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#E8EFF8] text-[#173B75]">
+                              +{project.associatedServices.length} Additional Service{project.associatedServices.length > 1 ? 's' : ''}
+                            </span>
+                          )}
                           <span className="text-[10px] text-[#252A34]/60 font-mono">
                             Client: {project.clientName || 'Confidential'} · Year: {project.projectYear || '2026'}
                           </span>
@@ -878,7 +911,8 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
                       </button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
         )}
@@ -917,20 +951,101 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#173B75] mb-1">Category</label>
+                  <label className="block text-xs font-bold text-[#173B75] mb-1">
+                    Primary Category <span className="text-[#F07822]">*</span>
+                  </label>
                   <select
-                    value={editingProject.category}
-                    onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-[#E4D8C8] rounded-xl text-xs bg-white"
+                    required
+                    value={PORTFOLIO_CATEGORIES.includes(editingProject.category) ? editingProject.category : ''}
+                    onChange={(e) => {
+                      const nextCategory = e.target.value;
+                      setEditingProject((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              category: nextCategory,
+                              associatedServices: (prev.associatedServices || []).filter(
+                                (s) => s !== nextCategory
+                              )
+                            }
+                          : prev
+                      );
+                    }}
+                    className={`w-full px-3 py-2 border rounded-xl text-xs bg-white ${
+                      !PORTFOLIO_CATEGORIES.includes(editingProject.category)
+                        ? 'border-amber-400 ring-2 ring-amber-200'
+                        : 'border-[#E4D8C8]'
+                    }`}
                   >
-                    {/* Safely preserve existing project category if outside standard 9 */}
-                    {editingProject.category && !PORTFOLIO_CATEGORIES.includes(editingProject.category) && (
-                      <option value={editingProject.category}>{editingProject.category} (Current)</option>
+                    {!PORTFOLIO_CATEGORIES.includes(editingProject.category) && (
+                      <option value="" disabled>
+                        Select standardized category (Current: {editingProject.category || 'None'})
+                      </option>
                     )}
-                    {PORTFOLIO_CATEGORIES.map(c => (
+                    {PORTFOLIO_CATEGORIES.map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
+                  {!PORTFOLIO_CATEGORIES.includes(editingProject.category) && (
+                    <p className="mt-1 text-[11px] text-amber-700 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>
+                        Legacy category "{editingProject.category}" retained for safety. Select one of the 10 standardized categories before saving.
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Optional Multi-Select Additional Services (uses Services categories as source of truth) */}
+              <div className="p-4 bg-[#F7F7F5] rounded-2xl border border-[#E4D8C8] space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <label className="block text-xs font-bold text-[#173B75]">
+                      Additional Services <span className="text-[10px] font-normal text-[#252A34]/60">(Optional · Multi-Select)</span>
+                    </label>
+                    <p className="text-[11px] text-[#252A34]/70">
+                      Associate secondary Goodfolk Solution services delivered in this case study without duplicating the Primary Category.
+                    </p>
+                  </div>
+                  {(editingProject.associatedServices?.length || 0) > 0 && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#173B75] text-white shrink-0">
+                      {editingProject.associatedServices?.length} Selected
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {PORTFOLIO_CATEGORIES.map((serviceName) => {
+                    const isPrimary = editingProject.category === serviceName;
+                    const isSelected = (editingProject.associatedServices || []).includes(serviceName);
+                    return (
+                      <button
+                        key={serviceName}
+                        type="button"
+                        disabled={isPrimary}
+                        onClick={() => handleToggleAdditionalService(serviceName)}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
+                          isPrimary
+                            ? 'bg-[#E8EFF8] border-[#173B75]/30 text-[#173B75]/60 cursor-not-allowed'
+                            : isSelected
+                            ? 'bg-[#173B75] border-[#173B75] text-white shadow-2xs cursor-pointer'
+                            : 'bg-white border-[#E4D8C8] text-[#252A34]/80 hover:border-[#173B75] cursor-pointer'
+                        }`}
+                        title={isPrimary ? 'Currently selected as Primary Category' : `Toggle ${serviceName}`}
+                      >
+                        {isPrimary ? (
+                          <Star className="w-3 h-3 text-[#F07822] fill-[#F07822]" />
+                        ) : isSelected ? (
+                          <Check className="w-3 h-3 text-[#F07822]" />
+                        ) : (
+                          <Plus className="w-3 h-3 text-[#252A34]/40" />
+                        )}
+                        <span>{serviceName}</span>
+                        {isPrimary && <span className="text-[9px] uppercase font-mono opacity-80">(Primary)</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1053,16 +1168,35 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
 
               {/* Multi-Image Project Gallery Section (10+ Images Supported) */}
               <div className="p-5 bg-[#F7F7F5] rounded-2xl border border-[#E4D8C8] space-y-4">
+                <input
+                  ref={replaceGalleryInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const selected = e.target.files?.[0] || null;
+                    if (selected && replacingGalleryIdx !== null) {
+                      handleReplaceGalleryImage(selected, replacingGalleryIdx);
+                    }
+                    e.target.value = '';
+                  }}
+                  className="hidden"
+                />
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E4D8C8]">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-[#173B75]">Project Multi-Image Gallery</h4>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-xs font-bold text-[#173B75]">
+                        {getVideoCategoryVariant(editingProject.category) === 'digital-social'
+                          ? 'Social Media Creatives & Multi-Image Gallery'
+                          : 'Project Multi-Image Gallery'}
+                      </h4>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#173B75] text-white">
                         {editingProject.gallery?.length || 0} Images
                       </span>
                     </div>
                     <p className="text-[11px] text-[#252A34]/70">
-                      Upload 10+ showcase images, dielines, packaging angles, reorder, and assign cover.
+                      {getVideoCategoryVariant(editingProject.category) === 'digital-social'
+                        ? 'Upload multiple social media creatives, carousels, and grid posts. Preview, replace, reorder, assign cover, or remove.'
+                        : 'Upload 10+ showcase images, dielines, packaging angles, replace, reorder, and assign cover.'}
                     </p>
                   </div>
 
@@ -1180,6 +1314,18 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
                               )}
 
                               <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  disabled={galleryUploading}
+                                  onClick={() => {
+                                    setReplacingGalleryIdx(gIdx);
+                                    replaceGalleryInputRef.current?.click();
+                                  }}
+                                  className="px-1.5 py-0.5 bg-[#EEF2F9] hover:bg-[#173B75] text-[#173B75] hover:text-white rounded text-[10px] font-bold transition-colors disabled:opacity-30 cursor-pointer"
+                                  title="Replace Image"
+                                >
+                                  Replace
+                                </button>
                                 <button
                                   type="button"
                                   disabled={gIdx === 0}

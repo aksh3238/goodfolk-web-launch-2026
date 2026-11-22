@@ -1,4 +1,4 @@
-export type VideoCategoryVariant = 'video-social' | 'motion-graphic';
+export type VideoCategoryVariant = 'video-production' | 'digital-social' | 'motion-graphics';
 
 export const RECOMMENDED_VIDEO_MAX_BYTES = 50 * 1024 * 1024; // 50 MB recommended
 export const MAX_VIDEO_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 MB Cloudinary video limit
@@ -11,16 +11,22 @@ export const ALLOWED_VIDEO_MIME_TYPES = [
 ] as const;
 
 /**
- * Determines whether a portfolio category should display a dedicated video upload section.
- * Matches "Video & Social" and "Motion Graphics" / "Motion Graphic" (case-insensitive).
+ * Determines whether a standardized portfolio category should display a dedicated video upload section:
+ * - Video Production & Editing -> 'video-production'
+ * - Digital Marketing & Social Media Management -> 'digital-social'
+ * - Motion Graphics & Animation -> 'motion-graphics'
+ * - All other categories -> null (image-only)
  */
 export function getVideoCategoryVariant(category?: string): VideoCategoryVariant | null {
   const normalized = (category || '').trim().toLowerCase();
-  if (normalized === 'video & social' || normalized === 'video and social') {
-    return 'video-social';
+  if (normalized === 'video production & editing') {
+    return 'video-production';
   }
-  if (normalized === 'motion graphics' || normalized === 'motion graphic') {
-    return 'motion-graphic';
+  if (normalized === 'digital marketing & social media management') {
+    return 'digital-social';
+  }
+  if (normalized === 'motion graphics & animation') {
+    return 'motion-graphics';
   }
   return null;
 }

@@ -17,9 +17,7 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ onOpenLetsTalk, on
   const [selectedProject, setSelectedProject] = useState<PortfolioItem | null>(null);
   const { portfolioProjects, siteContent } = useSiteContent();
 
-  const filters = (siteContent.portfolioCategories && siteContent.portfolioCategories.length > 0)
-    ? siteContent.portfolioCategories
-    : ['All', ...PORTFOLIO_CATEGORIES];
+  const filters = ['All', ...PORTFOLIO_CATEGORIES];
 
   const sourceItems: PortfolioItem[] = (portfolioProjects && portfolioProjects.length > 0)
     ? portfolioProjects
@@ -62,9 +60,6 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ onOpenLetsTalk, on
 
   const filteredItems = sourceItems.filter(item => {
     if (activeFilter === 'All') return true;
-    if (activeFilter === 'E-commerce') {
-      return item.category === 'Creative Design' || item.category === 'Packaging' || (item as any).category === 'E-commerce';
-    }
     return item.category === activeFilter;
   });
 
@@ -99,9 +94,6 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ onOpenLetsTalk, on
           {filters.map(filter => {
             const count = sourceItems.filter(item => {
               if (filter === 'All') return true;
-              if (filter === 'E-commerce') {
-                return item.category === 'Creative Design' || item.category === 'Packaging' || (item as any).category === 'E-commerce';
-              }
               return item.category === filter;
             }).length;
 

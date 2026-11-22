@@ -1,22 +1,87 @@
 import { PortfolioItem } from '../components/ProjectDetailModal';
+import { SERVICES_DATA } from './services';
 
-export const PORTFOLIO_CATEGORIES: string[] = [
-  'Packaging',
-  'Branding',
-  'Creative Design',
-  'Performance Marketing',
-  'Video & Social',
-  'Website & UI/UX',
-  'Branding & Packaging',
-  'Motion Graphics',
-  'Presentation Design'
-];
+/**
+ * Canonical 10 Portfolio Categories — derived directly from Services (single source of truth)
+ * in exact order:
+ *  1. Branding & Packaging
+ *  2. Creative Design
+ *  3. Performance Marketing Creatives
+ *  4. Video Production & Editing
+ *  5. Digital Marketing & Social Media Management
+ *  6. Website & UI/UX Design
+ *  7. E-commerce & Marketplace Creative Design
+ *  8. Motion Graphics & Animation
+ *  9. Print & Marketing Collateral
+ * 10. Presentation & Pitch Deck Design
+ */
+export const PORTFOLIO_CATEGORIES: string[] = SERVICES_DATA.map((service) => service.title);
+
+const LEGACY_CATEGORY_MAP: Record<string, string> = {
+  'branding': 'Branding & Packaging',
+  'packaging': 'Branding & Packaging',
+  'branding & packaging': 'Branding & Packaging',
+  'creative design': 'Creative Design',
+  'performance marketing': 'Performance Marketing Creatives',
+  'performance marketing creatives': 'Performance Marketing Creatives',
+  'video production': 'Video Production & Editing',
+  'video production & editing': 'Video Production & Editing',
+  'video & social': 'Digital Marketing & Social Media Management',
+  'video and social': 'Digital Marketing & Social Media Management',
+  'digital marketing & social media': 'Digital Marketing & Social Media Management',
+  'digital marketing & social media management': 'Digital Marketing & Social Media Management',
+  'website & ui/ux': 'Website & UI/UX Design',
+  'website & ui/ux design': 'Website & UI/UX Design',
+  'e-commerce': 'E-commerce & Marketplace Creative Design',
+  'ecommerce': 'E-commerce & Marketplace Creative Design',
+  'e-commerce & marketplace creative design': 'E-commerce & Marketplace Creative Design',
+  'motion graphic': 'Motion Graphics & Animation',
+  'motion graphics': 'Motion Graphics & Animation',
+  'motion graphics & animation': 'Motion Graphics & Animation',
+  'print': 'Print & Marketing Collateral',
+  'print & production': 'Print & Marketing Collateral',
+  'print & marketing collateral': 'Print & Marketing Collateral',
+  'presentation design': 'Presentation & Pitch Deck Design',
+  'presentation & pitch decks': 'Presentation & Pitch Deck Design',
+  'presentation & pitch deck design': 'Presentation & Pitch Deck Design'
+};
+
+/**
+ * Safely maps legacy portfolio category labels to the exact standardized category.
+ * Returns mapped=null when a category cannot be confidently mapped so the record is
+ * retained intact and flagged for manual selection rather than deleted or guessed.
+ */
+export function mapLegacyPortfolioCategory(category?: string): {
+  mapped: string | null;
+  isStandard: boolean;
+  wasMapped: boolean;
+} {
+  const trimmed = (category || '').trim();
+  if (!trimmed) {
+    return { mapped: null, isStandard: false, wasMapped: false };
+  }
+  const exactStandard = PORTFOLIO_CATEGORIES.find(
+    (c) => c.toLowerCase() === trimmed.toLowerCase()
+  );
+  if (exactStandard) {
+    return {
+      mapped: exactStandard,
+      isStandard: true,
+      wasMapped: exactStandard !== trimmed
+    };
+  }
+  const mapped = LEGACY_CATEGORY_MAP[trimmed.toLowerCase()] || null;
+  if (mapped) {
+    return { mapped, isStandard: true, wasMapped: true };
+  }
+  return { mapped: null, isStandard: false, wasMapped: false };
+}
 
 export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     id: 'zenith-botanicals',
     title: 'Zenith Artisanal Elixirs',
-    category: 'Packaging',
+    category: 'Branding & Packaging',
     tagline: 'Luxury cold-pressed juice packaging, tactile label dielines and brand identity system.',
     image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=1200&q=80',
     isConcept: true,
@@ -49,7 +114,7 @@ export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     id: 'aeris-skincare',
     title: 'Aeris Botanical Skincare',
-    category: 'Branding',
+    category: 'Branding & Packaging',
     tagline: 'Minimalist skincare visual identity, frosted cosmetic bottles and retail visual system.',
     image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1200&q=80',
     isConcept: true,
@@ -102,7 +167,7 @@ export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     id: 'lumina-sound',
     title: 'Lumina Wireless Audio Campaign',
-    category: 'Performance Marketing',
+    category: 'Performance Marketing Creatives',
     tagline: 'Conversion-engineered Meta and Google paid ad creative matrix featuring motion variations.',
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80',
     isConcept: true,
@@ -127,7 +192,7 @@ export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     id: 'roast-republic',
     title: 'Roast Republic Coffee Roasters',
-    category: 'Packaging',
+    category: 'Branding & Packaging',
     tagline: 'Artisanal compostable coffee pouch packaging, roast level iconography and retail boxes.',
     image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=1200&q=80',
     isConcept: true,
@@ -152,7 +217,7 @@ export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     id: 'aurora-fashion',
     title: 'Aurora Studio Summer Campaign',
-    category: 'Video & Social',
+    category: 'Digital Marketing & Social Media Management',
     tagline: 'High-energy fashion reels, lookbook photography editing and organic social campaign rollout.',
     image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80',
     isConcept: true,
@@ -177,7 +242,7 @@ export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     id: 'veloce-mobility',
     title: 'Veloce Urban Mobility Platform',
-    category: 'Website & UI/UX',
+    category: 'Website & UI/UX Design',
     tagline: 'Modern electric mobility booking web application, responsive dashboard and brand design system.',
     image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80',
     isConcept: true,
@@ -227,7 +292,7 @@ export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     id: 'stride-performance',
     title: 'Stride Athletic Motion Graphics',
-    category: 'Motion Graphics',
+    category: 'Motion Graphics & Animation',
     tagline: 'Kinetic 3D footwear motion ads, dynamic typography reveals and 60fps social campaign visuals.',
     image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
     isConcept: true,
@@ -252,7 +317,7 @@ export const PORTFOLIO_ITEMS: PortfolioItem[] = [
   {
     id: 'novanutrition-deck',
     title: 'Nova Nutrition Series A Investor Deck',
-    category: 'Presentation Design',
+    category: 'Presentation & Pitch Deck Design',
     tagline: '28-slide investor pitch presentation, market opportunity models and branded presentation system.',
     image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80',
     isConcept: true,

@@ -87,19 +87,28 @@ export const PortfolioVideoManager: React.FC<PortfolioVideoManagerProps> = ({
   const isUploading = uploadTasks.some((t) => t.stage === 'validating' || t.stage === 'uploading' || t.stage === 'saving');
 
   const sectionConfig =
-    variant === 'motion-graphic'
+    variant === 'motion-graphics'
       ? {
-          title: 'Motion Graphic — Video Showcase Manager',
+          title: 'Motion Graphics & Animation — Video Showcase Manager',
           subtitle:
-            'Upload multiple motion graphic reels, 3D product animations, and kinetic videos. Reorder, replace, or preview playback directly.',
+            'Upload multiple motion graphic reels, animated ads, logo animations, and 3D product videos. Preview, replace, remove, or reorder directly.',
           buttonLabel: 'Upload Motion Videos',
           emptyMessage:
-            'No motion graphic videos uploaded yet. Click "Upload Motion Videos" to add MP4, MOV, or WEBM reels.'
+            'No motion graphics videos uploaded yet. Click "Upload Motion Videos" to add MP4, MOV, or WEBM reels.'
+        }
+      : variant === 'digital-social'
+      ? {
+          title: 'Digital Marketing & Social Media Management — Reels & Social Video Manager',
+          subtitle:
+            'Upload multiple Instagram Reels, short-form social videos, and campaign clips alongside your social creative images above. Preview, replace, remove, or reorder directly.',
+          buttonLabel: 'Upload Reels & Social Videos',
+          emptyMessage:
+            'No reels or social media videos uploaded yet. Click "Upload Reels & Social Videos" to add MP4, MOV, or WEBM content.'
         }
       : {
-          title: 'Video & Social — Project Video Manager',
+          title: 'Video Production & Editing — Project Video Manager',
           subtitle:
-            'Upload multiple campaign videos, Instagram Reels, and social video edits. Reorder, replace, or preview playback directly.',
+            'Upload multiple promotional videos, product videos, and edited reels. Preview, replace, remove, or reorder directly.',
           buttonLabel: 'Upload Videos',
           emptyMessage:
             'No project videos uploaded yet. Click "Upload Videos" to add MP4, MOV, or WEBM videos for this case study.'
