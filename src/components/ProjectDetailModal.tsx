@@ -232,11 +232,6 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
             <span className="text-xs font-bold uppercase tracking-wider text-[#F07822] bg-[#F07822]/10 px-2.5 py-0.5 rounded-md">
               {project.category}
             </span>
-            {project.isConcept && (
-              <span className="text-[11px] font-semibold bg-[#173B75] text-white px-2 py-0.5 rounded-md">
-                Agency Concept
-              </span>
-            )}
             {project.projectYear && (
               <span className="text-[11px] text-[#252A34]/60 font-mono">
                 · {project.projectYear}

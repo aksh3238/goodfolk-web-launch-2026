@@ -148,9 +148,6 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ onOpenLetsTalk, on
                   <span className="bg-white/95 backdrop-blur-md px-3 py-1 rounded-md text-xs font-bold text-[#173B75] shadow-sm">
                     {filteredItems[0].category}
                   </span>
-                  <span className="bg-[#173B75] text-white px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider">
-                    Featured Case Study
-                  </span>
                 </div>
 
                 <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -236,12 +233,6 @@ export const PortfolioPage: React.FC<PortfolioPageProps> = ({ onOpenLetsTalk, on
                   <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-md text-xs font-bold text-[#173B75] shadow-sm">
                     {item.category}
                   </div>
-
-                  {item.isConcept && (
-                    <div className="absolute top-4 right-4 bg-black/75 backdrop-blur-md px-2.5 py-0.5 rounded text-[11px] font-medium text-white border border-white/20">
-                      Concept Studio
-                    </div>
-                  )}
 
                   {(item.videoUrl || (item.videos && item.videos.length > 0)) && (
                     <div className="absolute bottom-3 right-3 bg-[#173B75]/90 text-white backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 shadow-md">
